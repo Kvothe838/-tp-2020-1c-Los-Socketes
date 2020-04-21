@@ -65,6 +65,7 @@ int enviar_mensaje(char* mensaje, int socket_cliente)
 	}
 
 	free(mensaje_serializado);
+	return 0;
 }
 
 char* recibir_mensaje(int socket_cliente)
