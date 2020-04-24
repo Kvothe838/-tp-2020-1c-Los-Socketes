@@ -41,8 +41,9 @@ int crear_conexion(char *ip, char* puerto)
 
 int enviar_mensaje(char* mensaje, int socket_cliente)
 {
-	int tamanioMensaje = strlen(mensaje) + 1;
-	int bytes = 0;
+	int tamanioMensaje = strlen(mensaje) + 1, 
+		bytes = 0, 
+		resultado = 0;
 	void* mensaje_serializado;
 	t_paquete* paquete = malloc(sizeof(t_paquete));
 
@@ -60,37 +61,36 @@ int enviar_mensaje(char* mensaje, int socket_cliente)
 
 	if(send(socket_cliente, mensaje_serializado, bytes, 0) == -1){
 		printf("Error enviando mensaje.");
-		free(mensaje_serializado); //TODO Ver cómo evitar redundancia de código y avisarle al usuario que hubo un error.
-		return -1;
+		resultado = -1;
 	}
 
 	free(mensaje_serializado);
-	return 0;
+	return resultado;
 }
 
 char* recibir_mensaje(int socket_cliente)
 {
 	op_code codigo_operacion;
-	char* buffer;
+	char* stream = NULL;
 	int size;
 
 	if(recv(socket_cliente, &codigo_operacion, sizeof(int), 0) <= 0){
+		//Si hay error leyendo codigo_operacion o si la conexión se cayó.
 		printf("Error recibiendo mensaje.\n");
-		return NULL;
+		return stream;
 	}
 
 	switch(codigo_operacion) {
 	    case MENSAJE:
 	    	recv(socket_cliente, &size, sizeof(int), 0);
-			buffer = malloc(size);
-			recv(socket_cliente, buffer, size, 0);
+			stream = malloc(size);
+			recv(socket_cliente, stream, size, 0);
 	        break;
 	    default:
 	    	printf("Error: código no válido.\n");
-			return NULL;
 	}
 
-	return buffer;
+	return stream;
 }
 
 void liberar_conexion(int socket_cliente)
