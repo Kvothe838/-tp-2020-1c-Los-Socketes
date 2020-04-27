@@ -5,8 +5,13 @@
 #include<commons/config.h>
 #include<readline/readline.h>
 
+#include<commons/temporal.h>
+
 int main(void){
-	printf("HOLA MUNDO");
+	printf("Hora: ");
+	char* tiempo = temporal_get_string_time();
+	puts(tiempo);
+	free(tiempo);
 
 	t_log* logger = log_create("team.log", "Team", true, LOG_LEVEL_INFO);
 
