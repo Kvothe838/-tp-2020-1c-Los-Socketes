@@ -5,7 +5,7 @@
 
 int main(void) {
 	int prueba = crear_conexion("189", "189");
-	t_log* logger = log_create("testBroker.log", "BROKER", true, LOG_LEVEL_TRACE);
+	t_log* logger = log_create("testGameBoy.log", "GAMEBOY", true, LOG_LEVEL_TRACE);
 	log_trace(logger, "Conexión dio %d", prueba);
 	return EXIT_SUCCESS;
 }

@@ -3,6 +3,7 @@
 	<name>Team</name>
 	<comment></comment>
 	<projects>
+		<project>Shared</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
