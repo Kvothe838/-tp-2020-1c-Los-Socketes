@@ -6,6 +6,7 @@
 #include<readline/readline.h>
 
 #include<commons/temporal.h>
+#include<src/utils.h>
 
 int main(void){
 	printf("Hora: ");

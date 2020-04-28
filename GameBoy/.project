@@ -3,7 +3,6 @@
 	<name>GameBoy</name>
 	<comment></comment>
 	<projects>
-		<project>Librerias</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
