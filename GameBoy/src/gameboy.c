@@ -1,3 +1,5 @@
+// proyecto realizado por Alexis y Gabriel
+
 #include <commons/log.h>
 #include <shared/utils.h>
 #include <stdio.h>
