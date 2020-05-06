@@ -1,99 +1,36 @@
 #include "../shared/utils.h"
 
-void* serializar_paquete(t_paquete* paquete, int *bytes)
+t_log* iniciar_logger(char* nombreLogger, char* nombrePrograma)
 {
-	*bytes = sizeof(paquete->codigo_operacion) + sizeof(paquete->buffer->size) + paquete->buffer->size;
-	void* a_enviar = malloc(*bytes);
-	int offset = 0;
+	t_log* logger;
 
-	memcpy(a_enviar + offset, &(paquete->codigo_operacion), sizeof(paquete->codigo_operacion));
-	offset += sizeof(paquete->codigo_operacion);
-	memcpy(a_enviar + offset, &(paquete->buffer->size), sizeof(paquete->buffer->size));
-	offset += sizeof(paquete->buffer->size);
-	memcpy(a_enviar + offset, paquete->buffer->stream, paquete->buffer->size);
-	offset += paquete->buffer->size;
-
-	return a_enviar;
-}
-
-int crear_conexion(char *ip, char* puerto)
-{
-	struct addrinfo hints;
-	struct addrinfo *server_info;
-
-	memset(&hints, 0, sizeof(hints));
-	hints.ai_family = AF_UNSPEC;
-	hints.ai_socktype = SOCK_STREAM;
-	hints.ai_flags = AI_PASSIVE;
-
-	getaddrinfo(ip, puerto, &hints, &server_info);
-
-	int socket_cliente = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
-
-	if(connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen) == -1){
-		socket_cliente = 0;
+	if((logger = log_create(nombreLogger, nombrePrograma, true, LOG_LEVEL_INFO)) == NULL){
+		printf("Error al crear el logger.");
+		exit(-1);
 	}
 
-	freeaddrinfo(server_info);
-
-	return socket_cliente;
+	return logger;
 }
 
-int enviar_mensaje(char* mensaje, int socket_cliente)
+t_config* leer_config(char* nombreConfig, t_log* logger)
 {
-	int tamanioMensaje = strlen(mensaje) + 1, 
-		bytes = 0, 
-		resultado = 0;
-	void* mensaje_serializado;
-	t_paquete* paquete = malloc(sizeof(t_paquete));
+	t_config* config;
 
-	paquete->codigo_operacion = MENSAJE;
-	paquete->buffer = malloc(sizeof(t_buffer));
-	paquete->buffer->stream = mensaje;
-	paquete->buffer->size = tamanioMensaje;
-	paquete->buffer->stream = malloc(paquete->buffer->size);
-	memcpy(paquete->buffer->stream, mensaje, tamanioMensaje);
-	mensaje_serializado = serializar_paquete(paquete, &bytes);
-
-	free(paquete->buffer->stream);
-	free(paquete->buffer);
-	free(paquete);
-
-	if(send(socket_cliente, mensaje_serializado, bytes, 0) == -1){
-		printf("Error enviando mensaje.");
-		resultado = -1;
+	if((config = config_create(nombreConfig)) == NULL){
+		log_info(logger, "Error leyendo configuración.");
+		exit(-1);
 	}
 
-	free(mensaje_serializado);
-	return resultado;
+	return config;
 }
 
-char* recibir_mensaje(int socket_cliente)
+void terminar_programa(t_log* logger, t_config* config)
 {
-	op_code codigo_operacion;
-	char* stream = NULL;
-	int size;
-
-	if(recv(socket_cliente, &codigo_operacion, sizeof(int), 0) <= 0){
-		//Si hay error leyendo codigo_operacion o si la conexión se cayó.
-		printf("Error recibiendo mensaje.\n");
-		return stream;
+	if(logger != NULL){
+		log_destroy(logger);
 	}
 
-	switch(codigo_operacion) {
-	    case MENSAJE:
-	    	recv(socket_cliente, &size, sizeof(int), 0);
-			stream = malloc(size);
-			recv(socket_cliente, stream, size, 0);
-	        break;
-	    default:
-	    	printf("Error: código no válido.\n");
+	if(config != NULL){
+		config_destroy(config);
 	}
-
-	return stream;
-}
-
-void liberar_conexion(int socket_cliente)
-{
-	close(socket_cliente);
 }
