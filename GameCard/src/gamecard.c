@@ -4,10 +4,20 @@
 #include <stdlib.h>
 
 int main(void) {
-	int prueba = crear_conexion("127.0.0.1", "4444");
-	t_log* logger = log_create("testGameCard.log", "GAMECARD", true, LOG_LEVEL_TRACE);
-	log_trace(logger, "Conexión dio %d", prueba);
-	log_destroy(logger);
+	char* ip, *puerto;
+	t_log* logger;
+	t_config* config;
+
+	logger = iniciar_logger("loggerGameCard.log", "Broker");
+	config = leer_config("configGameCard.config", logger);
+
+	ip = config_get_string_value(config, "IP_BROKER");
+	puerto = config_get_string_value(config, "PUERTO_BROKER");
+
+	log_info(logger, "IP %s y PUERTO %s", ip, puerto);
+
+	terminar_programa(logger, config);
+
 	return EXIT_SUCCESS;
 }
 

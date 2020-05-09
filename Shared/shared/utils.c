@@ -17,7 +17,7 @@ t_config* leer_config(char* nombreConfig, t_log* logger)
 	t_config* config;
 
 	if((config = config_create(nombreConfig)) == NULL){
-		log_info(logger, "Error leyendo configuración.");
+		log_info(logger, "Error leyendo configuración: '%s'", nombreConfig);
 		exit(-1);
 	}
 

@@ -1,22 +1,20 @@
-#include <commons/log.h>
+//#include <commons/log.h>
 #include <shared/utils.h>
-#include <stdio.h>
-#include <stdlib.h>
+//#include <stdio.h>
+//#include <stdlib.h>
 
 int main(void) {
-	char* ip, puerto;
+	char* ip, *puerto;
 	t_log* logger;
 	t_config* config;
 
 	logger = iniciar_logger("loggerBroker.log", "Broker");
-	config = leer_config("loggerConfig.config", logger);
+	config = leer_config("configBroker.config", logger);
 
-	puerto = config_get_string_value(config, "PUERTO_BROKER");
 	ip = config_get_string_value(config, "IP_BROKER");
+	puerto = config_get_string_value(config, "PUERTO_BROKER");
 
-	/*iniciar_servidor(ip, puerto); Esto no funca, rompe porque dice que no reconoce
-	las funciones que llaman a thread. Debería reconocerlo porque la biblioteca está
-	declarada en structs.h y esa está importada en todos.*/
+	log_info(logger, "IP %s y PUERTO %s", ip, puerto);
 
 	terminar_programa(logger, config);
 
