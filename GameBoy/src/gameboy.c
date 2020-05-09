@@ -18,6 +18,8 @@ int main(void) {
 
 	log_info(logger, "IP %s y PUERTO %s", ip, puerto);
 
+	iniciar_servidor(ip, puerto);
+
 	terminar_programa(logger, config);
 
 	return EXIT_SUCCESS;

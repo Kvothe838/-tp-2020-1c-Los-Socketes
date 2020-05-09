@@ -14,6 +14,8 @@ int main(void) {
 	ip = config_get_string_value(config, "IP_BROKER");
 	puerto = config_get_string_value(config, "PUERTO_BROKER");
 
+	iniciar_servidor(ip, puerto);
+
 	log_info(logger, "IP %s y PUERTO %s", ip, puerto);
 
 	terminar_programa(logger, config);
