@@ -20,7 +20,9 @@ typedef enum
 	CATCH,
 	APPEARED,
 	LOCALIZED,
-	CAUGHT
+	CAUGHT,
+	SUSCRIBER,
+	PUBLISHER
 } op_code;
 
 typedef struct

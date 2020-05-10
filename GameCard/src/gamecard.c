@@ -6,19 +6,26 @@
 int main(void) {
 	char* ip, *puerto;
 	t_log* logger;
-	t_config* config;
+	//t_config* config;
 
 	logger = iniciar_logger("loggerGameCard.log", "Broker");
-	config = leer_config("configGameCard.config", logger);
+	//config = leer_config("configGameCard.config", logger);
 
-	ip = config_get_string_value(config, "IP_BROKER");
-	puerto = config_get_string_value(config, "PUERTO_BROKER");
+	ip = "127.0.0.1";
+	puerto = "6009";
 
 	log_info(logger, "IP %s y PUERTO %s", ip, puerto);
 
-	iniciar_servidor(ip, puerto);
+	int socket = crear_conexion_cliente(ip, puerto);
 
-	terminar_programa(logger, config);
+	int* numero;
+	*numero = 78;
+
+	int resultado = enviar_mensaje(numero, sizeof(int), SUSCRIBER, socket);
+
+	//iniciar_servidor(ip, puerto);
+
+	//terminar_programa(logger, config);
 
 	return EXIT_SUCCESS;
 }

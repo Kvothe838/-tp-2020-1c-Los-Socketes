@@ -1,5 +1,6 @@
 //#include <commons/log.h>
 #include <shared/utils.h>
+#include "brokerColas.h"
 //#include <stdio.h>
 //#include <stdlib.h>
 
@@ -13,12 +14,21 @@ int main(void) {
 
 	ip = config_get_string_value(config, "IP_BROKER");
 	puerto = config_get_string_value(config, "PUERTO_BROKER");
-
-	iniciar_servidor(ip, puerto);
-
 	log_info(logger, "IP %s y PUERTO %s", ip, puerto);
+
+	t_dictionary* diccionarioPrincipal = crearDiccionario();
+
+	log_info(logger, "Se crea el diccionario y a continuacion muestra a los suscriptores de 'NEW'", ip, puerto);
+
+	agregarSuscriptor(diccionarioPrincipal, "NEW", 1);
+	agregarSuscriptor(diccionarioPrincipal, "NEW", 2);
+	obtenerSuscriptoresPorCola(diccionarioPrincipal, "NEW");
+
+
+	//iniciar_servidor(ip, puerto);
+
 
 	terminar_programa(logger, config);
 
-	return EXIT_SUCCESS;
+	return 0;
 }

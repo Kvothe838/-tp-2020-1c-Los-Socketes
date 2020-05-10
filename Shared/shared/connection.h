@@ -8,6 +8,5 @@ pthread_t thread;
 
 int crear_conexion_cliente(char *ip, char* puerto);
 void liberar_conexion_cliente(int socket_cliente);
-void iniciar_servidor(char *ip, char* puerto);
 
 #endif
