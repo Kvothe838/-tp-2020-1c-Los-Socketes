@@ -1,5 +1,5 @@
 #include "../shared/serialize.h"
-
+//serializar_get
 void* serializar_paquete(t_paquete* paquete, int *bytes)
 {
 	*bytes = sizeof(paquete->codigo_operacion) + sizeof(paquete->buffer->size) + paquete->buffer->size;

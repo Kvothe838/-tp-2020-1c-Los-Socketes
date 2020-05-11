@@ -21,10 +21,43 @@ typedef enum
 	CATCH,
 	APPEARED,
 	LOCALIZED,
-	CAUGHT,
-	SUSCRIBER,
+	CAUGHT
+} tipoCola;
+
+typedef enum
+{
+	SUSCRIBER = 1,
 	PUBLISHER
-} op_code;
+} opCode;
+
+
+/*
+
+
+ * SUSCRIPCION (se suscribe a una cola)
+	opCode queCarajoHace; //SUSCRIBER o PUBLISHER
+	uint32_t size;
+	typedef struct
+	{
+		int cantidadQueMeSuscribo;
+		tipoCola* cantidad;
+	} inscripcion;
+
+
+
+ * PUBLISHER (manda un mensaje a una cola)
+	opCode queCarajoHace;
+	uint32_t size;
+	typedef struct{
+		tipoCola aQueCOla;
+		... //resto de datos
+		... //resto de datos
+		... //resto de datos
+	} especifica;
+
+
+*/
+
 
 typedef struct
 {
