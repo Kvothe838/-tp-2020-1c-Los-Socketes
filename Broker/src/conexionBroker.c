@@ -7,8 +7,8 @@ void process_request(int cod_op, int cliente_fd){
 	switch (cod_op) {
 		case SUSCRIBER:
 			printf("Llegó un suscriber");
-			//msg = recibir_mensaje_servidor(cliente_fd, &size);
-			//free(msg);
+			msg = recibir_mensaje_servidor(cliente_fd, &size);
+			free(msg);
 			break;
 		case 0:
 		case -1:

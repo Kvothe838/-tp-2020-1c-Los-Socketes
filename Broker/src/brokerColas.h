@@ -9,13 +9,16 @@
 typedef struct {
 	t_list* suscriptores;
 	t_list* mensajes;
-	t_queue* colaMensajes;
+	//t_queue* colaMensajes;
 } ColaConSuscriptores;
 
 
 typedef struct {
 	int ID;
+	int IDCorrelativo;
 	t_list* suscriptoresRecibidos;
+	t_list* suscriptoresEnviados;
+
 } Mensaje;
 
 

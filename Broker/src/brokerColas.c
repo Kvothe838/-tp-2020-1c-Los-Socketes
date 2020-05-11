@@ -15,7 +15,7 @@ ColaConSuscriptores* crearColaConSuscriptores(){
 	ColaConSuscriptores* cola = malloc(sizeof(ColaConSuscriptores));
 	cola->suscriptores = list_create();
 	cola->mensajes = list_create();
-	cola->colaMensajes = queue_create();
+	//cola->colaMensajes = queue_create();
 	return cola;
 }
 
@@ -30,7 +30,7 @@ void agregarSuscriptor(t_dictionary* diccionario, char* colaClave, int* nuevoSus
 
 void agregarMensaje(t_dictionary* diccionario, char* colaClave, void* mensaje){
 	ColaConSuscriptores* colaEspecifica = obtenerCola(diccionario, colaClave);
-	queue_push(colaEspecifica->colaMensajes, mensaje);
+	queue_push(colaEspecifica->mensajes, mensaje);
 }
 
 void imprimir(int a){

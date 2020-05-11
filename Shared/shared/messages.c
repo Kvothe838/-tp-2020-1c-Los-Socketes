@@ -1,7 +1,7 @@
 #include "../shared/messages.h"
 #include "../shared/serialize.h"
 
-int enviar_mensaje(int* mensaje, int tamanioMensaje, op_code codMensaje, int socket_cliente)
+int enviar_mensaje(void* mensaje, int tamanioMensaje, op_code codMensaje, int socket_cliente)
 {
 	int bytes = 0,
 		resultado = 0;
@@ -10,7 +10,7 @@ int enviar_mensaje(int* mensaje, int tamanioMensaje, op_code codMensaje, int soc
 
 	paquete->codigo_operacion = codMensaje;
 	paquete->buffer = malloc(sizeof(t_buffer));
-	//paquete->buffer->stream = mensaje;
+	paquete->buffer->stream = mensaje;
 	paquete->buffer->size = tamanioMensaje;
 	paquete->buffer->stream = malloc(paquete->buffer->size);
 	memcpy(paquete->buffer->stream, mensaje, tamanioMensaje);
