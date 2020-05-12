@@ -28,7 +28,7 @@ typedef enum
 {
 	SUSCRIBER = 1,
 	PUBLISHER
-} opCode;
+} op_code;
 
 
 /*
@@ -76,47 +76,48 @@ typedef struct
 typedef struct
 {
 	char* nombre;
-	uint_32 largoNombre;
-	uint_32 posX;
-	uint_32 posY;
-	uint_32 cantidad;
+	uint32_t largoNombre;
+	uint32_t posX;
+	uint32_t posY;
+	uint32_t cantidad;
 } t_NewPokemon;
 
 typedef struct
 {
 	char* nombre;
-	uint_32 largoNombre;
-	uint_32 posX;
-	uint_32 posY;
+	uint32_t largoNombre;
+	uint32_t posX;
+	uint32_t posY;
 } t_AppearedPokemon;
 
 typedef struct
 {
 	char* nombre;
-	uint_32 largoNombre;
-	uint_32 posX;
-	uint_32 posY;
+	uint32_t largoNombre;
+	uint32_t posX;
+	uint32_t posY;
 } t_CatchPokemon;
 
 typedef struct
 {
-	uint_32 loAtrapo;
+	uint32_t loAtrapo;
 } t_CaughtPokemon;
 
 typedef struct
 {
 	char* nombre;
-	uint_32 largoNombre;
+	uint32_t largoNombre;
 } t_GetPokemon;
 
-//ESTRUCTURAS
-//DEL TEAM
-typedef struct
-{
-	char* nombre;
-	uint_32 largoNombre;
-	uint_32 posX;
-	uint_32 posY;
-} t_AppearedPokemon;
+/*
+ * ESTRUCTURAS DEL TEAM
+ * typedef struct
+ * {
+ * char* nombre;
+ * uint32_t largoNombre;
+ * uint32_t posX;
+ * uint32_t posY;
+ * } t_AppearedPokemon;
+*/
 
 #endif
