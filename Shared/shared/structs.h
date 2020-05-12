@@ -86,11 +86,7 @@ typedef struct
 	uint32_t largoNombre;
 	uint32_t posX;
 	uint32_t posY;
-<<<<<<< HEAD
-	uint32_t cantidad;
-=======
 	uint32_t colas;
->>>>>>> 293a72982923e62a8c615eb238febb9cff30e76e
 } t_NewPokemon;
 
 typedef struct
@@ -120,18 +116,5 @@ typedef struct
 	uint32_t largoNombre;
 } t_GetPokemon;
 
-<<<<<<< HEAD
-/*
- * ESTRUCTURAS DEL TEAM
- * typedef struct
- * {
- * char* nombre;
- * uint32_t largoNombre;
- * uint32_t posX;
- * uint32_t posY;
- * } t_AppearedPokemon;
-*/
-=======
->>>>>>> 293a72982923e62a8c615eb238febb9cff30e76e
 
 #endif
