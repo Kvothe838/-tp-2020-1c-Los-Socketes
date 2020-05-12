@@ -13,6 +13,7 @@
 #include<commons/string.h>
 #include<commons/config.h>
 #include<pthread.h>
+//#include<inttypes.h>
 
 typedef enum
 {
@@ -58,6 +59,12 @@ typedef enum
 
 */
 
+typedef struct
+{
+	int cantidadDeColas;
+	tipoCola* colas;
+}
+Suscripcion;
 
 typedef struct
 {
@@ -67,7 +74,7 @@ typedef struct
 
 typedef struct
 {
-	op_code codigo_operacion;
+	tipoCola codigo_operacion;
 	t_buffer* buffer;
 } t_paquete;
 
@@ -79,7 +86,11 @@ typedef struct
 	uint32_t largoNombre;
 	uint32_t posX;
 	uint32_t posY;
+<<<<<<< HEAD
 	uint32_t cantidad;
+=======
+	uint32_t colas;
+>>>>>>> 293a72982923e62a8c615eb238febb9cff30e76e
 } t_NewPokemon;
 
 typedef struct
@@ -109,6 +120,7 @@ typedef struct
 	uint32_t largoNombre;
 } t_GetPokemon;
 
+<<<<<<< HEAD
 /*
  * ESTRUCTURAS DEL TEAM
  * typedef struct
@@ -119,5 +131,7 @@ typedef struct
  * uint32_t posY;
  * } t_AppearedPokemon;
 */
+=======
+>>>>>>> 293a72982923e62a8c615eb238febb9cff30e76e
 
 #endif
