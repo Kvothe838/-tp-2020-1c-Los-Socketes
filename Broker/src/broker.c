@@ -1,6 +1,7 @@
 #include <shared/utils.h>
 #include "brokerColas.h"
 
+
 int main(void) {
 	char* ip, *puerto;
 	t_log* logger;

@@ -17,6 +17,7 @@ void* serializarSuscripcion(Suscripcion* suscripto, int tamanio, void* stream){
 
 	prueba = malloc(sizeof(int) * ayuda);
 	memcpy(prueba, (suscripto->colas), sizeof(int) * ayuda);
+
 	for(int i = 0; i < ayuda; i++){
 
 		memcpy(stream + offset, (prueba + offset - sizeof(int)), sizeof(int));
@@ -71,22 +72,25 @@ int enviar_mensaje(void* mensaje, int tamanioMensaje, opCode codMensaje, int soc
 
 void mandarSuscripcion(int cantidadDeColasASuscribir, tipoCola colas[], int socket_server){
 	Suscripcion* suscripcion = malloc(sizeof(Suscripcion));
-	int offset = 0;
+	int offset = 0, tamanioFinal;
 
 	suscripcion->cantidadDeColas = cantidadDeColasASuscribir;
+
 	suscripcion->colas = malloc(sizeof(tipoCola) * suscripcion->cantidadDeColas);
-	void *cantidad = malloc(suscripcion->colas);
+	void *auxiliar = malloc(suscripcion->colas);
 
 	for(int i = 0; i < cantidadDeColasASuscribir; i++){
 
-		memcpy(cantidad + offset, &(colas[i]), sizeof(int));
+		memcpy(auxiliar + offset, &(colas[i]), sizeof(int));
 		offset += sizeof(int);
 
 	}
 
-	suscripcion->colas = cantidad;
+	suscripcion->colas = auxiliar;
 
-	int resultado = enviar_mensaje(suscripcion, cantidadDeColasASuscribir*sizeof(int) + sizeof(int), SUSCRIBER, socket_server);
+	tamanioFinal = cantidadDeColasASuscribir*sizeof(int) + sizeof(int);
+
+	int resultado = enviar_mensaje(suscripcion, tamanioFinal, SUSCRIBER, socket_server);
 	if(resultado == -1)
 		printf("ERROR");
 }

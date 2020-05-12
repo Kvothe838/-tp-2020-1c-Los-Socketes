@@ -6,7 +6,6 @@
 #include <commons/collections/dictionary.h>
 
 
-
 typedef struct {
 	t_list* suscriptores;
 	t_list* mensajes;

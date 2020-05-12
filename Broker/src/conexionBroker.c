@@ -38,8 +38,17 @@ void manejarSuscripcion(void* contenido, int socket_cliente, t_log* logger){
 	int tamanio, numeroActual;
 	memcpy(&tamanio, contenido, sizeof(int));
 	offset += sizeof(int);
+
 	for(int i = 0; i < tamanio; i++){
+
 		memcpy(&numeroActual, contenido + offset, sizeof(int));
+
+		/*
+		 * NEW, GET, CAUGHT
+		 * agregarSuscriptor(NEW, socket_cliente);
+		 * agregarSuscriptor(GET, socket_cliente);
+		 * agregarSuscriptor(CAUGHT, socket_cliente);
+		*/
 		log_trace(logger, "Posición %d - valor %d", i, numeroActual);
 		offset += sizeof(int);
 

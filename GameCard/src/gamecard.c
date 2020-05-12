@@ -20,7 +20,6 @@ int main(void) {
 
 
 	//////////////////////////////////////////////////
-
 	tipoCola colas[] = {NEW, GET, CAUGHT};
 	mandarSuscripcion(3, colas, socket);
 
