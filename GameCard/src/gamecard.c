@@ -18,10 +18,11 @@ int main(void) {
 
 	int socket = crear_conexion_cliente(ip, puerto);
 
-	int* numero;
-	*numero = 78;
 
-	int resultado = enviar_mensaje(numero, sizeof(int), SUSCRIBER, socket);
+	//////////////////////////////////////////////////
+
+	tipoCola colas[] = {NEW, GET, CAUGHT};
+	mandarSuscripcion(3, colas, socket);
 
 	//iniciar_servidor(ip, puerto);
 

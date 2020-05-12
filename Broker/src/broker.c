@@ -1,8 +1,5 @@
-//#include <commons/log.h>
 #include <shared/utils.h>
 #include "brokerColas.h"
-//#include <stdio.h>
-//#include <stdlib.h>
 
 int main(void) {
 	char* ip, *puerto;
@@ -20,12 +17,12 @@ int main(void) {
 
 	log_info(logger, "Se crea el diccionario y a continuacion muestra a los suscriptores de 'NEW'", ip, puerto);
 
-	agregarSuscriptor(diccionarioPrincipal, "NEW", 1);
-	agregarSuscriptor(diccionarioPrincipal, "NEW", 2);
+	agregarSuscriptor(diccionarioPrincipal, "NEW", 3);
+	agregarSuscriptor(diccionarioPrincipal, "NEW", 4);
 	obtenerSuscriptoresPorCola(diccionarioPrincipal, "NEW");
 
 
-	//iniciar_servidor(ip, puerto);
+	iniciar_servidor(ip, puerto);
 
 
 	terminar_programa(logger, config);
