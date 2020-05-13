@@ -29,7 +29,7 @@ typedef enum
 {
 	SUSCRIBER = 1,
 	PUBLISHER
-} op_code;
+} opCode;
 
 
 /*

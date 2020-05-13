@@ -1,5 +1,6 @@
 #include "../shared/messages.h"
 #include "../shared/serialize.h"
+#include "../shared/structs.h"
 
 
 void* serializarSuscripcion(Suscripcion* suscripto, int tamanio, void* stream){
