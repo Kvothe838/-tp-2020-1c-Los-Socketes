@@ -59,7 +59,7 @@ void inicializar_entrenadores(int indice, struct entrenador entrenador,char* pos
 	entrenador.mios = list_create();separarElementos(entrenador.mios,pertenecientes);
 	//printf("x: %d ---- y: %d \n",list_get(entrenador.posicion,0),list_get(entrenador.posicion,1));
 	//printf("p1: %s \n",list_get(entrenador.mios,0));
-	printf("cant: %d \n",list_size(entrenador.mios));
+	//printf("cant: %d \n",list_size(entrenador.mios));
 }
 
 int main(void) {
