@@ -1,100 +1,88 @@
 #include <commons/log.h>
+#include <commons/config.h>
+#include <commons/collections/node.h>
+#include <commons/collections/list.h>
+#include <commons/collections/dictionary.h>
+
 #include <shared/utils.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <string.h>
-#define MAX 2
-#define MAX_CANT_OBJETIVOS 10
 
-
+typedef enum estado{
+	NUEVO = 1,
+	LISTO,
+	EJECUTANDO,
+	BLOQUEADO,
+	SALIR,
+	PUNTOMUERTO
+};
 typedef struct entrenador{
-	uint32_t ID_entrenador;
-	uint32_t posicion[2];
-	char pokemons_pertenecientes[MAX_CANT_OBJETIVOS];
-	char pokemons_objetivos[MAX_CANT_OBJETIVOS];
-	// ESTADO --> BLOQUEADO, EXEC, NEW, ETC...
-}Entrenador;
+	int ID_entrenador;
+	t_list* posicion; // X = list_get(entrenador.posicion,0) // Y = list_get(entrenador.posicion,1)
+	t_list* mios;
+	t_list* objetivos;
+	enum estado;
+	// UN HILO ASOCIADO (?)
+}; // nose para que pongo este, pero compila
 
-int cantidad_comas(char*lista_posiciones){
-	int comas = 0;
-	for(int i=0;i<strlen(lista_posiciones);i++){
-		if(lista_posiciones[i]==','){
-			comas++;
-		}
+int cant_entrenadores(char** posiciones){
+	int cantidad = 0;
+	int i=0;
+	while(posiciones[i] != NULL){
+		cantidad++;
+		i++;
 	}
-	return comas;
+	return cantidad;
+}
+void separarElementosNumericos(t_list* lista,char* posicion){
+	char* token = strtok(posicion, "|");
+	while (token != NULL) {
+		list_add(lista,atoi(token));
+	    token = strtok(NULL, "|");
+	}
+}
+void separarElementos(t_list* lista,char* pokemons){
+	char* token = strtok(pokemons, "|");
+	while (token != NULL) {
+		list_add(lista,token);
+	    token = strtok(NULL, "|");
+	}
 }
 
-int posicionar_entrenador(struct entrenador *entrenador, char* lista_posiciones, int indice_actual){
-	int mismo_entrenador=1;
-	char* temporal;
-	int indice_temporal=0;
-	int eje=0;
-	while(mismo_entrenador){
-		if(lista_posiciones[indice_actual]!=',' && lista_posiciones[indice_actual]!='\0' && lista_posiciones[indice_actual]!=']'){
-			if(lista_posiciones[indice_actual]!='|'){
-				// ACA HAY CARACTER VALIDO
-				temporal[indice_temporal] = lista_posiciones[indice_actual];
-				indice_temporal++;
-				indice_actual++;
-			}else{
-				// ACA HAY UNA BARRA
-				// ASIGNAR VALOR A POSICION
-				temporal[indice_temporal] = '\0';
-				entrenador->posicion[eje]= atoi(temporal);
-				printf("%u|",entrenador->posicion[eje]);
-				indice_temporal=0;
-				indice_actual++;
-				eje++;
-			}
-		}else{
-			// ACA HAY CARACTER , ]
-			temporal[indice_temporal] = '\0';
-			entrenador->posicion[eje]= atoi(temporal);
-			printf("%u \n",entrenador->posicion[eje]);
-			mismo_entrenador=0;
-		}
-	}
-	return (indice_actual+1);
+void inicializar_entrenadores(int indice, struct entrenador entrenador,char* posicion,char* pertenecientes,char* objetivos){
+	printf("hola, soy el entrenador nro %d \n",indice);
+	entrenador.ID_entrenador = indice+1;
+	entrenador.posicion = list_create();separarElementosNumericos(entrenador.posicion,posicion);
+	entrenador.objetivos = list_create();separarElementos(entrenador.objetivos,objetivos);
+	entrenador.mios = list_create();separarElementos(entrenador.mios,pertenecientes);
+	//printf("x: %d ---- y: %d \n",list_get(entrenador.posicion,0),list_get(entrenador.posicion,1));
+	//printf("p1: %s \n",list_get(entrenador.mios,0));
+	//printf("cant: %d \n",list_size(entrenador.mios));
 }
 
 int main(void) {
-	char* lista_posiciones;
-	char* lista_pokemons;
-	char* lista_objetivos;
 	t_log* logger;
 	t_config* config;
 	logger = iniciar_logger("Team.log", "Team");
 	config = leer_config("configTeam.config", logger);
-	lista_posiciones = config_get_string_value(config, "POSICIONES_ENTRENADORES");
-	lista_pokemons = config_get_string_value(config, "POKEMON_ENTRENADORES");
-	lista_objetivos = config_get_string_value(config, "OBJETIVOS_ENTRENADORES");
+	char** posiciones = config_get_array_value(config,"POSICIONES_ENTRENADORES"); // lista de strings, ultimo elemento nulo
+	char** pertenecientes = config_get_array_value(config,"POKEMON_ENTRENADORES");
+	char** objetivos = config_get_array_value(config,"OBJETIVOS_ENTRENADORES");
 
-	int cantidad_entrenadores = cantidad_comas(lista_posiciones) +1;
-	printf("cantidad entrenadores en el archivo= %d \n",cantidad_entrenadores);
+	int cantidad_entrenadores = cant_entrenadores(posiciones);
+	//printf("cantidad entrenadores en el archivo: %d \n",cantidad_entrenadores);
 
-	struct entrenador entrenador[cantidad_entrenadores];
-	//pthread_t hilo[cantidad_entrenadores];
-	int indice = 1;
+	struct entrenador entrenadores[cantidad_entrenadores];
 
-	for(int x=0;x<cantidad_entrenadores;x++){
-		printf("inicia entrenador \n");
-		indice = posicionar_entrenador(&(entrenador[x]),lista_posiciones,indice);
-		printf("fin entrenador \n");
+	for(int a=0;a<cantidad_entrenadores;a++){
+		inicializar_entrenadores(a,entrenadores[a],posiciones[a],pertenecientes[a],objetivos[a]);
 	}
 
-		//pthread_create(&hilo[b], NULL, &inicializar_entrenador, NULL);
 
-
-
-
-
-
-
-
-
-
+	//pthread_t hilo[cantidad_entrenadores];
+	//pthread_create(&hilo[b], NULL, &inicializar_entrenador, NULL);
 /*
 	for(int c=0;c<cantidad_entrenadores;c++){
 		printf("se murio un hilo \n");
