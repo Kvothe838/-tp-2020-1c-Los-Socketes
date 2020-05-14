@@ -1,11 +1,12 @@
 #ifndef MESSAGES_H_
 #define MESSAGES_H_
 
+#include <stdarg.h>
 #include "../shared/structs.h"
 
-void mandarSuscripcion(int cantidadDeColasASuscribir, tipoCola colas[], int socket_server);
-int enviar_mensaje(void* mensaje, int tamanioMensaje, opCode codMensaje, int socket_cliente);
-void* recibir_mensaje(int socket_cliente);
-void* recibir_mensaje_servidor(int socket_cliente, int* size);
-
+void mandarSuscripcion(int socket_server, int cantidadColasASuscribir, ...);
+int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, int socket_cliente);
+void* recibirMensaje(int socket_cliente);
+void* recibirMensajeServidor(int socket_cliente, int* size);
+char* tipoColaToString(TipoCola tipoCola);
 #endif

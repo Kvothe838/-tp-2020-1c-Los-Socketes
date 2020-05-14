@@ -3,6 +3,7 @@
 
 #include <shared/structs.h>
 #include <shared/messages.h>
+#include "brokerColas.h"
 
 pthread_t thread;
 

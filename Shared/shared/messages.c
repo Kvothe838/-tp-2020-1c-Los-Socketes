@@ -5,42 +5,40 @@
 void* serializarSuscripcion(Suscripcion* suscripto, int tamanio, void* stream){
 	stream = malloc(tamanio);
 	void *prueba = malloc(tamanio);
-	int ayuda, offset = 0, offset2 = 0, imprimir;
-	memcpy(stream, &suscripto->cantidadDeColas, sizeof(int));
+	int ayuda, offset = 0, imprimir;
+	memcpy(stream, &suscripto->cantidadColas, sizeof(int));
 
 	memcpy(&ayuda, stream, sizeof(int));
 
 	printf("CANTIDAD DE COLAS: %d\n", ayuda);
 
-	offset += sizeof(tipoCola);
+	offset += sizeof(TipoCola);
 	memcpy(&ayuda, stream, sizeof(int));
 
 	prueba = malloc(sizeof(int) * ayuda);
 	memcpy(prueba, (suscripto->colas), sizeof(int) * ayuda);
 
 	for(int i = 0; i < ayuda; i++){
-
 		memcpy(stream + offset, (prueba + offset - sizeof(int)), sizeof(int));
 		memcpy(&imprimir, stream + offset, sizeof(int));
-		printf("DATO %d IMPRIMIR: %d\n", i, imprimir);
 		offset += sizeof(int);
-
 	}
+
 	return stream;
 }
 
 
-int enviar_mensaje(void* mensaje, int tamanioMensaje, opCode codMensaje, int socket_cliente)
+int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, int socket_cliente)
 {
 	int bytes = 0,
 		resultado = 0;
 	void* mensaje_serializado;
 
-	t_paquete* paquete = NULL;
-	paquete = malloc(sizeof(t_paquete));
+	Paquete* paquete = NULL;
+	paquete = malloc(sizeof(Paquete));
 
-	paquete->codigo_operacion = codMensaje;
-	paquete->buffer = malloc(sizeof(t_buffer));
+	paquete->codigoOperacion = codMensaje;
+	paquete->buffer = malloc(sizeof(Buffer));
 	paquete->buffer->size = tamanioMensaje;
 	paquete->buffer->stream = malloc(paquete->buffer->size);
 	void * stream = malloc(paquete->buffer->size);
@@ -70,33 +68,31 @@ int enviar_mensaje(void* mensaje, int tamanioMensaje, opCode codMensaje, int soc
 	return resultado;
 }
 
-void mandarSuscripcion(int cantidadDeColasASuscribir, tipoCola colas[], int socket_server){
+void mandarSuscripcion(int socket_server, int cantidadColasASuscribir, ...){
+	va_list colas;
+	va_start(colas, cantidadColasASuscribir);
 	Suscripcion* suscripcion = malloc(sizeof(Suscripcion));
 	int offset = 0, tamanioFinal;
+	suscripcion->cantidadColas = cantidadColasASuscribir;
+	void *auxiliar = malloc(sizeof(TipoCola) * suscripcion->cantidadColas);
 
-	suscripcion->cantidadDeColas = cantidadDeColasASuscribir;
-
-	suscripcion->colas = malloc(sizeof(tipoCola) * suscripcion->cantidadDeColas);
-	void *auxiliar = malloc(suscripcion->colas);
-
-	for(int i = 0; i < cantidadDeColasASuscribir; i++){
-
-		memcpy(auxiliar + offset, &(colas[i]), sizeof(int));
+	for(int i = 0; i < cantidadColasASuscribir; i++){
+		TipoCola cola = va_arg(colas, TipoCola);
+		memcpy(auxiliar + offset, &cola, sizeof(int));
 		offset += sizeof(int);
-
 	}
 
+	va_end(colas);
 	suscripcion->colas = auxiliar;
+	tamanioFinal = cantidadColasASuscribir*sizeof(int) + sizeof(int);
+	int resultado = enviarMensaje(suscripcion, tamanioFinal, SUSCRIBER, socket_server);
 
-	tamanioFinal = cantidadDeColasASuscribir*sizeof(int) + sizeof(int);
-
-	int resultado = enviar_mensaje(suscripcion, tamanioFinal, SUSCRIBER, socket_server);
 	if(resultado == -1)
 		printf("ERROR");
 }
-void* recibir_mensaje(int socket_cliente)
+void* recibirMensaje(int socket_cliente)
 {
-	tipoCola codigo_operacion;
+	TipoCola codigo_operacion;
 	void* stream = NULL;
 	int size;
 
@@ -119,7 +115,7 @@ void* recibir_mensaje(int socket_cliente)
 	return stream;
 }
 
-void* recibir_mensaje_servidor(int socket_cliente, int* size)
+void* recibirMensajeServidor(int socket_cliente, int* size)
 {
 	void * buffer;
 
@@ -128,4 +124,23 @@ void* recibir_mensaje_servidor(int socket_cliente, int* size)
 	recv(socket_cliente, buffer, *size, MSG_WAITALL);
 
 	return buffer;
+}
+
+char* tipoColaToString(TipoCola tipoCola){
+	switch(tipoCola){
+		case NEW:
+			return "NEW";
+		case GET:
+			return "GET";
+		case CATCH:
+			return "CATCH";
+		case APPEARED:
+			return "APPEARED";
+		case LOCALIZED:
+			return "LOCALIZED";
+		case CAUGHT:
+			return "CAUGHT";
+	}
+
+	return "";
 }

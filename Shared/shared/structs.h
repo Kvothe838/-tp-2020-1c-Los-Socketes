@@ -23,13 +23,13 @@ typedef enum
 	APPEARED,
 	LOCALIZED,
 	CAUGHT
-} tipoCola;
+} TipoCola;
 
 typedef enum
 {
 	SUSCRIBER = 1,
 	PUBLISHER
-} op_code;
+} OpCode;
 
 
 /*
@@ -61,25 +61,22 @@ typedef enum
 
 typedef struct
 {
-	int cantidadDeColas;
-	tipoCola* colas;
-}
-Suscripcion;
+	int cantidadColas;
+	TipoCola* colas;
+} Suscripcion;
 
 typedef struct
 {
 	int size;
 	void* stream;
-} t_buffer;
+} Buffer;
 
 typedef struct
 {
-	tipoCola codigo_operacion;
-	t_buffer* buffer;
-} t_paquete;
+	TipoCola codigoOperacion;
+	Buffer* buffer;
+} Paquete;
 
-//ESTRUCTURAS
-//DEL BROKER
 typedef struct
 {
 	char* nombre;
@@ -87,7 +84,7 @@ typedef struct
 	uint32_t posX;
 	uint32_t posY;
 	uint32_t colas;
-} t_NewPokemon;
+} NewPokemon;
 
 typedef struct
 {
@@ -95,7 +92,7 @@ typedef struct
 	uint32_t largoNombre;
 	uint32_t posX;
 	uint32_t posY;
-} t_AppearedPokemon;
+} AppearedPokemon;
 
 typedef struct
 {
@@ -103,18 +100,17 @@ typedef struct
 	uint32_t largoNombre;
 	uint32_t posX;
 	uint32_t posY;
-} t_CatchPokemon;
+} CatchPokemon;
 
 typedef struct
 {
 	uint32_t loAtrapo;
-} t_CaughtPokemon;
+} CaughtPokemon;
 
 typedef struct
 {
 	char* nombre;
 	uint32_t largoNombre;
-} t_GetPokemon;
-
+} GetPokemon;
 
 #endif
