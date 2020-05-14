@@ -10,22 +10,44 @@
 #include <pthread.h>
 #include <string.h>
 
-typedef enum estado{
+typedef struct {
+    char* nombre;
+    int x;
+    int y;
+} Pokemon;
+typedef struct {
+    char* nombre;
+} PokemonFantasia;
+typedef struct {
+	int ID_entrenador;
+	int posicion[2];
+	t_list* mios;
+	int estado;
+	int maximosPokemons;
+	int cantPokemons;
+	t_list* objetivos;
+}Entrenador;
+typedef enum {
 	NUEVO = 1,
 	LISTO,
 	EJECUTANDO,
 	BLOQUEADO,
 	SALIR,
 	PUNTOMUERTO
-};
-typedef struct entrenador{
-	int ID_entrenador;
-	t_list* posicion; // X = list_get(entrenador.posicion,0) // Y = list_get(entrenador.posicion,1)
-	t_list* mios;
-	t_list* objetivos;
-	enum estado;
-	// UN HILO ASOCIADO (?)
-}; // nose para que pongo este, pero compila
+}Estado;
+
+static Pokemon *crearPokemon(char *nombre,int x, int y) {
+	Pokemon *new = malloc(sizeof(Pokemon));
+    new->nombre = strdup(nombre);
+    new->y=y;
+    new->x=x;
+    return new;
+}
+static PokemonFantasia *crearObjetivo(char *nombre) {
+	PokemonFantasia *new = malloc(sizeof(PokemonFantasia));
+    new->nombre = strdup(nombre);
+    return new;
+}
 
 int cant_entrenadores(char** posiciones){
 	int cantidad = 0;
@@ -36,30 +58,42 @@ int cant_entrenadores(char** posiciones){
 	}
 	return cantidad;
 }
-void separarElementosNumericos(t_list* lista,char* posicion){
-	char* token = strtok(posicion, "|");
-	while (token != NULL) {
-		list_add(lista,atoi(token));
-	    token = strtok(NULL, "|");
-	}
-}
-void separarElementos(t_list* lista,char* pokemons){
-	char* token = strtok(pokemons, "|");
-	while (token != NULL) {
-		list_add(lista,token);
-	    token = strtok(NULL, "|");
-	}
-}
 
+void asignarPosicion(struct entrenador* persona,char* posicion){
+	char* token = strtok(posicion, "|");
+	int eje=0;
+	while (token != NULL) {
+		persona->posicion[eje] = atoi(token);
+	    token = strtok(NULL, "|");
+	    eje++;
+	}
+}
+void asignarPertenecientes(struct entrenador* persona,char* pokemons){
+	char* token = strtok(pokemons, "|");
+	persona->mios = list_create();
+	while (token != NULL) {
+		Pokemon* p;
+		p = crearPokemon(token,0,0);
+		list_add(persona->mios,p);
+		token = strtok(NULL, "|");
+	}
+}
+void asignarObjetivos(struct entrenador* persona,char* pokemons){
+	char* token = strtok(pokemons, "|");
+		persona->objetivos = list_create();
+		while (token != NULL) {
+			PokemonFantasia* p;
+			p = crearObjetivo(token);
+			list_add(persona->objetivos,p);
+			token = strtok(NULL, "|");
+		}
+}
 void inicializar_entrenadores(int indice, struct entrenador entrenador,char* posicion,char* pertenecientes,char* objetivos){
-	printf("hola, soy el entrenador nro %d \n",indice);
-	entrenador.ID_entrenador = indice+1;
-	entrenador.posicion = list_create();separarElementosNumericos(entrenador.posicion,posicion);
-	entrenador.objetivos = list_create();separarElementos(entrenador.objetivos,objetivos);
-	entrenador.mios = list_create();separarElementos(entrenador.mios,pertenecientes);
-	//printf("x: %d ---- y: %d \n",list_get(entrenador.posicion,0),list_get(entrenador.posicion,1));
-	//printf("p1: %s \n",list_get(entrenador.mios,0));
-	//printf("cant: %d \n",list_size(entrenador.mios));
+	asignarPosicion(&entrenador,posicion);
+	asignarPertenecientes(&entrenador,pertenecientes);
+	asignarObjetivos(&entrenador,objetivos);
+	//printf("x: %d y: %d \n ",entrenador.posicion[0],entrenador.posicion[1]);
+	printf("xd: %d",list_size(entrenador.objetivos));
 }
 
 int main(void) {
@@ -78,7 +112,16 @@ int main(void) {
 
 	for(int a=0;a<cantidad_entrenadores;a++){
 		inicializar_entrenadores(a,entrenadores[a],posiciones[a],pertenecientes[a],objetivos[a]);
+		  //printf("entrenador contiene a pikachu ? = ");
+
 	}
+	printf("entrenadores inicializados \n");
+
+
+	//t_list* list_filter(t_list*, bool(*condition)(void*));
+	//void *list_remove_by_condition(t_list *, bool(*condition)(void*));
+	//void *list_find(t_list *, bool(*closure)(void*));
+	//int list_size(t_list *);
 
 
 	//pthread_t hilo[cantidad_entrenadores];
@@ -89,5 +132,31 @@ int main(void) {
 		pthread_join(&hilo[c],NULL);
 	}
 */
+	/*t_pokemon* p1;
+	p1 = pokemon_create("gabo");
+	t_pokemon* p2;
+	p2 = pokemon_create("samuel");
+	t_list* lista = list_create();
+	list_add(lista,p1);
+	list_add(lista,p2);
+	printf("x: %d",list_size(lista));
+	t_list* nombres = list_create();
+	nombres = list_map(lista,obtenerNombre);
+	printf("             y: %s",list_get(nombres,0));*/
 	printf(" \n programa finalizado");
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
