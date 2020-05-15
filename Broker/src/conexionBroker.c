@@ -34,7 +34,7 @@ void process_request(int cod_op, int cliente_fd){
 	switch (cod_op) {
 		case SUSCRIBER:
 			log_trace(logger, "Llegó un SUSCRIBER");
-			msg = recibir_mensaje_servidor(cliente_fd, &size);
+			msg = recibirMensajeServidor(cliente_fd, &size);
 			log_trace(logger, "Payload: %d", size);
 			manejarSuscripcion(msg, cliente_fd, logger);
 

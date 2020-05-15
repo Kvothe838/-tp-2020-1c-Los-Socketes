@@ -25,7 +25,7 @@ ColaConSuscriptores* obtenerCola(TipoCola colaClave){
 
 void agregarSuscriptor(TipoCola colaClave, int nuevoSuscriptor){
 	ColaConSuscriptores* colaEspecifica = obtenerCola(colaClave);
-	list_add(colaEspecifica->suscriptores, &nuevoSuscriptor);
+	list_add(colaEspecifica->suscriptores, (void*)nuevoSuscriptor);
 }
 
 void agregarMensaje(TipoCola colaClave, void* mensaje){
@@ -34,7 +34,7 @@ void agregarMensaje(TipoCola colaClave, void* mensaje){
 }
 
 void imprimir(int a){
-	printf("Suscriptores %d \n", a);
+	printf("Suscriptor %d \n", a);
 }
 
 void obtenerSuscriptoresPorCola(TipoCola colaClave){
