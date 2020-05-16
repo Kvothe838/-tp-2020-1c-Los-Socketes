@@ -27,15 +27,15 @@ typedef struct {
     char* nombre;
 } PokemonFantasia;
 typedef struct {
-	int ID_entrenador;
+	int idEntrenador;
 	int posicion[2];
 	t_list* mios;
-	Estado estado;
-	int maximosPokemons;
-	int cantPokemons;
+	int estado;
 	t_list* objetivos;
+	t_list* objetivosActuales;
 }Entrenador;
 
+typedef Entrenador** Team;
 
 static Pokemon *crearPokemon(char *nombre,int x, int y) {
 	Pokemon *new = malloc(sizeof(Pokemon));
@@ -93,20 +93,27 @@ void inicializar_entrenadores(int indice, Entrenador entrenador,char* posicion,c
 	asignarPosicion(&entrenador,posicion);
 	asignarPertenecientes(&entrenador,pertenecientes);
 	asignarObjetivos(&entrenador,objetivos);
-	//printf("x: %d y: %d \n ",entrenador.posicion[0],entrenador.posicion[1]);
+
 	printf("xd: %d",list_size(entrenador.objetivos));
 }
+
+char* retornarNombrePosta(Pokemon* p){
+	return p->nombre;
+}
+char* retornarNombreFantasia(PokemonFantasia* p){
+	return p->nombre;
+}
+
 
 Entrenador* inicializarEntrenador(int id,char* posicion, char* pokePertenecientes , char* pokeObjetivos){
 	Entrenador* entrenador = (Entrenador*)malloc(sizeof(Entrenador));
 
-	entrenador->ID_entrenador = id;
+	entrenador->idEntrenador = id;
 	asignarPosicion(entrenador,posicion);
 	asignarPertenecientes(entrenador,pokePertenecientes);
 	asignarObjetivos(entrenador,pokeObjetivos);
 	entrenador->estado = NUEVO;
-	entrenador->maximosPokemons = sizeof(entrenador->objetivos)- 1;
-	entrenador->cantPokemons = sizeof(entrenador->mios)- 1;
+
 
 	return entrenador;
 
@@ -119,6 +126,44 @@ Entrenador** inicializarTeam(char** posiciones, char** pokePertenecientes , char
 	}
 	return team;
 }
+
+void asignarObjetivosActuales(Entrenador* persona){
+	persona->objetivosActuales = list_create();
+	t_list* nombresObjetivos = list_map(persona->objetivos,(void*) retornarNombreFantasia);
+	t_list* nombresPertenecientes = list_map(persona->mios,(void*) retornarNombrePosta);
+	int indiceObjetivos=0;
+	int indicePertenecientes;
+	int repetido;
+	int noRepetido;
+	while(indiceObjetivos<list_size(nombresObjetivos)){
+		indicePertenecientes=0;
+		repetido=1;
+		noRepetido=0;
+		while((indicePertenecientes<list_size(nombresPertenecientes))&&(repetido)){
+			//printf("comparo objetivo nro %d: %s con perteneciente nro %d: %s \n",indiceObjetivos,list_get(nombresObjetivos,indiceObjetivos),indicePertenecientes,list_get(nombresPertenecientes,indicePertenecientes));
+			if(!strcmp(list_get(nombresObjetivos,indiceObjetivos),list_get(nombresPertenecientes,indicePertenecientes))){
+				repetido=0;
+				list_remove(nombresObjetivos,indiceObjetivos);
+				list_remove(nombresPertenecientes,indicePertenecientes);
+				indiceObjetivos--;
+				//printf("saco 2 elementos \n");
+			}else{
+				noRepetido++;
+			}
+			indicePertenecientes++;
+		}
+
+		indiceObjetivos++;
+	}
+	if(list_size(nombresObjetivos)>0){
+		for(int i=0;i<list_size(nombresObjetivos);i++){
+			PokemonFantasia* p;
+			p = crearObjetivo(list_get(nombresObjetivos,i));
+			list_add(persona->objetivosActuales,p);
+		}
+	}
+}
+
 
 static void liberarTeam(Entrenador **team){
 	for(int i=0 ; i< sizeof(team)-1 ;i++){
@@ -141,40 +186,11 @@ int main(void) {
 	char** objetivos = config_get_array_value(config,"OBJETIVOS_ENTRENADORES");
 
 
-	//printf("cantidad entrenadores en el archivo: %d \n",cantidad_entrenadores);
+	Team team = inicializarTeam(posiciones,pertenecientes,objetivos);
 
-	//struct entrenador entrenadores[cantidad_entrenadores];
-	//crear una lista de entrenadores
-	Entrenador** team = inicializarTeam(posiciones,pertenecientes,objetivos);
-
-	printf("\n entrenador inicial id %d", team[1]->ID_entrenador);
+	printf("\n entrenador inicial id %d", team[2]->idEntrenador);
 
 
-	//t_list* list_filter(t_list*, bool(*condition)(void*));
-	//void *list_remove_by_condition(t_list *, bool(*condition)(void*));
-	//void *list_find(t_list *, bool(*closure)(void*));
-	//int list_size(t_list *);
-
-
-	//pthread_t hilo[cantidad_entrenadores];
-	//pthread_create(&hilo[b], NULL, &inicializar_entrenador, NULL);
-/*
-	for(int c=0;c<cantidad_entrenadores;c++){
-		printf("se murio un hilo \n");
-		pthread_join(&hilo[c],NULL);
-	}
-*/
-	/*t_pokemon* p1;
-	p1 = pokemon_create("gabo");
-	t_pokemon* p2;
-	p2 = pokemon_create("samuel");
-	t_list* lista = list_create();
-	list_add(lista,p1);
-	list_add(lista,p2);
-	printf("x: %d",list_size(lista));
-	t_list* nombres = list_create();
-	nombres = list_map(lista,obtenerNombre);
-	printf("             y: %s",list_get(nombres,0));*/
 	liberarMemoria(team);
 	printf(" \n programa finalizado");
 }
