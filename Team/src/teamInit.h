@@ -24,17 +24,34 @@ typedef struct {
     char* nombre;
 } PokemonFantasia;
 typedef struct {
-	int ID_entrenador;
-	int posicion[2];
+	int idEntrenador;
+	int posicion[1];
 	t_list* mios;
-	Estado estado;
-	int maximosPokemons;
-	int cantPokemons;
+	Estado* estado;
 	t_list* objetivos;
+	t_list* objetivosActuales;
 }Entrenador;
 
 typedef Entrenador** Team;
 
+Pokemon* crearPokemon(char* nombre,int x, int y);
+PokemonFantasia* crearObjetivo(char* nombre);
+int cant_entrenadores(char** posiciones);
+void asignarPosicion(Entrenador* persona,char* posicion);
+void asignarPertenecientes(Entrenador* persona,char* pokemons);
+void asignarObjetivos(Entrenador* persona,char* pokemons);
+void inicializar_entrenadores(int indice, Entrenador entrenador,char* posicion,char* pertenecientes,char* objetivos);
 Entrenador* inicializarEntrenador(int id,char*posicion ,char* pokePertenecientes, char* pokeObjetivos);
+Entrenador** inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeObjetivos);
+void asignarObjetivosActuales(Entrenador* persona);
+
+//cambiar el nombre
+
+char* retornarNombrePosta(Pokemon* p);
+char* retornarNombreFantasia(PokemonFantasia* p);
+
+// funciones para evitar Memory Leask
+void liberarTeam(Entrenador **team);
+void liberarMemoria(Entrenador **team);
 
 #endif /* TEAMINIT_H_ */
