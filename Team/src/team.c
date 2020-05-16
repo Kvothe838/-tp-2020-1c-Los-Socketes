@@ -23,9 +23,8 @@ typedef struct {
 	int posicion[2];
 	t_list* mios;
 	int estado;
-	int maximosPokemons;
-	int cantPokemons;
 	t_list* objetivos;
+	t_list* objetivosActuales;
 }Entrenador;
 typedef enum {
 	NUEVO = 1,
@@ -59,7 +58,7 @@ int cant_entrenadores(char** posiciones){
 	return cantidad;
 }
 
-void asignarPosicion(struct entrenador* persona,char* posicion){
+void asignarPosicion(Entrenador* persona,char* posicion){
 	char* token = strtok(posicion, "|");
 	int eje=0;
 	while (token != NULL) {
@@ -68,7 +67,7 @@ void asignarPosicion(struct entrenador* persona,char* posicion){
 	    eje++;
 	}
 }
-void asignarPertenecientes(struct entrenador* persona,char* pokemons){
+void asignarPertenecientes(Entrenador* persona,char* pokemons){
 	char* token = strtok(pokemons, "|");
 	persona->mios = list_create();
 	while (token != NULL) {
@@ -78,9 +77,18 @@ void asignarPertenecientes(struct entrenador* persona,char* pokemons){
 		token = strtok(NULL, "|");
 	}
 }
-void asignarObjetivos(struct entrenador* persona,char* pokemons){
-	char* token = strtok(pokemons, "|");
+
+char* retornarNombrePosta(Pokemon* p){
+	return p->nombre;
+}
+char* retornarNombreFantasia(PokemonFantasia* p){
+	return p->nombre;
+}
+
+void asignarObjetivos(Entrenador* persona,char* pokemons){
+		char* token = strtok(pokemons, "|");
 		persona->objetivos = list_create();
+
 		while (token != NULL) {
 			PokemonFantasia* p;
 			p = crearObjetivo(token);
@@ -88,12 +96,55 @@ void asignarObjetivos(struct entrenador* persona,char* pokemons){
 			token = strtok(NULL, "|");
 		}
 }
-void inicializar_entrenadores(int indice, struct entrenador entrenador,char* posicion,char* pertenecientes,char* objetivos){
+
+void asignarObjetivosActuales(Entrenador* persona){
+	persona->objetivosActuales = list_create();
+	t_list* nombresObjetivos = list_map(persona->objetivos,(void*) retornarNombreFantasia);
+	t_list* nombresPertenecientes = list_map(persona->mios,(void*) retornarNombrePosta);
+	int indiceObjetivos=0;
+	int indicePertenecientes;
+	int repetido;
+	int noRepetido;
+	while(indiceObjetivos<list_size(nombresObjetivos)){
+		indicePertenecientes=0;
+		repetido=1;
+		noRepetido=0;
+		while((indicePertenecientes<list_size(nombresPertenecientes))&&(repetido)){
+			//printf("comparo objetivo nro %d: %s con perteneciente nro %d: %s \n",indiceObjetivos,list_get(nombresObjetivos,indiceObjetivos),
+					indicePertenecientes,list_get(nombresPertenecientes,indicePertenecientes));
+			if(!strcmp(list_get(nombresObjetivos,indiceObjetivos),list_get(nombresPertenecientes,indicePertenecientes))){
+				repetido=0;
+				list_remove(nombresObjetivos,indiceObjetivos);
+				list_remove(nombresPertenecientes,indicePertenecientes);
+				indiceObjetivos--;
+				//printf("saco 2 elementos \n");
+			}else{
+				noRepetido++;
+			}
+			indicePertenecientes++;
+		}
+		//printf("tam objetivos: %d \n",list_size(nombresObjetivos));
+		//printf("tam pertenecientes: %d \n",list_size(nombresPertenecientes));
+
+		indiceObjetivos++;
+	}
+	if(list_size(nombresObjetivos)>0){
+		for(int i=0;i<list_size(nombresObjetivos);i++){
+			PokemonFantasia* p;
+			p = crearObjetivo(list_get(nombresObjetivos,i));
+			list_add(persona->objetivosActuales,p);
+		}
+	}
+	//printf("tam objetivos actuales: %d \n",list_size(persona->objetivosActuales));
+}
+
+void inicializar_entrenadores(int indice, Entrenador entrenador,char* posicion,char* pertenecientes,char* objetivos){
 	asignarPosicion(&entrenador,posicion);
 	asignarPertenecientes(&entrenador,pertenecientes);
 	asignarObjetivos(&entrenador,objetivos);
+	asignarObjetivosActuales(&entrenador);
 	//printf("x: %d y: %d \n ",entrenador.posicion[0],entrenador.posicion[1]);
-	printf("xd: %d",list_size(entrenador.objetivos));
+	//printf("xd: %d \n",list_size(entrenador.objetivos));
 }
 
 int main(void) {
@@ -108,7 +159,7 @@ int main(void) {
 	int cantidad_entrenadores = cant_entrenadores(posiciones);
 	//printf("cantidad entrenadores en el archivo: %d \n",cantidad_entrenadores);
 
-	struct entrenador entrenadores[cantidad_entrenadores];
+	Entrenador entrenadores[cantidad_entrenadores];
 
 	for(int a=0;a<cantidad_entrenadores;a++){
 		inicializar_entrenadores(a,entrenadores[a],posiciones[a],pertenecientes[a],objetivos[a]);
@@ -119,7 +170,7 @@ int main(void) {
 
 
 	//t_list* list_filter(t_list*, bool(*condition)(void*));
-	//void *list_remove_by_condition(t_list *, bool(*condition)(void*));
+	//list_remove_by_condition(t_list *, bool(*condition)(void*));
 	//void *list_find(t_list *, bool(*closure)(void*));
 	//int list_size(t_list *);
 
