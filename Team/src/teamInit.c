@@ -1,6 +1,15 @@
 #include "teamInit.h"
 
+void cargarConfig(Config* conexionConfig){
+	t_log* logger;
+	t_config* config;
+	logger = iniciar_logger("Team.log", "Team");
+	config = leer_config("configTeam.config", logger);
+	conexionConfig->posiciones = config_get_array_value(config,"POSICIONES_ENTRENADORES"); // lista de strings, ultimo elemento nulo
+	conexionConfig->pertenecientes = config_get_array_value(config,"POKEMON_ENTRENADORES");
+	conexionConfig->objetivos = config_get_array_value(config,"OBJETIVOS_ENTRENADORES");
 
+}
 Pokemon* crearPokemon(char *nombre,int x, int y) {
 	Pokemon *new = malloc(sizeof(Pokemon));
     new->nombre = strdup(nombre);
@@ -54,6 +63,18 @@ void asignarObjetivos(Entrenador* persona,char* pokemons){
 			token = strtok(NULL, "|");
 		}
 }
+void mostrarEntrenador(Entrenador* entrenador){
+	printf("\n entrenador %d",entrenador->idEntrenador);
+	printf(" posicion x=%d",entrenador->posicion[0]);
+	printf(" posicion y=%d",entrenador->posicion[1]);
+	PokemonFantasia* pokemon;
+	for(int i=0;i<list_size(entrenador->mios); i++ ){
+
+		pokemon =list_get(entrenador->mios,i);
+		printf(" pokemon[%d]=",i);
+		printf("%s",pokemon->nombre );
+	}
+}
 void inicializar_entrenadores(int indice, Entrenador entrenador,char* posicion,char* pertenecientes,char* objetivos){
 	asignarPosicion(&entrenador,posicion);
 	asignarPertenecientes(&entrenador,pertenecientes);
@@ -79,6 +100,7 @@ Entrenador* inicializarEntrenador(int id,char* posicion, char* pokePerteneciente
 	asignarObjetivos(entrenador,pokeObjetivos);
 	entrenador->estado = NUEVO;
 
+	mostrarEntrenador(entrenador);
 	return entrenador;
 
 }
@@ -127,7 +149,9 @@ void asignarObjetivosActuales(Entrenador* persona){
 		}
 	}
 }
-
+Entrenador* getEntrenador(int id, Team team){
+	return team[id];
+}
 
 void liberarTeam(Entrenador **team){
 	for(int i=0 ; i< sizeof(team)-1 ;i++){

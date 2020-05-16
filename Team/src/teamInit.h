@@ -25,15 +25,26 @@ typedef struct {
 } PokemonFantasia;
 typedef struct {
 	int idEntrenador;
-	int posicion[1];
+	int posicion[2];
 	t_list* mios;
 	Estado* estado;
 	t_list* objetivos;
 	t_list* objetivosActuales;
 }Entrenador;
 
+typedef struct{
+	char** posiciones;
+	char** pertenecientes;
+	char** objetivos;
+}Config;
+
+
 typedef Entrenador** Team;
 
+//carga el configTeam
+void cargarConfig(Config* conexionConfig);
+
+//inizializar
 Pokemon* crearPokemon(char* nombre,int x, int y);
 PokemonFantasia* crearObjetivo(char* nombre);
 int cant_entrenadores(char** posiciones);
@@ -45,11 +56,11 @@ Entrenador* inicializarEntrenador(int id,char*posicion ,char* pokePertenecientes
 Entrenador** inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeObjetivos);
 void asignarObjetivosActuales(Entrenador* persona);
 
+Entrenador* getEntrenador(int id,Team team);
 //cambiar el nombre
 
 char* retornarNombrePosta(Pokemon* p);
 char* retornarNombreFantasia(PokemonFantasia* p);
-
 // funciones para evitar Memory Leask
 void liberarTeam(Entrenador** team);
 void liberarMemoria(Entrenador** team);
