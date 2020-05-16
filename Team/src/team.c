@@ -9,6 +9,14 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <string.h>
+typedef enum {
+	NUEVO,
+	LISTO,
+	EJECUTANDO,
+	BLOQUEADO,
+	SALIR,
+	PUNTOMUERTO
+}Estado;
 
 typedef struct {
     char* nombre;
@@ -22,19 +30,12 @@ typedef struct {
 	int ID_entrenador;
 	int posicion[2];
 	t_list* mios;
-	int estado;
+	Estado estado;
 	int maximosPokemons;
 	int cantPokemons;
 	t_list* objetivos;
 }Entrenador;
-typedef enum {
-	NUEVO = 1,
-	LISTO,
-	EJECUTANDO,
-	BLOQUEADO,
-	SALIR,
-	PUNTOMUERTO
-}Estado;
+
 
 static Pokemon *crearPokemon(char *nombre,int x, int y) {
 	Pokemon *new = malloc(sizeof(Pokemon));
@@ -49,6 +50,7 @@ static PokemonFantasia *crearObjetivo(char *nombre) {
     return new;
 }
 
+
 int cant_entrenadores(char** posiciones){
 	int cantidad = 0;
 	int i=0;
@@ -58,8 +60,7 @@ int cant_entrenadores(char** posiciones){
 	}
 	return cantidad;
 }
-
-void asignarPosicion(struct entrenador* persona,char* posicion){
+void asignarPosicion(Entrenador* persona,char* posicion){
 	char* token = strtok(posicion, "|");
 	int eje=0;
 	while (token != NULL) {
@@ -68,7 +69,7 @@ void asignarPosicion(struct entrenador* persona,char* posicion){
 	    eje++;
 	}
 }
-void asignarPertenecientes(struct entrenador* persona,char* pokemons){
+void asignarPertenecientes(Entrenador* persona,char* pokemons){
 	char* token = strtok(pokemons, "|");
 	persona->mios = list_create();
 	while (token != NULL) {
@@ -78,7 +79,7 @@ void asignarPertenecientes(struct entrenador* persona,char* pokemons){
 		token = strtok(NULL, "|");
 	}
 }
-void asignarObjetivos(struct entrenador* persona,char* pokemons){
+void asignarObjetivos(Entrenador* persona,char* pokemons){
 	char* token = strtok(pokemons, "|");
 		persona->objetivos = list_create();
 		while (token != NULL) {
@@ -88,13 +89,47 @@ void asignarObjetivos(struct entrenador* persona,char* pokemons){
 			token = strtok(NULL, "|");
 		}
 }
-void inicializar_entrenadores(int indice, struct entrenador entrenador,char* posicion,char* pertenecientes,char* objetivos){
+void inicializar_entrenadores(int indice, Entrenador entrenador,char* posicion,char* pertenecientes,char* objetivos){
 	asignarPosicion(&entrenador,posicion);
 	asignarPertenecientes(&entrenador,pertenecientes);
 	asignarObjetivos(&entrenador,objetivos);
 	//printf("x: %d y: %d \n ",entrenador.posicion[0],entrenador.posicion[1]);
 	printf("xd: %d",list_size(entrenador.objetivos));
 }
+
+Entrenador* inicializarEntrenador(int id,char* posicion, char* pokePertenecientes , char* pokeObjetivos){
+	Entrenador* entrenador = (Entrenador*)malloc(sizeof(Entrenador));
+
+	entrenador->ID_entrenador = id;
+	asignarPosicion(entrenador,posicion);
+	asignarPertenecientes(entrenador,pokePertenecientes);
+	asignarObjetivos(entrenador,pokeObjetivos);
+	entrenador->estado = NUEVO;
+	entrenador->maximosPokemons = sizeof(entrenador->objetivos)- 1;
+	entrenador->cantPokemons = sizeof(entrenador->mios)- 1;
+
+	return entrenador;
+
+}
+Entrenador** inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeObjetivos){
+	Entrenador** team = (Entrenador**)(malloc(sizeof(Entrenador)));
+	int cant = sizeof(posiciones) - 1;
+	for(int i=0 ; i<cant ; i++){
+		team[i] = inicializarEntrenador(i,posiciones[i],pokePertenecientes[i],pokeObjetivos[i]);
+	}
+	return team;
+}
+
+static void liberarTeam(Entrenador **team){
+	for(int i=0 ; i< sizeof(team)-1 ;i++){
+		free(team[i]);
+	}
+	free(team);
+}
+void liberarMemoria(Entrenador **team){
+	liberarTeam(team);
+}
+
 
 int main(void) {
 	t_log* logger;
@@ -105,17 +140,14 @@ int main(void) {
 	char** pertenecientes = config_get_array_value(config,"POKEMON_ENTRENADORES");
 	char** objetivos = config_get_array_value(config,"OBJETIVOS_ENTRENADORES");
 
-	int cantidad_entrenadores = cant_entrenadores(posiciones);
+
 	//printf("cantidad entrenadores en el archivo: %d \n",cantidad_entrenadores);
 
-	struct entrenador entrenadores[cantidad_entrenadores];
+	//struct entrenador entrenadores[cantidad_entrenadores];
+	//crear una lista de entrenadores
+	Entrenador** team = inicializarTeam(posiciones,pertenecientes,objetivos);
 
-	for(int a=0;a<cantidad_entrenadores;a++){
-		inicializar_entrenadores(a,entrenadores[a],posiciones[a],pertenecientes[a],objetivos[a]);
-		  //printf("entrenador contiene a pikachu ? = ");
-
-	}
-	printf("entrenadores inicializados \n");
+	printf("\n entrenador inicial id %d", team[1]->ID_entrenador);
 
 
 	//t_list* list_filter(t_list*, bool(*condition)(void*));
@@ -143,6 +175,7 @@ int main(void) {
 	t_list* nombres = list_create();
 	nombres = list_map(lista,obtenerNombre);
 	printf("             y: %s",list_get(nombres,0));*/
+	liberarMemoria(team);
 	printf(" \n programa finalizado");
 }
 
