@@ -14,7 +14,7 @@ int main(void) {
 
 	Team team = inicializarTeam(posiciones,pertenecientes,objetivos);
 
-	printf("\n entrenador inicial id %d", team[2]->posicion[0]);s
+	printf("\n entrenador inicial id %d", team[2]->posicion[0]);
 
 
 	liberarMemoria(team);

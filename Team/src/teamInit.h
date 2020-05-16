@@ -51,7 +51,7 @@ char* retornarNombrePosta(Pokemon* p);
 char* retornarNombreFantasia(PokemonFantasia* p);
 
 // funciones para evitar Memory Leask
-void liberarTeam(Entrenador **team);
-void liberarMemoria(Entrenador **team);
+void liberarTeam(Entrenador** team);
+void liberarMemoria(Entrenador** team);
 
 #endif /* TEAMINIT_H_ */
