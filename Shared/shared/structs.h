@@ -61,14 +61,14 @@ typedef enum
 
 typedef struct
 {
-	int cantidadDeColas;
+	int cantidadColas;
 	TipoCola* colas;
 } Suscripcion;
 
 typedef struct
 {
-	int size; // Tamaño del payload
-	void* stream; // Payload
+	int size;
+	void* stream;
 } Buffer;
 
 typedef struct
@@ -112,6 +112,5 @@ typedef struct
 	char* nombre;
 	uint32_t largoNombre;
 } GetPokemon;
-
 
 #endif

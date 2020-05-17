@@ -20,8 +20,9 @@ int main(void) {
 
 
 	//////////////////////////////////////////////////
-	tipoCola colas[] = {NEW, GET, CAUGHT};
-	mandarSuscripcion(3, colas, socket);
+	mandarSuscripcion(socket, 3, NEW, GET, CAUGHT);
+
+	log_info(logger, "MANDADAS COLAS NEW, GET, CAUGHT");
 
 	//iniciar_servidor(ip, puerto);
 

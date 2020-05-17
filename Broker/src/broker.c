@@ -1,6 +1,6 @@
 #include <shared/utils.h>
 #include "brokerColas.h"
-
+#include "conexionBroker.h"
 
 int main(void) {
 	char* ip, *puerto;
@@ -14,17 +14,14 @@ int main(void) {
 	puerto = config_get_string_value(config, "PUERTO_BROKER");
 	log_info(logger, "IP %s y PUERTO %s", ip, puerto);
 
-	t_dictionary* diccionarioPrincipal = crearDiccionario();
-
 	log_info(logger, "Se crea el diccionario y a continuacion muestra a los suscriptores de 'NEW'", ip, puerto);
+	crearDiccionario();
 
-	agregarSuscriptor(diccionarioPrincipal, "NEW", 3);
-	agregarSuscriptor(diccionarioPrincipal, "NEW", 4);
-	obtenerSuscriptoresPorCola(diccionarioPrincipal, "NEW");
-
+	agregarSuscriptor(NEW, 3);
+	agregarSuscriptor(NEW, 4);
+	obtenerSuscriptoresPorCola(NEW);
 
 	iniciar_servidor(ip, puerto);
-
 
 	terminar_programa(logger, config);
 
