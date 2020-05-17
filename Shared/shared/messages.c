@@ -69,32 +69,17 @@ int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, int sock
 	return resultado;
 }
 
-<<<<<<< HEAD
-void mandarSuscripcion(int cantidadDeColasASuscribir, TipoCola colas[], int socket_server){
-=======
 void mandarSuscripcion(int socket_server, int cantidadColasASuscribir, ...){
 	va_list colas;
 	va_start(colas, cantidadColasASuscribir);
->>>>>>> 600a0349be88af999d119a2d4215ef0e9f183d4e
 	Suscripcion* suscripcion = malloc(sizeof(Suscripcion));
 	int offset = 0, tamanioFinal;
 	suscripcion->cantidadColas = cantidadColasASuscribir;
 	void *auxiliar = malloc(sizeof(TipoCola) * suscripcion->cantidadColas);
 
-<<<<<<< HEAD
-	suscripcion->cantidadDeColas = cantidadDeColasASuscribir;
-
-	suscripcion->colas = malloc(sizeof(TipoCola) * suscripcion->cantidadDeColas);
-	void *auxiliar = malloc(suscripcion->colas);
-
-	for(int i = 0; i < cantidadDeColasASuscribir; i++){
-
-		memcpy(auxiliar + offset, &(colas[i]), sizeof(int));
-=======
 	for(int i = 0; i < cantidadColasASuscribir; i++){
 		TipoCola cola = va_arg(colas, TipoCola);
 		memcpy(auxiliar + offset, &cola, sizeof(int));
->>>>>>> 600a0349be88af999d119a2d4215ef0e9f183d4e
 		offset += sizeof(int);
 	}
 
@@ -108,11 +93,7 @@ void mandarSuscripcion(int socket_server, int cantidadColasASuscribir, ...){
 }
 void* recibirMensaje(int socket_cliente)
 {
-<<<<<<< HEAD
 	TipoCola codigoOperacion;
-=======
-	TipoCola codigo_operacion;
->>>>>>> 600a0349be88af999d119a2d4215ef0e9f183d4e
 	void* stream = NULL;
 	int size;
 
