@@ -12,7 +12,7 @@ void* serializarSuscripcion(Suscripcion* suscripto, int tamanio, void* stream){
 
 	printf("CANTIDAD DE COLAS: %d\n", ayuda);
 
-	offset += sizeof(tipoCola);
+	offset += sizeof(TipoCola);
 	memcpy(&ayuda, stream, sizeof(int));
 
 	prueba = malloc(sizeof(int) * ayuda);
@@ -30,17 +30,17 @@ void* serializarSuscripcion(Suscripcion* suscripto, int tamanio, void* stream){
 }
 
 
-int enviar_mensaje(void* mensaje, int tamanioMensaje, opCode codMensaje, int socket_cliente)
+int enviar_mensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, int socket_cliente)
 {
 	int bytes = 0,
 		resultado = 0;
 	void* mensaje_serializado;
 
-	t_paquete* paquete = NULL;
-	paquete = malloc(sizeof(t_paquete));
+	Paquete* paquete = NULL;
+	paquete = malloc(sizeof(Paquete));
 
-	paquete->codigo_operacion = codMensaje;
-	paquete->buffer = malloc(sizeof(t_buffer));
+	paquete->codigoOperacion = codMensaje;
+	paquete->buffer = malloc(sizeof(Buffer));
 	paquete->buffer->size = tamanioMensaje;
 	paquete->buffer->stream = malloc(paquete->buffer->size);
 	void * stream = malloc(paquete->buffer->size);
@@ -70,13 +70,13 @@ int enviar_mensaje(void* mensaje, int tamanioMensaje, opCode codMensaje, int soc
 	return resultado;
 }
 
-void mandarSuscripcion(int cantidadDeColasASuscribir, tipoCola colas[], int socket_server){
+void mandarSuscripcion(int cantidadDeColasASuscribir, TipoCola colas[], int socket_server){
 	Suscripcion* suscripcion = malloc(sizeof(Suscripcion));
 	int offset = 0, tamanioFinal;
 
 	suscripcion->cantidadDeColas = cantidadDeColasASuscribir;
 
-	suscripcion->colas = malloc(sizeof(tipoCola) * suscripcion->cantidadDeColas);
+	suscripcion->colas = malloc(sizeof(TipoCola) * suscripcion->cantidadDeColas);
 	void *auxiliar = malloc(suscripcion->colas);
 
 	for(int i = 0; i < cantidadDeColasASuscribir; i++){
@@ -96,17 +96,17 @@ void mandarSuscripcion(int cantidadDeColasASuscribir, tipoCola colas[], int sock
 }
 void* recibir_mensaje(int socket_cliente)
 {
-	tipoCola codigo_operacion;
+	TipoCola codigoOperacion;
 	void* stream = NULL;
 	int size;
 
-	if(recv(socket_cliente, &codigo_operacion, sizeof(int), 0) <= 0){
+	if(recv(socket_cliente, &codigoOperacion, sizeof(int), 0) <= 0){
 		//Si hay error leyendo codigo_operacion o si la conexión se cayó.
 		printf("Error recibiendo mensaje.\n");
 		return stream;
 	}
 
-	switch(codigo_operacion) {
+	switch(codigoOperacion) {
 	    case SUSCRIBER:
 	    	recv(socket_cliente, &size, sizeof(int), 0);
 			stream = malloc(size);

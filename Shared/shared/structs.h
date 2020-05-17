@@ -23,13 +23,13 @@ typedef enum
 	APPEARED,
 	LOCALIZED,
 	CAUGHT
-} tipoCola;
+} TipoCola;
 
 typedef enum
 {
 	SUSCRIBER = 1,
 	PUBLISHER
-} op_code;
+} OpCode;
 
 
 /*
@@ -62,32 +62,20 @@ typedef enum
 typedef struct
 {
 	int cantidadDeColas;
-	tipoCola* colas;
-}
-Suscripcion;
+	TipoCola* colas;
+} Suscripcion;
 
 typedef struct
 {
-	int size;
-	void* stream;
-} t_buffer;
+	int size; // Tamaño del payload
+	void* stream; // Payload
+} Buffer;
 
 typedef struct
 {
-	tipoCola codigo_operacion;
-	t_buffer* buffer;
-} t_paquete;
-
-//ESTRUCTURAS
-//DEL BROKER
-typedef struct
-{
-	char* nombre;
-	uint32_t largoNombre;
-	uint32_t posX;
-	uint32_t posY;
-	uint32_t colas;
-} t_NewPokemon;
+	TipoCola codigoOperacion;
+	Buffer* buffer;
+} Paquete;
 
 typedef struct
 {
@@ -95,7 +83,8 @@ typedef struct
 	uint32_t largoNombre;
 	uint32_t posX;
 	uint32_t posY;
-} t_AppearedPokemon;
+	uint32_t cantidad;
+} NewPokemon;
 
 typedef struct
 {
@@ -103,18 +92,26 @@ typedef struct
 	uint32_t largoNombre;
 	uint32_t posX;
 	uint32_t posY;
-} t_CatchPokemon;
+} AppearedPokemon;
+
+typedef struct
+{
+	char* nombre;
+	uint32_t largoNombre;
+	uint32_t posX;
+	uint32_t posY;
+} CatchPokemon;
 
 typedef struct
 {
 	uint32_t loAtrapo;
-} t_CaughtPokemon;
+} CaughtPokemon;
 
 typedef struct
 {
 	char* nombre;
 	uint32_t largoNombre;
-} t_GetPokemon;
+} GetPokemon;
 
 
 #endif
