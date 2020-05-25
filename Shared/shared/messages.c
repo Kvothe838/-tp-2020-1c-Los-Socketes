@@ -3,32 +3,6 @@
 #include "../shared/structs.h"
 
 
-void* serializarSuscripcion(Suscripcion* suscripto, int tamanio, void* stream){
-	stream = malloc(tamanio);
-	void *prueba = malloc(tamanio);
-	int ayuda, offset = 0, imprimir;
-	memcpy(stream, &suscripto->cantidadColas, sizeof(int));
-
-	memcpy(&ayuda, stream, sizeof(int));
-
-	printf("CANTIDAD DE COLAS: %d\n", ayuda);
-
-	offset += sizeof(TipoCola);
-	memcpy(&ayuda, stream, sizeof(int));
-
-	prueba = malloc(sizeof(int) * ayuda);
-	memcpy(prueba, (suscripto->colas), sizeof(int) * ayuda);
-
-	for(int i = 0; i < ayuda; i++){
-		memcpy(stream + offset, (prueba + offset - sizeof(int)), sizeof(int));
-		memcpy(&imprimir, stream + offset, sizeof(int));
-		offset += sizeof(int);
-	}
-
-	return stream;
-}
-
-
 int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, int socket_cliente)
 {
 	int bytes = 0,
@@ -72,8 +46,10 @@ int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, int sock
 void mandarSuscripcion(int socket_server, int cantidadColasASuscribir, ...){
 	va_list colas;
 	va_start(colas, cantidadColasASuscribir);
+
 	Suscripcion* suscripcion = malloc(sizeof(Suscripcion));
 	int offset = 0, tamanioFinal;
+
 	suscripcion->cantidadColas = cantidadColasASuscribir;
 	void *auxiliar = malloc(sizeof(TipoCola) * suscripcion->cantidadColas);
 
@@ -84,9 +60,15 @@ void mandarSuscripcion(int socket_server, int cantidadColasASuscribir, ...){
 	}
 
 	va_end(colas);
+
 	suscripcion->colas = auxiliar;
+
 	tamanioFinal = cantidadColasASuscribir*sizeof(int) + sizeof(int);
 	int resultado = enviarMensaje(suscripcion, tamanioFinal, SUSCRIBER, socket_server);
+
+	free(suscripcion->colas);
+	free(suscripcion);
+
 
 	if(resultado == -1)
 		printf("ERROR");

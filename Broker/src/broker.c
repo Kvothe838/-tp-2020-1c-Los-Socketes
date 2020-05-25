@@ -14,12 +14,15 @@ int main(void) {
 	puerto = config_get_string_value(config, "PUERTO_BROKER");
 	log_info(logger, "IP %s y PUERTO %s", ip, puerto);
 
-	log_info(logger, "Se crea el diccionario y a continuacion muestra a los suscriptores de 'NEW'", ip, puerto);
+
 	crearDiccionario();
 
+	/*
+	log_info(logger, "Se crea el diccionario y a continuacion muestra a los suscriptores de 'NEW'", ip, puerto);
 	agregarSuscriptor(NEW, 3);
 	agregarSuscriptor(NEW, 4);
 	obtenerSuscriptoresPorCola(NEW);
+	*/
 
 	iniciar_servidor(ip, puerto);
 

@@ -5,6 +5,6 @@
 
 void* serializar_paquete(Paquete* paquete, int *bytes);
 
-void* serializarNew(Paquete* paquete, int *bytes);
+void* serializarSuscripcion(Suscripcion* suscripto, int tamanio, void* stream);
 
 #endif
