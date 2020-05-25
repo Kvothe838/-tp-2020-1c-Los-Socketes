@@ -18,8 +18,8 @@ void* serializar_paquete(Paquete* paquete, int *bytes)
 
 //Acá hay que hacer una función para cada estructura de cola que se quiera serializar (6 estructuras).
 
+/*
 void* serializarNew(Paquete* paquete, int *bytes){
-	
-	*bytes = sizeof(paquete-> codigoOperacion) + sizeof(paquete->buffer->size) + paquete->buffer->size;
 
 }
+*/
