@@ -11,5 +11,4 @@ void setValue (void* value, int size, int position);
 
 void* getValue (int size, int position);
 
-
 #endif
