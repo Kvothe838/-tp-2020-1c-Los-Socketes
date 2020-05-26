@@ -1,6 +1,7 @@
 #include <shared/utils.h>
 #include "brokerColas.h"
 #include "conexionBroker.h"
+#include "cache/basicCache.h";
 
 int main(void) {
 	char* ip, *puerto;
@@ -17,6 +18,13 @@ int main(void) {
 
 	crearDiccionario();
 
+	initializeCache(2048);
+	int a = 7, *b;
+	setValue(&a, sizeof(int), 0);
+	b = getValue(sizeof(int), 0);
+	printf("El valor es : %d", *b);
+
+
 	/*
 	log_info(logger, "Se crea el diccionario y a continuacion muestra a los suscriptores de 'NEW'", ip, puerto);
 	agregarSuscriptor(NEW, 3);
@@ -24,7 +32,7 @@ int main(void) {
 	obtenerSuscriptoresPorCola(NEW);
 	*/
 
-	iniciar_servidor(ip, puerto);
+	//iniciar_servidor(ip, puerto);
 
 	terminar_programa(logger, config);
 
