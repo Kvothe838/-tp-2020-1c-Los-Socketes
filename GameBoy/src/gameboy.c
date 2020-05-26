@@ -41,174 +41,189 @@ int main(int argc, char **argv){
 printf("\n\n");
 
 if (strcmp(argv[1],"BROKER") == 0){
-					ipBroker = config_get_string_value(config, "IP_BROKER");
-					puertoBroker = config_get_string_value(config, "PUERTO_BROKER");
-					log_info(logger, "IP_BROKER   %s y PUERTO_BROKER   %s", ipBroker, puertoBroker);
-					conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
+	ipBroker = config_get_string_value(config, "IP_BROKER");
+	puertoBroker = config_get_string_value(config, "PUERTO_BROKER");
+	log_info(logger, "IP_BROKER   %s y PUERTO_BROKER   %s", ipBroker, puertoBroker);
+	conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
 
-					if (strcmp(argv[2],"NEW_POKEMON") == 0){
-						//t_persona *ptr_persona = (t_persona*) malloc(sizeof(t_persona)); 
-						//(*ptr_persona).dni = 41543667;
-						//ptr_persona -> dni = 41543667;
-						//free(ptr_persona);
-						// Si se tuviese la estructura dinámica ejemplificada anteriormente, se deberá hacer lo mismo con los punteros "internos"
-						//free((*ptr_paquete).username);
-						//free((*ptr_paquete).message);
-						//free(ptr_paquete);
+	if (strcmp(argv[2],"NEW_POKEMON") == 0){
+		NewPokemon* pokemon = (NewPokemon*) malloc(sizeof(NewPokemon));
+		pokemon->nombre = argv[3];
+		pokemon->largoNombre = strlen(pokemon->nombre);
+		pokemon->posX = atoi(argv[4]);
+		pokemon->posY = atoi(argv[5]);
+		pokemon->cantidad = atoi(argv[6]);
+		
+		int tamanio = sizeof(uint32_t) * 4 + pokemon->largoNombre;
 
-						NewPokemon *pokemon = (NewPokemon*) malloc(sizeof(NewPokemon));
-						pokemon->nombre = argv[3];
-						pokemon->largoNombre = strlen(pokemon->nombre);
-						pokemon->posX = atoi(argv[4]);
-						pokemon->posY = atoi(argv[5]);
-						pokemon->cantidad = atoi(argv[6]);
-						
-						Buffer* buffer = malloc(sizeof(Buffer));
+		enviarMensaje(pokemon, tamanio, PUBLISHER, NEW, conexionBroker);
 
-						buffer->size = sizeof(uint32_t) * 4 + strlen(pokemon->nombre) + 1;
+		log_info(logger, "El mensaje enviado es: %s %s %s %d %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY, pokemon->cantidad);
+					
+		liberar_conexion_cliente(conexionBroker);
+					
+		free(pokemon->nombre);
+		free(pokemon);
+	}
 
-						void* stream = malloc(buffer->size);
-						int offset = 0;
+	else if (strcmp(argv[2],"APPEARED_POKEMON") == 0){
+			AppearedPokemon* pokemon = (AppearedPokemon*) malloc(sizeof(AppearedPokemon));
+			pokemon->nombre = argv[3];
+			pokemon->largoNombre = strlen(pokemon->nombre);
+			pokemon->posX = atoi(argv[4]);
+			pokemon->posY = atoi(argv[5]);
 
-						memcpy(stream + offset, &pokemon->posX, sizeof(uint32_t));
-						offset += sizeof(uint32_t);
+			int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre;
 
-						memcpy(stream + offset, &pokemon->posY, sizeof(uint32_t));
-						offset += sizeof(uint32_t);
+			enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, conexionBroker);
 
-						memcpy(stream + offset, &pokemon->cantidad, sizeof(uint32_t));
-						offset += sizeof(uint32_t);
+			log_info(logger, "El mensaje enviado es: %s %s %s %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY);
 
-						memcpy(stream + offset, &pokemon->largoNombre, sizeof(uint32_t));
-						offset += sizeof(uint32_t);
+			liberar_conexion_cliente(conexionBroker);
 
-						memcpy(stream + offset, pokemon->nombre, strlen(pokemon->nombre) + 1);
+			free(pokemon->nombre);
+			free(pokemon);
+		}
 
-						buffer->stream = stream;
+	else if (strcmp(argv[2],"CATCH_POKEMON") == 0){
+				CatchPokemon* pokemon = (CatchPokemon*) malloc(sizeof(CatchPokemon));
+				pokemon->nombre = argv[3];
+				pokemon->largoNombre = strlen(pokemon->nombre);
+				pokemon->posX = atoi(argv[4]);
+				pokemon->posY = atoi(argv[5]);
 
-						free(pokemon);
+				int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre;
 
-						//Entonces podemos llenar el paquete con el buffer///
+				enviarMensaje(pokemon, tamanio, PUBLISHER, CATCH, conexionBroker);
 
-						Paquete* paquete = malloc(sizeof(paquete));
+				log_info(logger, "El mensaje enviado es: %s %s %s %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY);
 
-						paquete->codigoOperacion = NEW;
-						paquete->buffer = buffer;
+				liberar_conexion_cliente(conexionBroker);
 
-						//Armamos el stream a enviar//
-						void* aEnviar = malloc(buffer->size + sizeof(TipoCola) + sizeof(uint32_t));
-						int offsetS = 0;
+				free(pokemon->nombre);
+				free(pokemon);
+			}
 
-						memcpy(aEnviar + offsetS, &(paquete->codigoOperacion), sizeof(TipoCola));
-						offsetS += sizeof(TipoCola);
+	else if (strcmp(argv[2],"CAUGHT_POKEMON") == 0){
+				CaughtPokemon* pokemon = (CaughtPokemon*) malloc(sizeof(CaughtPokemon));
+				pokemon->loAtrapo = atoi(argv[3]); //si se pudo o no atrapar al pokemon (0 o 1)
 
-						memcpy(aEnviar + offsetS, &(paquete->buffer->size), sizeof(uint32_t));
-						offsetS += sizeof(uint32_t);
+				int tamanio = sizeof(uint32_t);
 
-						memcpy(aEnviar + offsetS, paquete->buffer->stream, paquete->buffer->size);
+				enviarMensaje(pokemon, tamanio, PUBLISHER, CAUGHT, conexionBroker);
 
-						//Enviamos//
-						send(conexionBroker, aEnviar, buffer->size + sizeof(TipoCola) + sizeof(uint32_t), 0);
+				log_info(logger, "El mensaje enviado es: %s %s %d\n", argv[1], argv[2], pokemon->loAtrapo);
 
-						log_info(logger, "El mensaje enviado es: %s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
-						
-						liberar_conexion_cliente(conexionBroker);
+				liberar_conexion_cliente(conexionBroker);
 
-						free(aEnviar);
-						free(paquete->buffer->stream);
-						free(paquete->buffer);
-						free(paquete);
-					}
+				free(pokemon);
+			}
+
+	else if (strcmp(argv[2],"GET_POKEMON") == 0){
+				GetPokemon* pokemon = (GetPokemon*) malloc(sizeof(GetPokemon));
+				pokemon->nombre = argv[3];
+				pokemon->largoNombre = strlen(pokemon->nombre);
+
+				int tamanio = sizeof(uint32_t) + pokemon->largoNombre;
+
+				enviarMensaje(pokemon, tamanio, PUBLISHER, GET, conexionBroker);
+
+				log_info(logger, "El mensaje enviado es: %s %s %s\n", argv[1], argv[2], pokemon->nombre);
+
+				liberar_conexion_cliente(conexionBroker);
+
+				free(pokemon->nombre);
+				free(pokemon);
+			}
 }
 else if (strcmp(argv[1],"TEAM") == 0){
-						ipTeam = config_get_string_value(config, "IP_TEAM");
-						puertoTeam = config_get_string_value(config, "PUERTO_TEAM");
-						log_info(logger, "IP_TEAM     %s y PUERTO_TEAM     %s", ipTeam, puertoTeam);
-						conexionTeam = crear_conexion_cliente(ipTeam, puertoTeam);
+		ipTeam = config_get_string_value(config, "IP_TEAM");
+		puertoTeam = config_get_string_value(config, "PUERTO_TEAM");
+		log_info(logger, "IP_TEAM     %s y PUERTO_TEAM     %s", ipTeam, puertoTeam);
+		conexionTeam = crear_conexion_cliente(ipTeam, puertoTeam);
 
-						AppearedPokemon *pokemon = (AppearedPokemon*) malloc(sizeof(AppearedPokemon));
-						pokemon->nombre = argv[3];
-						pokemon->largoNombre = strlen(pokemon->nombre);
-						pokemon->posX = atoi(argv[4]);
-						pokemon->posY = atoi(argv[5]);
+		if (strcmp(argv[2],"APPEARED_POKEMON") == 0){
+			AppearedPokemon* pokemon = malloc(sizeof(AppearedPokemon));
+			pokemon->nombre = argv[3];
+			pokemon->largoNombre = strlen(pokemon->nombre);
+			pokemon->posX = atoi(argv[4]);
+			pokemon->posY = atoi(argv[5]);
+
+			int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre;
+
+			if(enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, conexionTeam) == -1 ){
+				printf("Error enviando mensaje a TEAM");
+			}
+
+			log_info(logger, "El mensaje enviado es: %s %s %s %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY);
 						
-						Buffer* buffer = malloc(sizeof(Buffer));
+			liberar_conexion_cliente(conexionTeam);
 
-						buffer->size = sizeof(uint32_t) * 3 + strlen(pokemon->nombre) + 1;
+			free(pokemon->nombre);
+			free(pokemon);
 
-						void* stream = malloc(buffer->size);
-						int offset = 0;
-
-						memcpy(stream + offset, &pokemon->posX, sizeof(uint32_t));
-						offset += sizeof(uint32_t);
-
-						memcpy(stream + offset, &pokemon->posY, sizeof(uint32_t));
-						offset += sizeof(uint32_t);
-
-						memcpy(stream + offset, &pokemon->largoNombre, sizeof(uint32_t));
-						offset += sizeof(uint32_t);
-
-						memcpy(stream + offset, pokemon->nombre, strlen(pokemon->nombre) + 1);
-
-						buffer->stream = stream;
-
-						free(pokemon);
-
-						//Entonces podemos llenar el paquete con el buffer///
-
-						Paquete* paquete = malloc(sizeof(paquete));
-
-						paquete->codigoOperacion = APPEARED;
-						paquete->buffer = buffer;
-
-						//Armamos el stream a enviar//
-						void* aEnviar = malloc(buffer->size + sizeof(TipoCola) + sizeof(uint32_t));
-						int offsetS = 0;
-
-						memcpy(aEnviar + offsetS, &(paquete->codigoOperacion), sizeof(TipoCola));
-						offsetS += sizeof(TipoCola);
-
-						memcpy(aEnviar + offsetS, &(paquete->buffer->size), sizeof(uint32_t));
-						offsetS += sizeof(uint32_t);
-
-						memcpy(aEnviar + offsetS, paquete->buffer->stream, paquete->buffer->size);
-
-						//Enviamos//
-						send(conexionTeam, aEnviar, buffer->size + sizeof(TipoCola) + sizeof(uint32_t), 0);
-
-						log_info(logger, "El mensaje enviado es: %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4], argv[5]);
-						
-						liberar_conexion_cliente(conexionTeam);
-
-						free(aEnviar);
-						free(paquete->buffer->stream);
-						free(paquete->buffer);
-						free(paquete);
+		}
 }
 else if (strcmp(argv[1],"GAMECARD") == 0){
-						ipGamecard = config_get_string_value(config, "IP_GAMECARD");
-						puertoGamecard = config_get_string_value(config, "PUERTO_GAMECARD");
-						log_info(logger, "IP_GAMECARD %s y PUERTO_GAMECARD %s", ipGamecard, puertoGamecard);
-						conexionGamecard = crear_conexion_cliente(ipGamecard, puertoGamecard);
+		ipGamecard = config_get_string_value(config, "IP_GAMECARD");
+		puertoGamecard = config_get_string_value(config, "PUERTO_GAMECARD");
+		log_info(logger, "IP_GAMECARD %s y PUERTO_GAMECARD %s", ipGamecard, puertoGamecard);
+		conexionGamecard = crear_conexion_cliente(ipGamecard, puertoGamecard);
+
+		if (strcmp(argv[2],"CATCH_POKEMON") == 0){
+			CatchPokemon* pokemon = (CatchPokemon*) malloc(sizeof(CatchPokemon));
+			pokemon->nombre = argv[3];
+			pokemon->largoNombre = strlen(pokemon->nombre);
+			pokemon->posX = atoi(argv[4]);
+			pokemon->posY = atoi(argv[5]);
+
+			int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre;
+
+			enviarMensaje(pokemon, tamanio, PUBLISHER, CATCH, conexionGamecard);
+
+			log_info(logger, "El mensaje enviado es: %s %s %s %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY);
+
+			liberar_conexion_cliente(conexionGamecard);
+
+			free(pokemon->nombre);
+			free(pokemon);
+		}
+
+		else if (strcmp(argv[2],"GET_POKEMON") == 0){
+				GetPokemon* pokemon = (GetPokemon*) malloc(sizeof(GetPokemon));
+				pokemon->nombre = argv[3];
+				pokemon->largoNombre = strlen(pokemon->nombre);
+
+				int tamanio = sizeof(uint32_t) + pokemon->largoNombre;
+
+				enviarMensaje(pokemon, tamanio, PUBLISHER, GET, conexionGamecard);
+
+				log_info(logger, "El mensaje enviado es: %s %s %s\n", argv[1], argv[2], pokemon->nombre);
+
+				liberar_conexion_cliente(conexionGamecard);
+
+				free(pokemon->nombre);
+				free(pokemon);
+			}
+
 }
 else if (strcmp(argv[1],"SUSCRIPTOR") == 0){
-						printf("./gameboy SUSCRIPTOR [COLA_DE_MENSAJES] [TIEMPO]\n");
+		printf("./gameboy SUSCRIPTOR [COLA_DE_MENSAJES] [TIEMPO]\n");
 }
 
-	//enviar_mensaje
+//enviar_mensaje
 
-	//NewPokemon = {"Pikachu",5,10,2};
+//NewPokemon = {"Pikachu",5,10,2};
 
-	//AppearedPokemon = {"Pikachu",1,5};
+//AppearedPokemon = {"Pikachu",1,5};
 
-	//CatchPokemon = {"Pikachu",1,5};
+//CatchPokemon = {"Pikachu",1,5};
 
-	//CaughtPokemon = {0};
+//CaughtPokemon = {0};
 
-	//GetPokemon = {"Pikachu"};
+//GetPokemon = {"Pikachu"};
 
+terminar_programa(logger, config);
 
-	terminar_programa(logger, config);
-
-	return EXIT_SUCCESS;
+return EXIT_SUCCESS;
 }

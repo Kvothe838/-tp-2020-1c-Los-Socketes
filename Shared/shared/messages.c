@@ -2,8 +2,7 @@
 #include "../shared/serialize.h"
 #include "../shared/structs.h"
 
-
-int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, int socket_cliente)
+int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, TipoCola colaMensaje, int socket_cliente)
 {
 	int bytes = 0,
 		resultado = 0;
@@ -21,6 +20,9 @@ int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, int sock
 	switch(codMensaje){
 		case SUSCRIBER:
 			stream = serializarSuscripcion(mensaje, tamanioMensaje, stream);
+			break;
+		case PUBLISHER:
+			stream = serializarDato(mensaje, tamanioMensaje, stream, colaMensaje);
 			break;
 		default:
 			break;
@@ -46,10 +48,8 @@ int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, int sock
 void mandarSuscripcion(int socket_server, int cantidadColasASuscribir, ...){
 	va_list colas;
 	va_start(colas, cantidadColasASuscribir);
-
 	Suscripcion* suscripcion = malloc(sizeof(Suscripcion));
 	int offset = 0, tamanioFinal;
-
 	suscripcion->cantidadColas = cantidadColasASuscribir;
 	void *auxiliar = malloc(sizeof(TipoCola) * suscripcion->cantidadColas);
 
@@ -60,15 +60,9 @@ void mandarSuscripcion(int socket_server, int cantidadColasASuscribir, ...){
 	}
 
 	va_end(colas);
-
 	suscripcion->colas = auxiliar;
-
 	tamanioFinal = cantidadColasASuscribir*sizeof(int) + sizeof(int);
-	int resultado = enviarMensaje(suscripcion, tamanioFinal, SUSCRIBER, socket_server);
-
-	free(suscripcion->colas);
-	free(suscripcion);
-
+	int resultado = enviarMensaje(suscripcion, tamanioFinal, SUSCRIBER, 0, socket_server);
 
 	if(resultado == -1)
 		printf("ERROR");
