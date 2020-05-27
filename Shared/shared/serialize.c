@@ -41,22 +41,22 @@ void* serializarSuscripcion(Suscripcion* suscripto, int tamanio, void* stream){
 	return stream;
 }
 
-void* serializarDato(void* mensaje, int* tamanioMensaje, void* stream, TipoCola colaMensaje){
+void* serializarDato(void* mensaje, int tamanioMensaje, void* stream, TipoCola colaMensaje){
 	switch(colaMensaje){
 		case NEW:
-			return serializarNew(mensaje, tamanioMensaje);
+			return serializarNew(mensaje, &tamanioMensaje);
 			break;
 		case APPEARED:
-			return serializarAppeared(mensaje, tamanioMensaje);
+			return serializarAppeared(mensaje, &tamanioMensaje);
 			break;
 		case CATCH:
-			return serializarCatch(mensaje, tamanioMensaje);
+			return serializarCatch(mensaje, &tamanioMensaje);
 			break;
 		case CAUGHT:
-			return serializarCaught(mensaje, tamanioMensaje);
+			return serializarCaught(mensaje, &tamanioMensaje);
 			break;
 		case GET:
-			return serializarGet(mensaje, tamanioMensaje);
+			return serializarGet(mensaje, &tamanioMensaje);
 			break;
 		default:
 			break;

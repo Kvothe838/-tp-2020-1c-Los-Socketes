@@ -19,11 +19,10 @@ int main(int argc, char **argv){
 	logger = iniciar_logger("GameBoy.log", "GAMEBOY");
 	config = leer_config("GameBoy.config", logger);
 
-
     printf("El nombre del programa es: %s\n",argv[0]); 
     if(argc == 1){
         printf("\nNo se ha ingresado ningún argumento de línea de comando adicional que no sea el nombre del programa\n");
-		printf("Formato de ejecución: ./gameboy [BROKER|GAMECARD|TEAM|SUSCRIPTOR] [NEW_POKEMON|APPEARED_POKEMON|CATCH_POKEMON|CAUGHT_POKEMON|GET_POKEMON] [ARGUMENTOS]*\n");
+		printf("Formato de ejecución: ./gameboy [BROKER|GAMECARD|TEAM] [NEW_POKEMON|APPEARED_POKEMON|CATCH_POKEMON|CAUGHT_POKEMON|GET_POKEMON] [ARGUMENTOS]*\n");
 		exit(1);
 	}
     if(argc >= cantidadMinArgc && argc <= cantidadMaxArgc) 
@@ -47,7 +46,7 @@ if (strcmp(argv[1],"BROKER") == 0){
 	conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
 
 	if (strcmp(argv[2],"NEW_POKEMON") == 0){
-		NewPokemon* pokemon = (NewPokemon*) malloc(sizeof(NewPokemon));
+		NewPokemon* pokemon = malloc(sizeof(NewPokemon));
 		pokemon->nombre = argv[3];
 		pokemon->largoNombre = strlen(pokemon->nombre);
 		pokemon->posX = atoi(argv[4]);
@@ -61,13 +60,12 @@ if (strcmp(argv[1],"BROKER") == 0){
 		log_info(logger, "El mensaje enviado es: %s %s %s %d %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY, pokemon->cantidad);
 					
 		liberar_conexion_cliente(conexionBroker);
-					
-		free(pokemon->nombre);
+
 		free(pokemon);
 	}
 
 	else if (strcmp(argv[2],"APPEARED_POKEMON") == 0){
-			AppearedPokemon* pokemon = (AppearedPokemon*) malloc(sizeof(AppearedPokemon));
+			AppearedPokemon* pokemon = malloc(sizeof(AppearedPokemon));
 			pokemon->nombre = argv[3];
 			pokemon->largoNombre = strlen(pokemon->nombre);
 			pokemon->posX = atoi(argv[4]);
@@ -81,12 +79,11 @@ if (strcmp(argv[1],"BROKER") == 0){
 
 			liberar_conexion_cliente(conexionBroker);
 
-			free(pokemon->nombre);
 			free(pokemon);
 		}
 
 	else if (strcmp(argv[2],"CATCH_POKEMON") == 0){
-				CatchPokemon* pokemon = (CatchPokemon*) malloc(sizeof(CatchPokemon));
+				CatchPokemon* pokemon = malloc(sizeof(CatchPokemon));
 				pokemon->nombre = argv[3];
 				pokemon->largoNombre = strlen(pokemon->nombre);
 				pokemon->posX = atoi(argv[4]);
@@ -100,12 +97,11 @@ if (strcmp(argv[1],"BROKER") == 0){
 
 				liberar_conexion_cliente(conexionBroker);
 
-				free(pokemon->nombre);
 				free(pokemon);
 			}
 
 	else if (strcmp(argv[2],"CAUGHT_POKEMON") == 0){
-				CaughtPokemon* pokemon = (CaughtPokemon*) malloc(sizeof(CaughtPokemon));
+				CaughtPokemon* pokemon = malloc(sizeof(CaughtPokemon));
 				pokemon->loAtrapo = atoi(argv[3]); //si se pudo o no atrapar al pokemon (0 o 1)
 
 				int tamanio = sizeof(uint32_t);
@@ -120,7 +116,7 @@ if (strcmp(argv[1],"BROKER") == 0){
 			}
 
 	else if (strcmp(argv[2],"GET_POKEMON") == 0){
-				GetPokemon* pokemon = (GetPokemon*) malloc(sizeof(GetPokemon));
+				GetPokemon* pokemon = malloc(sizeof(GetPokemon));
 				pokemon->nombre = argv[3];
 				pokemon->largoNombre = strlen(pokemon->nombre);
 
@@ -132,7 +128,6 @@ if (strcmp(argv[1],"BROKER") == 0){
 
 				liberar_conexion_cliente(conexionBroker);
 
-				free(pokemon->nombre);
 				free(pokemon);
 			}
 }
@@ -151,15 +146,12 @@ else if (strcmp(argv[1],"TEAM") == 0){
 
 			int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre;
 
-			if(enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, conexionTeam) == -1 ){
-				printf("Error enviando mensaje a TEAM");
-			}
+			enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, conexionTeam);
 
 			log_info(logger, "El mensaje enviado es: %s %s %s %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY);
 						
 			liberar_conexion_cliente(conexionTeam);
 
-			free(pokemon->nombre);
 			free(pokemon);
 
 		}
@@ -171,7 +163,7 @@ else if (strcmp(argv[1],"GAMECARD") == 0){
 		conexionGamecard = crear_conexion_cliente(ipGamecard, puertoGamecard);
 
 		if (strcmp(argv[2],"CATCH_POKEMON") == 0){
-			CatchPokemon* pokemon = (CatchPokemon*) malloc(sizeof(CatchPokemon));
+			CatchPokemon* pokemon = malloc(sizeof(CatchPokemon));
 			pokemon->nombre = argv[3];
 			pokemon->largoNombre = strlen(pokemon->nombre);
 			pokemon->posX = atoi(argv[4]);
@@ -185,12 +177,11 @@ else if (strcmp(argv[1],"GAMECARD") == 0){
 
 			liberar_conexion_cliente(conexionGamecard);
 
-			free(pokemon->nombre);
 			free(pokemon);
 		}
 
 		else if (strcmp(argv[2],"GET_POKEMON") == 0){
-				GetPokemon* pokemon = (GetPokemon*) malloc(sizeof(GetPokemon));
+				GetPokemon* pokemon = malloc(sizeof(GetPokemon));
 				pokemon->nombre = argv[3];
 				pokemon->largoNombre = strlen(pokemon->nombre);
 
@@ -202,13 +193,14 @@ else if (strcmp(argv[1],"GAMECARD") == 0){
 
 				liberar_conexion_cliente(conexionGamecard);
 
-				free(pokemon->nombre);
 				free(pokemon);
 			}
 
 }
 else if (strcmp(argv[1],"SUSCRIPTOR") == 0){
 		printf("./gameboy SUSCRIPTOR [COLA_DE_MENSAJES] [TIEMPO]\n");
+
+		//mandarSuscripcion(conexionBroker, 1, stringToCola(argv[2]));
 }
 
 //enviar_mensaje
