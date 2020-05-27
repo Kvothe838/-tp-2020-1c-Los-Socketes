@@ -63,10 +63,43 @@ void asignarObjetivos(Entrenador* persona,char* pokemons){
 			token = strtok(NULL, "|");
 		}
 }
+void mostrarObjetivosActualesDe(Entrenador* entrenador){
+	t_list* listaObjetivos = entrenador->objetivosActuales;
+	printf("\nPokemones por encontrar: ");
+	for(int i = 0 ; i<list_size(listaObjetivos);i++){
+		PokemonFantasia* pokemon = list_get(listaObjetivos,i);
+		printf("\n %s",pokemon->nombre);
+	}
+	printf("\n");
+}
+void mostrarEstado(Entrenador* entrenador){
+	switch(entrenador->estado){
+		case NUEVO:
+			printf("NUEVO");
+		break;
+		case LISTO:
+			printf("LISTO");
+		break;
+		case EJECUTANDO:
+			printf("EJECUTANDO");
+		break;
+		case BLOQUEADO:
+			printf("BLOQUEADO");
+		break;
+		case SALIR:
+			printf("SALIR");
+		break;
+		default:
+			printf("DEADLOCK");
+	}
+}
 void mostrarEntrenador(Entrenador* entrenador){
-	printf("\n entrenador %d",entrenador->idEntrenador);
+	printf("\nEntrenador(%d)",entrenador->idEntrenador);
 	printf(" posicion x=%d",entrenador->posicion[0]);
 	printf(" posicion y=%d",entrenador->posicion[1]);
+	printf(" estado= ");
+	mostrarEstado(entrenador);
+	printf("\n");
 	PokemonFantasia* pokemon;
 	for(int i=0;i<list_size(entrenador->mios); i++ ){
 
@@ -74,7 +107,10 @@ void mostrarEntrenador(Entrenador* entrenador){
 		printf(" pokemon[%d]=",i);
 		printf("%s",pokemon->nombre );
 	}
+
+	mostrarObjetivosActualesDe(entrenador);
 }
+
 void inicializar_entrenadores(int indice, Entrenador entrenador,char* posicion,char* pertenecientes,char* objetivos){
 	asignarPosicion(&entrenador,posicion);
 	asignarPertenecientes(&entrenador,pertenecientes);
@@ -99,11 +135,14 @@ Entrenador* inicializarEntrenador(int id,char* posicion, char* pokePerteneciente
 	asignarPertenecientes(entrenador,pokePertenecientes);
 	asignarObjetivos(entrenador,pokeObjetivos);
 	entrenador->estado = NUEVO;
+	asignarObjetivosActuales(entrenador);
+
 
 	mostrarEntrenador(entrenador);
 	return entrenador;
 
 }
+
 Entrenador** inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeObjetivos){
 	Entrenador** team = (Entrenador**)(malloc(sizeof(Entrenador)));
 	int cant = sizeof(posiciones) - 1;
@@ -152,6 +191,7 @@ void asignarObjetivosActuales(Entrenador* persona){
 Entrenador* getEntrenador(int id, Team team){
 	return team[id];
 }
+
 
 void liberarTeam(Entrenador **team){
 	for(int i=0 ; i< sizeof(team)-1 ;i++){

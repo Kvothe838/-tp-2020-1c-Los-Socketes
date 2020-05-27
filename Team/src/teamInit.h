@@ -27,7 +27,7 @@ typedef struct {
 	int idEntrenador;
 	int posicion[2];
 	t_list* mios;
-	Estado* estado;
+	Estado estado;
 	t_list* objetivos;
 	t_list* objetivosActuales;
 }Entrenador;
@@ -55,12 +55,14 @@ void inicializar_entrenadores(int indice, Entrenador entrenador,char* posicion,c
 Entrenador* inicializarEntrenador(int id,char*posicion ,char* pokePertenecientes, char* pokeObjetivos);
 Entrenador** inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeObjetivos);
 void asignarObjetivosActuales(Entrenador* persona);
-
+void mostarObjetivosActualesDe(Entrenador* entrenador);
+void mostrarEntrenador(Entrenador* entrenador);
 Entrenador* getEntrenador(int id,Team team);
 //cambiar el nombre
 
 char* retornarNombrePosta(Pokemon* p);
 char* retornarNombreFantasia(PokemonFantasia* p);
+
 // funciones para evitar Memory Leask
 void liberarTeam(Entrenador** team);
 void liberarMemoria(Entrenador** team);
