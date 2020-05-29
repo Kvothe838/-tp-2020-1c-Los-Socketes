@@ -93,6 +93,7 @@ void mostrarEstado(Entrenador* entrenador){
 			printf("DEADLOCK");
 	}
 }
+
 void mostrarEntrenador(Entrenador* entrenador){
 	printf("\nEntrenador(%d)",entrenador->idEntrenador);
 	printf(" posicion x=%d",entrenador->posicion[0]);
@@ -142,13 +143,26 @@ Entrenador* inicializarEntrenador(int id,char* posicion, char* pokePerteneciente
 	return entrenador;
 
 }
+int getCantEntrenadores(Team team){
+	return sizeof(team)-1;
+}
+void getObjetivosGlobales(Team team){
+	printf("\n POkemones Objetivos: ");
+	for(int i = 0 ;i<getCantEntrenadores(team);i++){
+		for(int j = 0 ; j<list_size(team[i]->objetivosActuales);j++){
+			list_add(OBJETIVO_GLOBAL,list_get(team[i]->objetivosActuales,j));
+		}
+	}
+}
 
-Entrenador** inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeObjetivos){
+
+Team inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeObjetivos){
 	Entrenador** team = (Entrenador**)(malloc(sizeof(Entrenador)));
 	int cant = sizeof(posiciones) - 1;
 	for(int i=0 ; i<cant ; i++){
 		team[i] = inicializarEntrenador(i,posiciones[i],pokePertenecientes[i],pokeObjetivos[i]);
 	}
+	getObjetivosGlobales(team);
 	return team;
 }
 
@@ -192,9 +206,8 @@ Entrenador* getEntrenador(int id, Team team){
 	return team[id];
 }
 
-
-void liberarTeam(Entrenador **team){
-	for(int i=0 ; i< sizeof(team)-1 ;i++){
+void liberarTeam(Team team){
+	for(int i=0 ; i< getCantEntrenadores(team);i++){
 		free(team[i]);
 	}
 	free(team);
