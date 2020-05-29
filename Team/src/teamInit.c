@@ -147,17 +147,22 @@ int getCantEntrenadores(Team team){
 	return sizeof(team)-1;
 }
 void getObjetivosGlobales(Team team){
-	printf("\n POkemones Objetivos: ");
+	//printf("\n ------------------- \n");
 	for(int i = 0 ;i<getCantEntrenadores(team);i++){
 		for(int j = 0 ; j<list_size(team[i]->objetivosActuales);j++){
 			list_add(OBJETIVO_GLOBAL,list_get(team[i]->objetivosActuales,j));
 		}
-	}
+	}/*
+	printf("\n cant objetivos globales:%d \n",list_size(OBJETIVO_GLOBAL));
+	for(int x=0;x<list_size(OBJETIVO_GLOBAL);x++){
+		printf("%s \n",retornarNombreFantasia(list_get(OBJETIVO_GLOBAL,x)));
+	}*/
 }
 
 
 Team inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeObjetivos){
 	Entrenador** team = (Entrenador**)(malloc(sizeof(Entrenador)));
+	OBJETIVO_GLOBAL = list_create();
 	int cant = sizeof(posiciones) - 1;
 	for(int i=0 ; i<cant ; i++){
 		team[i] = inicializarEntrenador(i,posiciones[i],pokePertenecientes[i],pokeObjetivos[i]);
