@@ -78,9 +78,9 @@ int main(void) {
 	for(int i = 0; i<58; i++)
 		agregarItem(&b, sizeof(double), tablaElementos, tablaVacios);
 
-	eliminarItem(47, tableSize, tamanioParticionMinima, tablaElementos, tablaVacios);
-	eliminarItem(35, tableSize, tamanioParticionMinima, tablaElementos, tablaVacios);
-	eliminarItem(17, tableSize, tamanioParticionMinima, tablaElementos, tablaVacios);
+	eliminarItem(47, tablaElementos, tablaVacios);
+	eliminarItem(35, tablaElementos, tablaVacios);
+	eliminarItem(17, tablaElementos, tablaVacios);
 
 	char* mensajeLargo2 = "hola soy un STRING MUY LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARGO";
 

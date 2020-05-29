@@ -35,12 +35,11 @@ void agregarItem(	void* item, int tamanioItem,
 					t_dynamic_table_entry tablaElementos[],
 					t_dynamic_table_entry tablaVacios[]);
 
-void eliminarItem(int id, int tamanioTabla, int tamanioParticionMinima,
+void eliminarItem(int id,
 					t_dynamic_table_entry tablaElementos[],
 					t_dynamic_table_entry tablaVacios[]);
 
-void compactarCache(int tamanioParticionMinima, int tamanioTabla,
-					t_dynamic_table_entry tablaACompactar[],
+void compactarCache(t_dynamic_table_entry tablaACompactar[],
 					t_dynamic_table_entry tablaFinal[]);
 /*
  *  - agregar part

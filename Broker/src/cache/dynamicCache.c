@@ -82,8 +82,8 @@ int obtenerDesplazamientoMinimo(int tamanioParticionMinima, int espacioRequerido
 	return posicionRelativa;
 }
 
-int obtenerTablaPorId(int id, int tamanio, t_dynamic_table_entry tablaElementos[]){
-	for(int i = 0; i < tamanio; i++){
+int obtenerTablaPorId(int id, t_dynamic_table_entry tablaElementos[]){
+	for(int i = 0; i < tableSize; i++){
 		if(tablaElementos[i].id == id)
 			return i;
 	}
@@ -145,7 +145,7 @@ void agregarItem(	void* item, int tamanioItem,
 	}
 	else
 	{
-		compactarCache(tamanioParticionMinima, tableSize, tablaElementos, tablaVacios);
+		compactarCache(tablaElementos, tablaVacios);
 		if(hayEspacio(tablaVacios, tamanioItem, &posicionVacioAModificar))
 		{
 			agregarElementoValido(posicionElementoAModificar, posicionVacioAModificar, tamanioItem, item,
@@ -167,11 +167,11 @@ void* obtenerItem(int id, t_dynamic_table_entry tablaElementos[]){
 	}while(tablaElementos[i].id != id);
 }
 
-void eliminarItem(int id, int tamanioTabla, int tamanioParticionMinima,
+void eliminarItem(int id,
 					t_dynamic_table_entry tablaElementos[],
 					t_dynamic_table_entry tablaVacios[]){
 
-	int posDatoAEliminar = obtenerTablaPorId(id, tamanioTabla, tablaElementos);
+	int posDatoAEliminar = obtenerTablaPorId(id, tablaElementos);
 	int posNuevoVacio = obtenerParticion(tablaVacios, 1);
 	int espacioVacio = obtenerDesplazamientoMinimo(tamanioParticionMinima, tablaElementos[posDatoAEliminar].size);
 
@@ -187,7 +187,7 @@ void eliminarItem(int id, int tamanioTabla, int tamanioParticionMinima,
 
 }
 
-void compactarCache(int tamanioParticionMinima, int tamanioTabla,
+void compactarCache(
 					t_dynamic_table_entry tablaACompactar[],
 					t_dynamic_table_entry tablaVacio[])
 {
@@ -197,7 +197,7 @@ void compactarCache(int tamanioParticionMinima, int tamanioTabla,
 
 	int posicionNueva = 0, posicionVieja;
 
-	for(int i = 0; i < tamanioTabla; i++)
+	for(int i = 0; i < tableSize; i++)
 	{
 		t_dynamic_table_entry elementoActual = tablaACompactar[i];
 		if(!(elementoActual.isEmpty))
