@@ -8,7 +8,8 @@ void cargarConfig(Config* conexionConfig){
 	conexionConfig->posiciones = config_get_array_value(config,"POSICIONES_ENTRENADORES"); // lista de strings, ultimo elemento nulo
 	conexionConfig->pertenecientes = config_get_array_value(config,"POKEMON_ENTRENADORES");
 	conexionConfig->objetivos = config_get_array_value(config,"OBJETIVOS_ENTRENADORES");
-
+	conexionConfig->ip = config_get_string_value(config, "IP_TEAM");
+	conexionConfig->puerto = config_get_string_value(config, "PUERTO_TEAM");
 }
 Pokemon* crearPokemon(char *nombre,int x, int y) {
 	Pokemon *new = malloc(sizeof(Pokemon));

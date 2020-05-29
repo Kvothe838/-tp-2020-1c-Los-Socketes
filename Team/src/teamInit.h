@@ -37,6 +37,8 @@ typedef struct{
 	char** posiciones;
 	char** pertenecientes;
 	char** objetivos;
+	char* ip;
+	char* puerto;
 }Config;
 
 
