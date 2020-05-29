@@ -1,12 +1,11 @@
 #include <shared/utils.h>
 #include "brokerColas.h"
 #include "conexionBroker.h"
-#include "cache/basicCache.h"
 #include "cache/dynamicCache.h"
 
-void imprimirTabla(int tamanioTabla, t_dynamic_table_entry tabla[], t_log* logger){
-	log_info(logger, "MOSTRANDO OCUPADOS");
-	for(int i = 0; i < tamanioTabla; i++){
+void imprimirTabla(t_dynamic_table_entry tabla[], t_log* logger){
+	log_info(logger, "MOSTRANDO ELEMENTOS");
+	for(int i = 0; i < tableSize; i++){
 		if(!tabla[i].isEmpty){
 			log_info(logger, "Elemento ID %d, posicion %d,  espacio %d, fecha %s",
 					tabla[i].id, tabla[i].position, tabla[i].size, tabla[i].dateBorn);
@@ -15,8 +14,8 @@ void imprimirTabla(int tamanioTabla, t_dynamic_table_entry tabla[], t_log* logge
 }
 
 int main(void) {
-	char* ip, *puerto, *algoritmoEleccion;
-	int tamanioCache, tamanioParticionMinima;
+	char* ip, *puerto;
+
 	t_log* logger;
 	t_config* config;
 
@@ -28,31 +27,31 @@ int main(void) {
 
 	log_info(logger, "IP %s y PUERTO %s", ip, puerto);
 
-	tamanioCache = config_get_int_value(config, "TAMANO_MEMORIA");
-	tamanioParticionMinima = config_get_int_value(config, "TAMANO_MINIMO_PARTICION");
-	algoritmoEleccion = config_get_string_value(config, "ALGORITMO_PARTICION_LIBRE");
+	initializeDataBasic(config);
 	log_info(logger, "Tamaño cache %d y tamanio mínimo %d", tamanioCache, tamanioParticionMinima);
 
 	//crearDiccionario();
 
 
 	initializeCache(tamanioCache);
-	int tableSize = (tamanioCache / tamanioParticionMinima);
-	t_dynamic_table_entry tablaElementos[tableSize], tablaVacios[tableSize], tablaElementosCompacta[tableSize];
+	tableSize = (tamanioCache / tamanioParticionMinima);
+
+	t_dynamic_table_entry tablaElementos[tamanioCache], tablaVacios[tamanioCache];
+
+
 	initializeTable(tamanioCache, tableSize, tablaElementos, 0);
 	initializeTable(tamanioCache, tableSize, tablaVacios, 1);
 
 
 	log_info(logger, "[VACIO] %d, espacio %d, posicion %d",
-			tablaVacios[0].id, tablaVacios[0].size, tablaVacios[0].position);
+			(tablaVacios)->id, (tablaVacios)->size, (tablaVacios)->position);
 
 
 	int a = 87;
 	double b = 7;
 	char* mensaje = "HOLA SOY UN STRING MUUUUUUUUUUY LAAAAAAARGO";
 
-	agregarItem(&a, sizeof(int), tableSize, tamanioParticionMinima, algoritmoEleccion,
-			tablaElementos, tablaVacios);
+	agregarItem(&a, sizeof(int), tablaElementos, tablaVacios);
 	//log_info(logger, "Primer elemento fecha %s", tablaElementos[0].dateBorn);
 
 	/*
@@ -60,12 +59,10 @@ int main(void) {
 	 * Entonces ocupa la partición completa, usa 4 bytes y el resto (32-4 = 28 bytes) queda como espacio inservible
 	 */
 
-	agregarItem(&b, sizeof(double), tableSize, tamanioParticionMinima, algoritmoEleccion,
-			tablaElementos, tablaVacios);
+	agregarItem(&b, sizeof(double), tablaElementos, tablaVacios);
 	//Idem que arriba, ocupa 8 bytes y entonces solo usa 1 partición
 
-	agregarItem(mensaje, strlen(mensaje)+1, tableSize, tamanioParticionMinima, algoritmoEleccion,
-			tablaElementos, tablaVacios);
+	agregarItem(mensaje, strlen(mensaje)+1, tablaElementos, tablaVacios);
 	/*
 	 * Acá sucede algo especial: ocupa 120 bytes, por lo que ocupa 4
 	 * particiones de memoria (32 * 4 = 128 bytes)
@@ -74,13 +71,25 @@ int main(void) {
 	 *
 	 * */
 
-	agregarItem(&b, sizeof(double), tableSize, tamanioParticionMinima, algoritmoEleccion,
-			tablaElementos, tablaVacios);
+	agregarItem(&b, sizeof(double), tablaElementos, tablaVacios);
+	agregarItem(mensaje, strlen(mensaje)+1, tablaElementos, tablaVacios);
+	agregarItem(&b, sizeof(double), tablaElementos, tablaVacios);
 
+	for(int i = 0; i<58; i++)
+		agregarItem(&b, sizeof(double), tablaElementos, tablaVacios);
 
+	eliminarItem(47, tableSize, tamanioParticionMinima, tablaElementos, tablaVacios);
+	eliminarItem(35, tableSize, tamanioParticionMinima, tablaElementos, tablaVacios);
+	eliminarItem(17, tableSize, tamanioParticionMinima, tablaElementos, tablaVacios);
 
-	imprimirTabla(tableSize, tablaElementos, logger);
-	imprimirTabla(tableSize, tablaVacios, logger);
+	char* mensajeLargo2 = "hola soy un STRING MUY LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARGO";
+
+	agregarItem(mensajeLargo2, strlen(mensajeLargo2)+1, tablaElementos, tablaVacios);
+
+	//compactarCache(tamanioParticionMinima, tableSize, tablaElementos, tablaVacios);
+
+	imprimirTabla(tablaElementos, logger);
+	imprimirTabla(tablaVacios, logger);
 
 
 	//Acá testeo si los datos guardados por las tablas se pueden obtenre correctamente
@@ -101,20 +110,23 @@ int main(void) {
 
 	log_info(logger, "Item %d y su valor %f", tablaElementos[3].id, *recibido3);
 
-	eliminarItem(0, tableSize, tamanioParticionMinima, tablaElementos, tablaVacios);
+	double *recibido18 = obtenerItem(18, tablaElementos);
 
-	agregarItem(&b, sizeof(double), tableSize, tamanioParticionMinima, algoritmoEleccion,
-				tablaElementos, tablaVacios);
+	log_info(logger, "Item %d y su valor %f", tablaElementos[18].id, *recibido18);
 
+	double *recibido16 = obtenerItem(16, tablaElementos);
 
-	imprimirTabla(tableSize, tablaElementos, logger);
-	imprimirTabla(tableSize, tablaVacios, logger);
+	log_info(logger, "Item %d y su valor %f", tablaElementos[16].id, *recibido16);
 
+	char* mensajerLargo2DeCache = obtenerItem(17, tablaElementos);
 
-	terminar_programa(logger, config);
+	log_info(logger, "Item %d y su valor %s y largo %d", tablaElementos[17].id, mensajerLargo2DeCache, strlen(mensajerLargo2DeCache));
+
+	//terminar_programa(logger, config);
 
 	return 0;
 }
+
 
 
 

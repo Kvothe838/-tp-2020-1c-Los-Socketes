@@ -15,6 +15,11 @@ void setValue(void* value, int size, int position){
 	memcpy(mainCache+position, value, size);
 }
 
+void setValueCompaction(void* value, int size, int position){
+	memcpy(alternativeCache+position, value, size);
+}
+
+
 void* getValue(int size, int position){
 	void* result;
 	result = malloc(size);
@@ -22,8 +27,12 @@ void* getValue(int size, int position){
 	return result;
 }
 
-void moveBlock(int position, int size, int newPosition){
-	void * result = getValue(size, position);
-	setValue(result, size, newPosition);
+void moveBlock(int size, int oldPosition, int newPosition){
+	void * result = getValue(size, oldPosition);
+	setValueCompaction(result, size, newPosition);
+}
+
+void replaceCache(int tamanioCache){
+	memcpy(mainCache, alternativeCache, tamanioCache);
 }
 

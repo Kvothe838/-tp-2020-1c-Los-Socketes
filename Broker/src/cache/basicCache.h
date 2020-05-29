@@ -8,13 +8,12 @@ typedef void* t_basicCache;
 t_basicCache mainCache;
 t_basicCache alternativeCache;
 
-
 void initializeCache (int size);
 
 void setValue (void* value, int size, int position);
 
 void* getValue (int size, int position);
 
-void moveBlock(int position, int size, int newPosition);
+void moveBlock(int size, int oldPosition, int newPosition);
 
 #endif
