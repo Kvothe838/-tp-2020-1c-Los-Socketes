@@ -37,9 +37,8 @@ int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, TipoCola
 	free(paquete);
 
 	if(send(socket_cliente, mensaje_serializado, bytes, 0) == -1){
-		printf("Error enviando mensaje.");
+		printf("Error enviando mensaje.\n");
 		resultado = -1;
-		exit(resultado);
 	}
 
 	free(mensaje_serializado);
