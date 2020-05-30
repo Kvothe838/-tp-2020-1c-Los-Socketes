@@ -8,11 +8,12 @@
 #ifndef CACHE_DYNAMICCACHE_H_
 #define CACHE_DYNAMICCACHE_H_
 
-char *algoritmoEleccion;
+char *algoritmoEleccionDeParticionLibre;
+char *algoritmoEleccionDeVictima;
+int frecuenciaCompactacion;
 int tableSize;
 int tamanioCache, tamanioParticionMinima;
 
-#include <string.h>
 #include "commons/config.h";
 
 
@@ -41,6 +42,9 @@ void eliminarItem(int id,
 
 void compactarCache(t_dynamic_table_entry tablaACompactar[],
 					t_dynamic_table_entry tablaFinal[]);
+
+void eliminarVictima(t_dynamic_table_entry tablaElementos[], t_dynamic_table_entry tablaVacios[]);
+
 /*
  *  - agregar part
  *  - leer partic

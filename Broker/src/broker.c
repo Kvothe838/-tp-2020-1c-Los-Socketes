@@ -8,7 +8,7 @@ void imprimirTabla(t_dynamic_table_entry tabla[], t_log* logger){
 	for(int i = 0; i < tableSize; i++){
 		if(!tabla[i].isEmpty){
 			log_info(logger, "Elemento ID %d, posicion %d,  espacio %d, fecha %s",
-					tabla[i].id, tabla[i].position, tabla[i].size, tabla[i].dateBorn);
+					tabla[i].id, tabla[i].position, tabla[i].size, tabla[i].dateLastUse);
 		}
 	}
 }
@@ -28,15 +28,13 @@ int main(void) {
 	log_info(logger, "IP %s y PUERTO %s", ip, puerto);
 
 	initializeDataBasic(config);
+	crearDiccionario();
+
 	log_info(logger, "Tamaño cache %d y tamanio mínimo %d", tamanioCache, tamanioParticionMinima);
 
-	//crearDiccionario();
 
 
-	initializeCache(tamanioCache);
-	tableSize = (tamanioCache / tamanioParticionMinima);
-
-	t_dynamic_table_entry tablaElementos[tamanioCache], tablaVacios[tamanioCache];
+	t_dynamic_table_entry tablaElementos[tableSize], tablaVacios[tableSize];
 
 
 	initializeTable(tamanioCache, tableSize, tablaElementos, 0);
@@ -44,7 +42,7 @@ int main(void) {
 
 
 	log_info(logger, "[VACIO] %d, espacio %d, posicion %d",
-			(tablaVacios)->id, (tablaVacios)->size, (tablaVacios)->position);
+			tablaVacios[0].id, tablaVacios[0].size, tablaVacios[0].position);
 
 
 	int a = 87;
@@ -74,6 +72,7 @@ int main(void) {
 	agregarItem(&b, sizeof(double), tablaElementos, tablaVacios);
 	agregarItem(mensaje, strlen(mensaje)+1, tablaElementos, tablaVacios);
 	agregarItem(&b, sizeof(double), tablaElementos, tablaVacios);
+
 
 	for(int i = 0; i<58; i++)
 		agregarItem(&b, sizeof(double), tablaElementos, tablaVacios);
@@ -122,7 +121,7 @@ int main(void) {
 
 	log_info(logger, "Item %d y su valor %s y largo %d", tablaElementos[17].id, mensajerLargo2DeCache, strlen(mensajerLargo2DeCache));
 
-	//terminar_programa(logger, config);
+	terminar_programa(logger, config);
 
 	return 0;
 }
