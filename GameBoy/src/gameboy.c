@@ -53,7 +53,7 @@ if (strcmp(argv[1],"BROKER") == 0){
 		pokemon->posY = atoi(argv[5]);
 		pokemon->cantidad = atoi(argv[6]);
 		
-		int tamanio = sizeof(uint32_t) * 4 + pokemon->largoNombre;
+		int tamanio = sizeof(uint32_t) * 4 + pokemon->largoNombre + sizeof(TipoCola);
 
 		enviarMensaje(pokemon, tamanio, PUBLISHER, NEW, conexionBroker);
 
@@ -71,7 +71,7 @@ if (strcmp(argv[1],"BROKER") == 0){
 			pokemon->posX = atoi(argv[4]);
 			pokemon->posY = atoi(argv[5]);
 
-			int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre;
+			int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
 
 			enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, conexionBroker);
 
@@ -89,7 +89,7 @@ if (strcmp(argv[1],"BROKER") == 0){
 				pokemon->posX = atoi(argv[4]);
 				pokemon->posY = atoi(argv[5]);
 
-				int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre;
+				int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
 
 				enviarMensaje(pokemon, tamanio, PUBLISHER, CATCH, conexionBroker);
 
@@ -104,7 +104,7 @@ if (strcmp(argv[1],"BROKER") == 0){
 				CaughtPokemon* pokemon = malloc(sizeof(CaughtPokemon));
 				pokemon->loAtrapo = atoi(argv[3]); //si se pudo o no atrapar al pokemon (0 o 1)
 
-				int tamanio = sizeof(uint32_t);
+				int tamanio = sizeof(uint32_t) + sizeof(TipoCola);
 
 				enviarMensaje(pokemon, tamanio, PUBLISHER, CAUGHT, conexionBroker);
 
@@ -120,7 +120,7 @@ if (strcmp(argv[1],"BROKER") == 0){
 				pokemon->nombre = argv[3];
 				pokemon->largoNombre = strlen(pokemon->nombre);
 
-				int tamanio = sizeof(uint32_t) + pokemon->largoNombre;
+				int tamanio = sizeof(uint32_t) + pokemon->largoNombre + sizeof(TipoCola);
 
 				enviarMensaje(pokemon, tamanio, PUBLISHER, GET, conexionBroker);
 
@@ -144,7 +144,7 @@ else if (strcmp(argv[1],"TEAM") == 0){
 			pokemon->posX = atoi(argv[4]);
 			pokemon->posY = atoi(argv[5]);
 
-			int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre;
+			int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
 
 			enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, conexionTeam);
 
@@ -169,7 +169,7 @@ else if (strcmp(argv[1],"GAMECARD") == 0){
 			pokemon->posX = atoi(argv[4]);
 			pokemon->posY = atoi(argv[5]);
 
-			int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre;
+			int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
 
 			enviarMensaje(pokemon, tamanio, PUBLISHER, CATCH, conexionGamecard);
 
@@ -185,7 +185,7 @@ else if (strcmp(argv[1],"GAMECARD") == 0){
 				pokemon->nombre = argv[3];
 				pokemon->largoNombre = strlen(pokemon->nombre);
 
-				int tamanio = sizeof(uint32_t) + pokemon->largoNombre;
+				int tamanio = sizeof(uint32_t) + pokemon->largoNombre + sizeof(TipoCola);
 
 				enviarMensaje(pokemon, tamanio, PUBLISHER, GET, conexionGamecard);
 
