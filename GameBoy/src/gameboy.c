@@ -16,8 +16,8 @@ int main(int argc, char **argv){
 	t_log* logger;
 	t_config* config;
 
-	logger = iniciar_logger("GameBoy.log", "GAMEBOY");
-	config = leer_config("GameBoy.config", logger);
+	logger = iniciar_logger("loggerGameBoy.log", "GameBoy");
+	config = leer_config("configGameBoy.config", logger);
 
     printf("El nombre del programa es: %s\n",argv[0]); 
     if(argc == 1){

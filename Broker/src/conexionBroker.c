@@ -1,14 +1,4 @@
-#include <shared/connection.h>
 #include "conexionBroker.h"
-#include<stdio.h>
-#include<stdlib.h>
-#include<sys/socket.h>
-#include<unistd.h>
-#include<netdb.h>
-#include<commons/log.h>
-#include<commons/collections/list.h>
-#include<string.h>
-#include<pthread.h>
 
 void manejarSuscripcion(void* contenido, int socket_cliente, t_log* logger){
 	int offset = 0;
@@ -25,6 +15,32 @@ void manejarSuscripcion(void* contenido, int socket_cliente, t_log* logger){
 	}
 }
 
+void manejarPublisher(void* contenido, t_log* logger){
+	TipoCola colaAMandar;
+	Mensaje nuevoMensaje;
+	nuevoMensaje.suscriptoresRecibidos = list_create();
+	nuevoMensaje.suscriptoresEnviados = list_create();
+
+	memcpy(&colaAMandar, contenido, sizeof(TipoCola));
+
+	t_list* suscriptores = obtenerSuscriptoresPorCola(colaAMandar);
+
+	if(suscriptores != NULL){
+		for(int i = 0; i < list_size(suscriptores); i++){
+			int suscriptor = (int)list_get(suscriptores, i);
+
+			if(send(suscriptor, contenido, sizeof(contenido), 0) != -1){
+				list_add(nuevoMensaje.suscriptoresRecibidos, &suscriptor);
+				//Modificar: debería agregarse a la lista cuando el suscriptor devuelve el ACK.
+			}
+
+			list_add(nuevoMensaje.suscriptoresEnviados, &suscriptor);
+		}
+	}
+
+	agregarMensaje(colaAMandar, nuevoMensaje);
+}
+
 void process_request(int cod_op, int cliente_fd){
 	t_log* logger = log_create("respuesta.log", "RESPUESTA", true, LOG_LEVEL_TRACE);
 	log_trace(logger, "Llegó algo");
@@ -33,10 +49,17 @@ void process_request(int cod_op, int cliente_fd){
 
 	switch (cod_op) {
 		case SUSCRIBER:
-			log_trace(logger, "Llegó un SUSCRIBER");
+			log_trace(logger, "Llegó un Suscriber");
 			msg = recibirMensajeServidor(cliente_fd, &size);
 			log_trace(logger, "Payload: %d", size);
 			manejarSuscripcion(msg, cliente_fd, logger);
+
+			break;
+		case PUBLISHER:
+			log_trace(logger, "Llegó un Publisher");
+			msg = recibirMensajeServidor(cliente_fd, &size);
+			log_trace(logger, "Payload: %d", size);
+			manejarPublisher(msg, logger);
 
 			break;
 		case 0:

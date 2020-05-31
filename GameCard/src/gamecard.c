@@ -2,25 +2,30 @@
 #include <shared/utils.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "conexionGameCard.h"
 
 int main(void) {
 	char* ip, *puerto;
 	t_log* logger;
-	//t_config* config;
+	t_config* config;
 
 	logger = iniciar_logger("loggerGameCard.log", "Broker");
-	//config = leer_config("configGameCard.config", logger);
+	config = leer_config("configGameCard.config", logger);
 
-	ip = "127.0.0.1";
-	puerto = "6009";
+	ip = config_get_string_value(config, "IP_BROKER");
+	puerto = config_get_string_value(config, "PUERTO_BROKER");
 
 	log_info(logger, "IP %s y PUERTO %s", ip, puerto);
 
 	int socket = crear_conexion_cliente(ip, puerto);
 
-
-	//////////////////////////////////////////////////
 	mandarSuscripcion(socket, 3, NEW, GET, CAUGHT);
+
+	listen(socket, SOMAXCONN);
+
+	while(1){
+		esperarCliente(socket);
+	}
 
 	log_info(logger, "MANDADAS COLAS NEW, GET, CAUGHT");
 

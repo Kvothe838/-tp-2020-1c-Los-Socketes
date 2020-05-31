@@ -25,7 +25,7 @@ void crearDiccionario();
 ColaConSuscriptores* crearColaConSuscriptores();
 ColaConSuscriptores* obtenerCola(TipoCola colaClave);
 void agregarSuscriptor(TipoCola colaClave, int nuevoSuscriptor);
-void agregarMensaje(TipoCola colaClave, void* mensaje);
-void obtenerSuscriptoresPorCola(TipoCola colaClave);
+void agregarMensaje(TipoCola colaClave, Mensaje mensaje);
+t_list* obtenerSuscriptoresPorCola(TipoCola colaClave);
 
 #endif /* BROKERCOLAS_H_ */

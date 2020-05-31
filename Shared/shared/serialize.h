@@ -7,7 +7,7 @@ void* serializar_paquete(Paquete* paquete, int *bytes);
 
 void* serializarSuscripcion(Suscripcion* suscripto, int tamanio, void* stream);
 
-void* serializarDato(void* mensaje, int tamanioMensaje, void* stream, TipoCola colaMensaje);
+void* serializarDato(void* mensaje, int tamanioMensaje, TipoCola colaMensaje);
 
 void* serializarNew(NewPokemon* pokemon, int* bytes);
 

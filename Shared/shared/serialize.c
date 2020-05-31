@@ -41,7 +41,7 @@ void* serializarSuscripcion(Suscripcion* suscripto, int tamanio, void* stream){
 	return stream;
 }
 
-void* serializarDato(void* mensaje, int tamanioMensaje, void* stream, TipoCola colaMensaje){
+void* serializarDato(void* mensaje, int tamanioMensaje, TipoCola colaMensaje){
 	switch(colaMensaje){
 		case NEW:
 			return serializarNew(mensaje, &tamanioMensaje);
