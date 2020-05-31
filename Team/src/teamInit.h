@@ -6,6 +6,7 @@
 #include <commons/collections/list.h>
 #include <shared/utils.h>
 
+t_list* OBJETIVO_GLOBAL;
 typedef enum {
 	NUEVO,
 	LISTO,
@@ -36,6 +37,8 @@ typedef struct{
 	char** posiciones;
 	char** pertenecientes;
 	char** objetivos;
+	char* ip;
+	char* puerto;
 }Config;
 
 
@@ -58,13 +61,14 @@ void asignarObjetivosActuales(Entrenador* persona);
 void mostarObjetivosActualesDe(Entrenador* entrenador);
 void mostrarEntrenador(Entrenador* entrenador);
 Entrenador* getEntrenador(int id,Team team);
+void getObjetivosGLobales(Team team);
 //cambiar el nombre
 
 char* retornarNombrePosta(Pokemon* p);
 char* retornarNombreFantasia(PokemonFantasia* p);
 
 // funciones para evitar Memory Leask
-void liberarTeam(Entrenador** team);
-void liberarMemoria(Entrenador** team);
+void liberarTeam(Team team);
+void liberarMemoria(Team team);
 
 #endif /* TEAMINIT_H_ */

@@ -53,9 +53,12 @@ if (strcmp(argv[1],"BROKER") == 0){
 		pokemon->posY = atoi(argv[5]);
 		pokemon->cantidad = atoi(argv[6]);
 		
-		int tamanio = sizeof(uint32_t) * 4 + pokemon->largoNombre;
+		int tamanio = sizeof(uint32_t) * 4 + pokemon->largoNombre + sizeof(TipoCola);
 
-		enviarMensaje(pokemon, tamanio, PUBLISHER, NEW, conexionBroker);
+		if(enviarMensaje(pokemon, tamanio, PUBLISHER, NEW, conexionBroker) == -1){
+			log_info(logger, "ERROR enviando el mensaje %s %s %s %d %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY, pokemon->cantidad);
+			exit(-1);
+		}
 
 		log_info(logger, "El mensaje enviado es: %s %s %s %d %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY, pokemon->cantidad);
 					
@@ -71,9 +74,12 @@ if (strcmp(argv[1],"BROKER") == 0){
 			pokemon->posX = atoi(argv[4]);
 			pokemon->posY = atoi(argv[5]);
 
-			int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre;
+			int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
 
-			enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, conexionBroker);
+			if(enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, conexionBroker) == -1){
+				log_info(logger, "ERROR enviando el mensaje %s %s %s %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY);
+				exit(-1);
+			}
 
 			log_info(logger, "El mensaje enviado es: %s %s %s %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY);
 
@@ -89,9 +95,12 @@ if (strcmp(argv[1],"BROKER") == 0){
 				pokemon->posX = atoi(argv[4]);
 				pokemon->posY = atoi(argv[5]);
 
-				int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre;
+				int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
 
-				enviarMensaje(pokemon, tamanio, PUBLISHER, CATCH, conexionBroker);
+				if(enviarMensaje(pokemon, tamanio, PUBLISHER, CATCH, conexionBroker) == -1){
+					log_info(logger, "ERROR enviando el mensaje %s %s %s %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY);
+					exit(-1);
+				}
 
 				log_info(logger, "El mensaje enviado es: %s %s %s %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY);
 
@@ -104,9 +113,12 @@ if (strcmp(argv[1],"BROKER") == 0){
 				CaughtPokemon* pokemon = malloc(sizeof(CaughtPokemon));
 				pokemon->loAtrapo = atoi(argv[3]); //si se pudo o no atrapar al pokemon (0 o 1)
 
-				int tamanio = sizeof(uint32_t);
+				int tamanio = sizeof(uint32_t) + sizeof(TipoCola);
 
-				enviarMensaje(pokemon, tamanio, PUBLISHER, CAUGHT, conexionBroker);
+				if(enviarMensaje(pokemon, tamanio, PUBLISHER, CAUGHT, conexionBroker) == -1 ){
+					log_info(logger, "ERROR enviando el mensaje %s %s %d\n", argv[1], argv[2], pokemon->loAtrapo);
+					exit(-1);
+				}
 
 				log_info(logger, "El mensaje enviado es: %s %s %d\n", argv[1], argv[2], pokemon->loAtrapo);
 
@@ -120,9 +132,12 @@ if (strcmp(argv[1],"BROKER") == 0){
 				pokemon->nombre = argv[3];
 				pokemon->largoNombre = strlen(pokemon->nombre);
 
-				int tamanio = sizeof(uint32_t) + pokemon->largoNombre;
+				int tamanio = sizeof(uint32_t) + pokemon->largoNombre + sizeof(TipoCola);
 
-				enviarMensaje(pokemon, tamanio, PUBLISHER, GET, conexionBroker);
+				if(enviarMensaje(pokemon, tamanio, PUBLISHER, GET, conexionBroker) == -1){
+					log_info(logger, "ERROR enviando el mensaje %s %s %s\n", argv[1], argv[2], pokemon->nombre);
+					exit(-1);
+				}
 
 				log_info(logger, "El mensaje enviado es: %s %s %s\n", argv[1], argv[2], pokemon->nombre);
 
@@ -144,9 +159,12 @@ else if (strcmp(argv[1],"TEAM") == 0){
 			pokemon->posX = atoi(argv[4]);
 			pokemon->posY = atoi(argv[5]);
 
-			int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre;
+			int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
 
-			enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, conexionTeam);
+			if(enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, conexionTeam) == -1){
+				log_info(logger, "ERROR enviando el mensaje %s %s %s %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY);
+				exit(-1);
+			}
 
 			log_info(logger, "El mensaje enviado es: %s %s %s %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY);
 						
@@ -169,9 +187,12 @@ else if (strcmp(argv[1],"GAMECARD") == 0){
 			pokemon->posX = atoi(argv[4]);
 			pokemon->posY = atoi(argv[5]);
 
-			int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre;
+			int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
 
-			enviarMensaje(pokemon, tamanio, PUBLISHER, CATCH, conexionGamecard);
+			if(enviarMensaje(pokemon, tamanio, PUBLISHER, CATCH, conexionGamecard) == -1){
+				log_info(logger, "ERROR enviando el mensaje %s %s %s %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY);
+				exit(-1);
+			}
 
 			log_info(logger, "El mensaje enviado es: %s %s %s %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY);
 
@@ -185,9 +206,12 @@ else if (strcmp(argv[1],"GAMECARD") == 0){
 				pokemon->nombre = argv[3];
 				pokemon->largoNombre = strlen(pokemon->nombre);
 
-				int tamanio = sizeof(uint32_t) + pokemon->largoNombre;
+				int tamanio = sizeof(uint32_t) + pokemon->largoNombre + sizeof(TipoCola);
 
-				enviarMensaje(pokemon, tamanio, PUBLISHER, GET, conexionGamecard);
+				if(enviarMensaje(pokemon, tamanio, PUBLISHER, GET, conexionGamecard) == -1){
+					log_info(logger, "ERROR enviando el mensaje %s %s %s\n", argv[1], argv[2], pokemon->nombre);
+					exit(-1);
+				}
 
 				log_info(logger, "El mensaje enviado es: %s %s %s\n", argv[1], argv[2], pokemon->nombre);
 

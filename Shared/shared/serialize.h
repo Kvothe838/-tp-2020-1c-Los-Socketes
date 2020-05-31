@@ -9,14 +9,14 @@ void* serializarSuscripcion(Suscripcion* suscripto, int tamanio, void* stream);
 
 void* serializarDato(void* mensaje, int tamanioMensaje, TipoCola colaMensaje);
 
-void* serializarNew(NewPokemon* pokemon, int* bytes);
+void* serializarNew(NewPokemon* pokemon, int* bytes, TipoCola colaMensaje);
 
-void* serializarAppeared(AppearedPokemon* pokemon, int* bytes);
+void* serializarAppeared(AppearedPokemon* pokemon, int* bytes, TipoCola colaMensaje);
 
-void* serializarCatch(CatchPokemon* pokemon, int* bytes);
+void* serializarCatch(CatchPokemon* pokemon, int* bytes, TipoCola colaMensaje);
 
-void* serializarCaught(CaughtPokemon* pokemon, int* bytes);
+void* serializarCaught(CaughtPokemon* pokemon, int* bytes, TipoCola colaMensaje);
 
-void* serializarGet(GetPokemon* pokemon, int* bytes);
+void* serializarGet(GetPokemon* pokemon, int* bytes, TipoCola colaMensaje);
 
 #endif
