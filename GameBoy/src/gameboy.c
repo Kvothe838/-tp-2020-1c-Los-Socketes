@@ -71,7 +71,7 @@ switch(argvToTipoModulo(argv[1]))
 		{
 			case NEW:
 			{
-				NewPokemon* pokemon = getNewPokemon(argv[3], argv[4], argv[5], argv[6]); //usa malloc, entonces hay que hacer un free
+				NewPokemon* pokemon = getNewPokemon(argv[3], atoi(argv[4]), atoi(argv[5]), atoi(argv[6])); //usa malloc, entonces hay que hacer un free
 
 				int tamanio = sizeof(uint32_t) * 4 + pokemon->largoNombre + sizeof(TipoCola);
 
@@ -92,7 +92,7 @@ switch(argvToTipoModulo(argv[1]))
 
 			case APPEARED:
 			{
-				AppearedPokemon* pokemon = getAppearedPokemon(argv[3], argv[4], argv[5]);//usa malloc, entonces hay que hacer un free
+				AppearedPokemon* pokemon = getAppearedPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 
 				int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
 
@@ -113,7 +113,7 @@ switch(argvToTipoModulo(argv[1]))
 
 			case CATCH:
 			{
-				CatchPokemon* pokemon = getCatchPokemon(argv[3], argv[4], argv[5]);//usa malloc, entonces hay que hacer un free
+				CatchPokemon* pokemon = getCatchPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 
 				int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
 
@@ -134,7 +134,7 @@ switch(argvToTipoModulo(argv[1]))
 
 			case CAUGHT:
 			{
-				CaughtPokemon* pokemon = getCaughtPokemon(argv[3]);//usa malloc, entonces hay que hacer un free
+				CaughtPokemon* pokemon = getCaughtPokemon(atoi(argv[3]));//usa malloc, entonces hay que hacer un free
 
 				int tamanio = sizeof(uint32_t) + sizeof(TipoCola);
 
@@ -202,7 +202,7 @@ switch(argvToTipoModulo(argv[1]))
 		{
 			case APPEARED:
 			{
-				AppearedPokemon* pokemon = getAppearedPokemon(argv[3], argv[4], argv[5]);//usa malloc, entonces hay que hacer un free
+				AppearedPokemon* pokemon = getAppearedPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 
 				int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
 
@@ -249,7 +249,7 @@ switch(argvToTipoModulo(argv[1]))
 		{
 			case CATCH:
 			{
-				CatchPokemon* pokemon = getCatchPokemon(argv[3], argv[4], argv[5]);//usa malloc, entonces hay que hacer un free
+				CatchPokemon* pokemon = getCatchPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 
 				int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
 

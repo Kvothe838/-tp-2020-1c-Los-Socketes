@@ -152,37 +152,37 @@ TipoCola argvToTipoCola(char* cola)
 		return -1;
 }
 
-NewPokemon* getNewPokemon(char* nombre, char* posX, char* posY, char* cantidad){
+NewPokemon* getNewPokemon(char* nombre, int posX, int posY, int cantidad){
 	NewPokemon* pokemon = malloc(sizeof(NewPokemon));
 	pokemon->nombre = nombre;
 	pokemon->largoNombre = strlen(pokemon->nombre);
-	pokemon->posX = atoi(posX);
-	pokemon->posY = atoi(posY);
-	pokemon->cantidad = atoi(cantidad);
+	pokemon->posX = posX;
+	pokemon->posY = posY;
+	pokemon->cantidad = cantidad;
 	return pokemon;
 }
 
-AppearedPokemon* getAppearedPokemon(char* nombre, char* posX, char* posY){
+AppearedPokemon* getAppearedPokemon(char* nombre, int posX, int posY){
 	AppearedPokemon* pokemon = malloc(sizeof(AppearedPokemon));
 	pokemon->nombre = nombre;
 	pokemon->largoNombre = strlen(pokemon->nombre);
-	pokemon->posX = atoi(posX);
-	pokemon->posY = atoi(posY);
+	pokemon->posX = posX;
+	pokemon->posY = posY;
 	return pokemon;
 }
 
-CatchPokemon* getCatchPokemon(char* nombre, char* posX, char* posY){
+CatchPokemon* getCatchPokemon(char* nombre, int posX, int posY){
 	CatchPokemon* pokemon = malloc(sizeof(CatchPokemon));
 	pokemon->nombre = nombre;
 	pokemon->largoNombre = strlen(pokemon->nombre);
-	pokemon->posX = atoi(posX);
-	pokemon->posY = atoi(posY);
+	pokemon->posX = posX;
+	pokemon->posY = posY;
 	return pokemon;
 }
 
-CaughtPokemon* getCaughtPokemon(char* loAtrapo){
+CaughtPokemon* getCaughtPokemon(int loAtrapo){
 	CaughtPokemon* pokemon = malloc(sizeof(CaughtPokemon));
-	pokemon->loAtrapo = atoi(loAtrapo); //si se pudo o no atrapar al pokemon (0 o 1)
+	pokemon->loAtrapo = loAtrapo; //si se pudo o no atrapar al pokemon (0 o 1)
 	return pokemon;
 }
 
