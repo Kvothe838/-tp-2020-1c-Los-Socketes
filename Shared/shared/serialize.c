@@ -163,3 +163,99 @@ void* serializarGet(GetPokemon* pokemon, int* bytes, TipoCola colaMensaje){
 
 	return stream;
 }
+
+
+
+NewPokemon* deserializarNew(void* msj, int* bytes){
+
+	NewPokemon* pokemon = malloc(sizeof(NewPokemon));
+	uint32_t pos = 0;
+	memcpy(&pokemon->posX, msj, sizeof(uint32_t));
+	pos += sizeof(uint32_t);
+	memcpy(&pokemon->posY, msj+pos, sizeof(uint32_t));
+	pos += sizeof(uint32_t);
+	memcpy(&pokemon->cantidad, msj+pos, sizeof(uint32_t));
+	pos += sizeof(uint32_t);
+	memcpy(&pokemon->largoNombre, msj+pos, sizeof(uint32_t));
+	pos += sizeof(uint32_t);
+	memcpy(pokemon->nombre, msj+pos, pokemon->largoNombre + 1);
+
+	return pokemon;
+}
+
+AppearedPokemon* deserializarAppeared(void* msj, int* bytes){
+
+	AppearedPokemon* pokemon = malloc(sizeof(AppearedPokemon));
+	uint32_t pos = 0;
+	memcpy(&pokemon->posX, msj, sizeof(uint32_t));
+	pos += sizeof(uint32_t);
+	memcpy(&pokemon->posY, msj+pos, sizeof(uint32_t));
+	pos += sizeof(uint32_t);
+	memcpy(&pokemon->largoNombre, msj+pos, sizeof(uint32_t));
+	pos += sizeof(uint32_t);
+	memcpy(pokemon->nombre, msj+pos, pokemon->largoNombre + 1);
+
+	return pokemon;
+}
+
+CaughtPokemon* deserializarCaught(void* msj, int* bytes){
+
+	CaughtPokemon* pokemon = malloc(sizeof(CaughtPokemon));
+
+	memcpy(&pokemon->loAtrapo, msj, sizeof(uint32_t));
+
+	return pokemon;
+}
+
+CatchPokemon* deserializarCatch(void* msj, int* bytes){
+
+	CatchPokemon* pokemon = malloc(sizeof(CatchPokemon));
+	uint32_t pos = 0;
+	memcpy(&pokemon->posX, msj, sizeof(uint32_t));
+	pos += sizeof(uint32_t);
+	memcpy(&pokemon->posY, msj+pos, sizeof(uint32_t));
+	pos += sizeof(uint32_t);
+	memcpy(&pokemon->largoNombre, msj+pos, sizeof(uint32_t));
+	pos += sizeof(uint32_t);
+	memcpy(pokemon->nombre, msj+pos, pokemon->largoNombre + 1);
+
+	return pokemon;
+}
+
+GetPokemon* deserializarGet(void* msj, int* bytes){
+
+	GetPokemon* pokemon = malloc(sizeof(GetPokemon));
+
+	uint32_t pos = 0;
+	memcpy(&pokemon->largoNombre, msj, sizeof(uint32_t));
+	pos += sizeof(uint32_t);
+	memcpy(pokemon->nombre, msj+pos, pokemon->largoNombre + 1);
+
+	return pokemon;
+}
+void* deseralizarDato(void* msj,int* bytes){
+
+	TipoCola tipo;
+
+	memcpy(&tipo, msj , sizeof(TipoCola));
+
+	switch(tipo){
+			case NEW:
+				return deserializarNew(msj,bytes);
+				break;
+			case APPEARED:
+				return deserializarAppeared(msj,bytes);
+				break;
+			case CATCH:
+				return deserializarCatch(msj,bytes);
+				break;
+			case CAUGHT:
+				return deserializarCaught(msj,bytes);
+				break;
+			case GET:
+				return deserializarGet(msj,bytes);
+				break;
+			default:
+				break;
+		}
+}
