@@ -121,3 +121,75 @@ char* tipoColaToString(TipoCola tipoCola){
 
 	return "";
 }
+
+TipoModulo argvToTipoModulo(char* modulo)
+{
+	if(strcmp(modulo,"BROKER") == 0)
+		return BROKER;
+	else if(strcmp(modulo,"TEAM") == 0)
+		return TEAM;
+	else if(strcmp(modulo,"GAMECARD") == 0)
+		return GAMECARD;
+	else if(strcmp(modulo,"SUSCRIPTOR") == 0)
+		return SUSCRIPTOR;
+	else
+		return -1;
+}
+
+TipoCola argvToTipoCola(char* cola)
+{
+	if(strcmp(cola,"NEW_POKEMON") == 0)
+		return NEW;
+	else if(strcmp(cola,"APPEARED_POKEMON") == 0)
+		return APPEARED;
+	else if(strcmp(cola,"CATCH_POKEMON") == 0)
+		return CATCH;
+	else if(strcmp(cola,"CAUGHT_POKEMON") == 0)
+		return CAUGHT;
+	else if(strcmp(cola,"GET_POKEMON") == 0)
+		return GET;
+	else
+		return -1;
+}
+
+NewPokemon* getNewPokemon(char* nombre, char* posX, char* posY, char* cantidad){
+	NewPokemon* pokemon = malloc(sizeof(NewPokemon));
+	pokemon->nombre = nombre;
+	pokemon->largoNombre = strlen(pokemon->nombre);
+	pokemon->posX = atoi(posX);
+	pokemon->posY = atoi(posY);
+	pokemon->cantidad = atoi(cantidad);
+	return pokemon;
+}
+
+AppearedPokemon* getAppearedPokemon(char* nombre, char* posX, char* posY){
+	AppearedPokemon* pokemon = malloc(sizeof(AppearedPokemon));
+	pokemon->nombre = nombre;
+	pokemon->largoNombre = strlen(pokemon->nombre);
+	pokemon->posX = atoi(posX);
+	pokemon->posY = atoi(posY);
+	return pokemon;
+}
+
+CatchPokemon* getCatchPokemon(char* nombre, char* posX, char* posY){
+	CatchPokemon* pokemon = malloc(sizeof(CatchPokemon));
+	pokemon->nombre = nombre;
+	pokemon->largoNombre = strlen(pokemon->nombre);
+	pokemon->posX = atoi(posX);
+	pokemon->posY = atoi(posY);
+	return pokemon;
+}
+
+CaughtPokemon* getCaughtPokemon(char* loAtrapo){
+	CaughtPokemon* pokemon = malloc(sizeof(CaughtPokemon));
+	pokemon->loAtrapo = atoi(loAtrapo); //si se pudo o no atrapar al pokemon (0 o 1)
+	return pokemon;
+}
+
+GetPokemon* getGetPokemon(char* nombre){
+	GetPokemon* pokemon = malloc(sizeof(GetPokemon));
+	pokemon->nombre = nombre;
+	pokemon->largoNombre = strlen(pokemon->nombre);
+	return pokemon;
+}
+

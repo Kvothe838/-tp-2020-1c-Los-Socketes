@@ -15,6 +15,13 @@
 #include<pthread.h>
 //#include<inttypes.h>
 
+typedef enum{
+	BROKER = 1,
+	TEAM,
+	GAMECARD,
+	SUSCRIPTOR,
+} TipoModulo;
+
 typedef enum
 {
 	NEW = 1,
