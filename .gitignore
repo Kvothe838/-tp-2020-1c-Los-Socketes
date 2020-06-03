@@ -53,5 +53,5 @@ dkms.conf
 
 #Extras
 *.log
-bin
+*.bin
 .vscode/

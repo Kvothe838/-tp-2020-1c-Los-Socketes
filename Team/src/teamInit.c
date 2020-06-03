@@ -1,5 +1,20 @@
 #include "teamInit.h"
 
+/* pthread_mutex_t sumar;
+ * pthread_mutex_init(&sumar,NULL);
+ * pthread_mutex_lock(&sumar);
+ * pthread_mutex_unlock(&sumar);
+ */
+
+void iniciar_entrenador(Entrenador** entrenador){
+	while(1){
+		printf("\nhola soy %d y me trabe",(*entrenador)->idEntrenador);
+		sem_wait(&((*entrenador)->activador));
+		printf("\nhola soy %d y me destrabe",(*entrenador)->idEntrenador);
+	}
+	pthread_exit(NULL);
+}
+
 void cargarConfig(Config* conexionConfig){
 	t_log* logger;
 	t_config* config;
@@ -113,14 +128,6 @@ void mostrarEntrenador(Entrenador* entrenador){
 	mostrarObjetivosActualesDe(entrenador);
 }
 
-void inicializar_entrenadores(int indice, Entrenador entrenador,char* posicion,char* pertenecientes,char* objetivos){
-	asignarPosicion(&entrenador,posicion);
-	asignarPertenecientes(&entrenador,pertenecientes);
-	asignarObjetivos(&entrenador,objetivos);
-
-	printf("xd: %d",list_size(entrenador.objetivos));
-}
-
 char* retornarNombrePosta(Pokemon* p){
 	return p->nombre;
 }
@@ -131,14 +138,14 @@ char* retornarNombreFantasia(PokemonFantasia* p){
 
 Entrenador* inicializarEntrenador(int id,char* posicion, char* pokePertenecientes , char* pokeObjetivos){
 	Entrenador* entrenador = (Entrenador*)malloc(sizeof(Entrenador));
-
 	entrenador->idEntrenador = id;
 	asignarPosicion(entrenador,posicion);
 	asignarPertenecientes(entrenador,pokePertenecientes);
 	asignarObjetivos(entrenador,pokeObjetivos);
 	entrenador->estado = NUEVO;
 	asignarObjetivosActuales(entrenador);
-
+	sem_init(&(entrenador->activador),0,0);
+	entrenador->movimiento[0]=0;entrenador->movimiento[1]=0;
 
 	mostrarEntrenador(entrenador);
 	return entrenador;
@@ -153,11 +160,7 @@ void getObjetivosGlobales(Team team){
 		for(int j = 0 ; j<list_size(team[i]->objetivosActuales);j++){
 			list_add(OBJETIVO_GLOBAL,list_get(team[i]->objetivosActuales,j));
 		}
-	}/*
-	printf("\n cant objetivos globales:%d \n",list_size(OBJETIVO_GLOBAL));
-	for(int x=0;x<list_size(OBJETIVO_GLOBAL);x++){
-		printf("%s \n",retornarNombreFantasia(list_get(OBJETIVO_GLOBAL,x)));
-	}*/
+	}
 }
 
 
@@ -165,10 +168,14 @@ Team inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeO
 	Entrenador** team = (Entrenador**)(malloc(sizeof(Entrenador)));
 	OBJETIVO_GLOBAL = list_create();
 	int cant = sizeof(posiciones) - 1;
+	pthread_t hilo[cant];
 	for(int i=0 ; i<cant ; i++){
 		team[i] = inicializarEntrenador(i,posiciones[i],pokePertenecientes[i],pokeObjetivos[i]);
+		pthread_create(&hilo[i],NULL,(void*)iniciar_entrenador,&(team[i]));
+		pthread_detach(hilo[i]);
 	}
 	getObjetivosGlobales(team);
+
 	return team;
 }
 

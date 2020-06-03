@@ -1,5 +1,12 @@
 #include "planificacion.h"
 
+void asignar_movimiento(Entrenador* entrenador,int mov_x,int mov_y){
+	entrenador->movimiento[0]=mov_x;
+	entrenador->movimiento[1]=mov_y;
+	printf("%d se mueve %d en el eje X, %d en el eje Y \n",entrenador->idEntrenador,entrenador->movimiento[0],entrenador->movimiento[1]);
+	sem_post(&(entrenador->activador));
+}
+
 float distancia(int e_x,int e_y,int p_x,int p_y){ // se calcula la distancia entre el pokemon recien aparecido y el entrenador en su posicion actual
 	int distx= p_x - e_x;
 	int disty= p_y - e_y;
@@ -18,16 +25,22 @@ float distancia(int e_x,int e_y,int p_x,int p_y){ // se calcula la distancia ent
 }
 
 void cercania(Team team,int p_x, int p_y){ // se manda el team, y la posicion X e Y del pokemon recien aparecido
-	int indice_menor=0;
+	int indice_menor=0;int mov_x;int mov_y;
 	float masCerca = distancia(team[0]->posicion[0],team[0]->posicion[1],p_x,p_y);
+	mov_x=(p_x - team[0]->posicion[0]);
+	mov_y=(p_y - team[0]->posicion[1]);
+
 	for(int i=0;i<(sizeof(team)-1);i++){
 		printf("distancia del entrenador %d = %.2f \n",team[i]->idEntrenador,distancia(team[i]->posicion[0],team[i]->posicion[1],p_x,p_y));
 		if(masCerca > distancia(team[i]->posicion[0],team[i]->posicion[1],p_x,p_y)){
 			masCerca = distancia(team[i]->posicion[0],team[i]->posicion[1],p_x,p_y);
 			indice_menor = i;
+			mov_x=(p_x - team[i]->posicion[0]);
+			mov_y=(p_y - team[i]->posicion[1]);
 		}
 	}
-	printf("%d es el mas cercano %.2f",indice_menor,masCerca);
+	printf("%d es el mas cercano %.2f \n",indice_menor,masCerca);
+	asignar_movimiento(team[indice_menor],mov_x,mov_y);
 }
 
 int loNecesito(char* pokemon){
@@ -41,10 +54,6 @@ int loNecesito(char* pokemon){
 }
 
 void planificacion_fifo(Team team){
-	/* V1.0 de fifo, llega un pokemon nuevo, con los objetivos globales verificar si el pokemon es
-	 * requerido en el team, si lo es; se calcula el entrenador mas cercano, debe moverse (gabo: el
-	 * entrenador se mueve dentro de su hilo)
-	 */
 	char pokemon[10];int x;int y;
 	printf("\n");
 	printf("\n cant objetivos globales:%d \n",list_size(OBJETIVO_GLOBAL));
