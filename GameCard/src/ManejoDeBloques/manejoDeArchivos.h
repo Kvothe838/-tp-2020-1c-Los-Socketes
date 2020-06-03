@@ -21,7 +21,14 @@ typedef struct {
 	uint32_t abierto;
 } pokemonMetadata;
 
-pokemonMetadata* obtenerMetadatosPokemon(char* pokemon);
+typedef struct {
+	uint32_t posX;
+	uint32_t posY;
+	uint32_t cantidad;
+} pokemonDatoPosicion;
+
+void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t cantidad);
 void inicializarData(t_log* logger);
+char* intToString(uint32_t bloque);
 
 #endif /* MANEJODEARCHIVOS_H_ */
