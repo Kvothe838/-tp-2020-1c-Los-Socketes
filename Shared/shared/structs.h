@@ -13,7 +13,6 @@
 #include<commons/string.h>
 #include<commons/config.h>
 #include<pthread.h>
-//#include<inttypes.h>
 
 typedef enum
 {
@@ -28,36 +27,10 @@ typedef enum
 typedef enum
 {
 	SUSCRIBER = 1,
-	PUBLISHER
+	PUBLISHER,
+	ACK,
+	ID_MENSAJE
 } OpCode;
-
-
-/*
-
-
- * SUSCRIPCION (se suscribe a una cola)
-	opCode queCarajoHace; //SUSCRIBER o PUBLISHER
-	uint32_t size;
-	typedef struct
-	{
-		int cantidadQueMeSuscribo;
-		tipoCola* cantidad;
-	} inscripcion;
-
-
-
- * PUBLISHER (manda un mensaje a una cola)
-	opCode queCarajoHace;
-	uint32_t size;
-	typedef struct{
-		tipoCola aQueCOla;
-		... //resto de datos
-		... //resto de datos
-		... //resto de datos
-	} especifica;
-
-
-*/
 
 typedef struct
 {

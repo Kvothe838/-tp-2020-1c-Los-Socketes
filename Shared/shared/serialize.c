@@ -59,6 +59,7 @@ void* serializarDato(void* mensaje, int tamanioMensaje, TipoCola colaMensaje){
 			return serializarGet(mensaje, &tamanioMensaje, colaMensaje);
 			break;
 		default:
+			return NULL;
 			break;
 	}
 }
@@ -256,6 +257,7 @@ void* deseralizarDato(void* msj,int* bytes){
 				return deserializarGet(msj,bytes);
 				break;
 			default:
+				return NULL;
 				break;
 		}
 }

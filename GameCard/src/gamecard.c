@@ -20,14 +20,16 @@ int main(void) {
 	int socket = crear_conexion_cliente(ip, puerto);
 
 	mandarSuscripcion(socket, 3, NEW, GET, CAUGHT);
-
-	listen(socket, SOMAXCONN);
-
-	while(1){
-		esperarCliente(socket);
-	}
-
 	log_info(logger, "MANDADAS COLAS NEW, GET, CAUGHT");
+
+	TipoCola cola;
+	while(1){
+		recv(socket, &cola, sizeof(TipoCola), 0);
+		log_info(logger, "RECIBÍ COLA %d", cola);
+		int recibido = 1;
+		send(socket, &recibido, sizeof(int), 0);
+		log_info(logger, "Envío confirmación");
+	}
 
 	//iniciar_servidor(ip, puerto);
 

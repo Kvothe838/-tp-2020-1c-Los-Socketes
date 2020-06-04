@@ -16,13 +16,13 @@ int isDateOlder(char* a, char* b){
 int getBestFit(t_dynamic_table_entry tablaVacios[], int desiredSize) {
 	int i = 0;
 	int found = -1;
-	int bestPosition, bestDifference = 99999999999;
+	int bestPosition, *bestDifference = NULL;
 	for(i=0; i<tableSize; i++){
 		t_dynamic_table_entry currentEntry = tablaVacios[i];
 		if(!currentEntry.isEmpty && currentEntry.size >= desiredSize){
 			int diff = currentEntry.size - desiredSize;
-			if(diff < bestDifference){
-				bestDifference = diff;
+			if(bestDifference == NULL || diff < *bestDifference){
+				*bestDifference = diff;
 				bestPosition = i;
 				found = 1;
 			}
@@ -70,7 +70,7 @@ void eliminarVictima(t_dynamic_table_entry tablaElementos[], t_dynamic_table_ent
 }
 
 int hayEspacio(t_dynamic_table_entry tablaVacios[], int espacioRequerido, int *posicion){
-	int posEspacioMinimo = 0;
+	//int posEspacioMinimo = 0;
 	if(strcmp(algoritmoEleccionDeParticionLibre, "FF") == 0){
 		for(*posicion = 0; *posicion < tableSize; (*posicion)++){
 			if(!tablaVacios[*posicion].isEmpty && tablaVacios[*posicion].size >= espacioRequerido)
@@ -97,6 +97,13 @@ int obtenerPrimeraParticion(t_dynamic_table_entry table[], int esVacio){
 	return -1;
 }
 
+int obtenerDesplazamientoMinimo(int tamanioParticionMinima, int espacioRequerido){
+	int posicionRelativa = 0;
+	posicionRelativa = espacioRequerido < tamanioParticionMinima ? tamanioParticionMinima : espacioRequerido;
+	//while((posicionRelativa += tamanioParticionMinima) < espacioRequerido);
+	return posicionRelativa;
+}
+
 void modificarTablaVacio(t_dynamic_table_entry table[],
 		int espacioRequerido, int posicionVector, int tamanioParticionMinima){
 	int desplazamiento = obtenerDesplazamientoMinimo(tamanioParticionMinima, espacioRequerido);
@@ -117,19 +124,17 @@ void modificarTablaVacio(t_dynamic_table_entry table[],
 
 }
 
-int obtenerDesplazamientoMinimo(int tamanioParticionMinima, int espacioRequerido){
-	int posicionRelativa = 0;
-	posicionRelativa = espacioRequerido < tamanioParticionMinima ? tamanioParticionMinima : espacioRequerido;
-	//while((posicionRelativa += tamanioParticionMinima) < espacioRequerido);
-	return posicionRelativa;
-}
-
 int obtenerTablaPorId(int id, t_dynamic_table_entry tablaElementos[]){
 	for(int i = 0; i < tableSize; i++){
 		if(tablaElementos[i].id == id)
 			return i;
 	}
 	return -1;
+}
+
+void inicializarCache(){
+	initializeTable(tamanioCache, tableSize, tablaElementos, 0);
+	initializeTable(tamanioCache, tableSize, tablaVacios, 1);
 }
 
 void initializeTable(int tamanioCache, int tableSize, t_dynamic_table_entry table[], int esVacio){
@@ -156,7 +161,7 @@ void initializeDataBasic(t_config* config) {
 			"ALGORITMO_PARTICION_LIBRE");
 	algoritmoEleccionDeVictima  = config_get_string_value(config,
 			"ALGORITMO_REEMPLAZO");
-	frecuenciaCompactacion = config_get_string_value(config,
+	frecuenciaCompactacion = (int)config_get_string_value(config,
 			"FRECUENCIA_COMPACTACION");
 
 	tableSize = (tamanioCache / tamanioParticionMinima);
@@ -183,18 +188,15 @@ void agregarElementoValido(int posicionElementoAModificar, int posicionVacioAMod
 
 }
 
-void agregarItem(	void* item, int tamanioItem,
-					t_dynamic_table_entry tablaElementos[],
-					t_dynamic_table_entry tablaVacios[]){
+void agregarItem(void* item, int tamanioItem){
 
-	int posicionVacioAModificar, posicionElementoAModificar;
+	int posicionVacioAModificar = 1, posicionElementoAModificar = 1;
+	//Las inicializo para que no me tire warnings. Ariel te voy a matar.
 
 	if(hayEspacio(tablaVacios, tamanioItem, &posicionVacioAModificar)){
 		agregarElementoValido(posicionElementoAModificar, posicionVacioAModificar, tamanioItem, item,
-									tablaElementos,	tablaVacios);
-	}
-	else
-	{
+							  tablaElementos, tablaVacios);
+	} else {
 		int seAgrego = 0;
 		for(int i = 0; i < frecuenciaCompactacion && !seAgrego; i++)
 		{
@@ -210,21 +212,21 @@ void agregarItem(	void* item, int tamanioItem,
 	}
 }
 
-void* obtenerItem(int id, t_dynamic_table_entry tablaElementos[]){
+void* obtenerItem(long id){
 	int i = -1;
-	do{
+	do {
 		i++;
 		if(tablaElementos[i].id == id){
 			free(tablaElementos[i].dateLastUse);
 			tablaElementos[i].dateLastUse = temporal_get_string_time();
 			return getValue(tablaElementos[i].size, tablaElementos[i].position);
 		}
-	}while(tablaElementos[i].id != id);
+	} while(tablaElementos[i].id != id);
+
+	return NULL;
 }
 
-void eliminarItem(int id,
-					t_dynamic_table_entry tablaElementos[],
-					t_dynamic_table_entry tablaVacios[]){
+void eliminarItem(int id, t_dynamic_table_entry tablaElementos[], t_dynamic_table_entry tablaVacios[]){
 
 	int posDatoAEliminar = obtenerTablaPorId(id, tablaElementos);
 	int posNuevoVacio = obtenerPrimeraParticion(tablaVacios, 1);
@@ -242,10 +244,7 @@ void eliminarItem(int id,
 
 }
 
-void compactarCache(
-					t_dynamic_table_entry tablaACompactar[],
-					t_dynamic_table_entry tablaVacio[])
-{
+void compactarCache(t_dynamic_table_entry tablaACompactar[], t_dynamic_table_entry tablaVacio[]){
 	t_dynamic_table_entry tablaCompactada[tableSize], tablaNuevoVacio[tableSize];
 	initializeTable(tamanioCache, tableSize, tablaCompactada, 0);
 	initializeTable(tamanioCache, tableSize, tablaNuevoVacio, 1);
@@ -274,7 +273,7 @@ void compactarCache(
 	modificarTablaVacio(tablaNuevoVacio, posicionNueva, 0 /*al principio*/, tamanioParticionMinima);
 	memcpy(tablaACompactar, tablaCompactada, sizeof(t_dynamic_table_entry) * tableSize);
 	memcpy(tablaVacio, tablaNuevoVacio, sizeof(t_dynamic_table_entry) * tableSize);
-	replaceCache(tamanioCache);
+	//replaceCache(tamanioCache);
 }
 
 

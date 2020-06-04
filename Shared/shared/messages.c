@@ -22,7 +22,7 @@ int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, TipoCola
 			stream = serializarSuscripcion(mensaje, tamanioMensaje, stream);
 			break;
 		case PUBLISHER:
-			stream = serializarDato(mensaje, tamanioMensaje, stream, colaMensaje);
+			stream = serializarDato(mensaje, tamanioMensaje, colaMensaje);
 			break;
 		default:
 			break;

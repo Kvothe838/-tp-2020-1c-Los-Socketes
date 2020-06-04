@@ -19,16 +19,16 @@ int main(int argc, char **argv){
 	logger = iniciar_logger("loggerGameBoy.log", "GameBoy");
 	config = leer_config("configGameBoy.config", logger);
 
-    printf("El nombre del programa es: %s\n",argv[0]); 
+    printf("El nombre del programa es: %s\n",argv[0]);
     if(argc == 1){
         printf("\nNo se ha ingresado ningún argumento de línea de comando adicional que no sea el nombre del programa\n");
 		printf("Formato de ejecución: ./gameboy [BROKER|GAMECARD|TEAM] [NEW_POKEMON|APPEARED_POKEMON|CATCH_POKEMON|CAUGHT_POKEMON|GET_POKEMON] [ARGUMENTOS]*\n");
 		exit(1);
 	}
-    if(argc >= cantidadMinArgc && argc <= cantidadMaxArgc) 
-    { 
-        printf("\nNumero de argumentos ingresados: %d",argc); 
-        printf("\n----Los siguientes son los argumentos de la línea de comando ingresados----"); 
+    if(argc >= cantidadMinArgc && argc <= cantidadMaxArgc)
+    {
+        printf("\nNumero de argumentos ingresados: %d",argc);
+        printf("\n----Los siguientes son los argumentos de la línea de comando ingresados----");
         for(int counter = 0;counter<argc;counter++)
             printf("\nargv[%d]: %s",counter,argv[counter]);
 	}
@@ -36,7 +36,7 @@ int main(int argc, char **argv){
 		printf("\nPor favor, revise que esta ingresando como MINIMO %d argumentos, y como MAXIMO %d argumentos, y vuelva a intentar\n", cantidadMinArgc, cantidadMaxArgc);
 		exit(3);
 	}
-	
+
 printf("\n\n");
 
 if (strcmp(argv[1],"BROKER") == 0){
@@ -52,7 +52,7 @@ if (strcmp(argv[1],"BROKER") == 0){
 		pokemon->posX = atoi(argv[4]);
 		pokemon->posY = atoi(argv[5]);
 		pokemon->cantidad = atoi(argv[6]);
-		
+
 		int tamanio = sizeof(uint32_t) * 4 + pokemon->largoNombre + sizeof(TipoCola);
 
 		if(enviarMensaje(pokemon, tamanio, PUBLISHER, NEW, conexionBroker) == -1){
@@ -61,7 +61,7 @@ if (strcmp(argv[1],"BROKER") == 0){
 		}
 
 		log_info(logger, "El mensaje enviado es: %s %s %s %d %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY, pokemon->cantidad);
-					
+
 		liberar_conexion_cliente(conexionBroker);
 
 		free(pokemon);
@@ -167,7 +167,7 @@ else if (strcmp(argv[1],"TEAM") == 0){
 			}
 
 			log_info(logger, "El mensaje enviado es: %s %s %s %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY);
-						
+
 			liberar_conexion_cliente(conexionTeam);
 
 			free(pokemon);

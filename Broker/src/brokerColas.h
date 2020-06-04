@@ -15,17 +15,39 @@ typedef struct {
 } ColaConSuscriptores;
 
 typedef struct {
-	int ID;
-	int IDCorrelativo;
-	t_list* suscriptoresRecibidos;
-	t_list* suscriptoresEnviados;
-} Mensaje;
+  long ID;
+  TipoCola cola;
+  t_list* suscriptoresRecibidos; //ACK
+  t_list* suscriptoresEnviados;
+} MensajeEnCache;
+
+typedef struct {
+  long ID;
+  long IDCorrelativo;
+  //TipoCola cola; Podría no ser útil
+  void* contenido;
+} MensajeEnCola;
+
+typedef struct {
+  long IdMensaje;
+  TipoCola cola;
+  void* contenido;
+} IdMensajeConCola; //Mensaje que recibe el suscriptor de una cola.
+
+/*CACHÉ:
+
+  Identificador único del mensaje dentro del sistema.
+  El tipo de mensaje (a que cola de mensajes pertenece).
+  Los suscriptores a los cuales ya se envió el mensaje.
+  Los suscriptores que retornaron el ACK del mismo.
+
+*/
 
 void crearDiccionario();
 ColaConSuscriptores* crearColaConSuscriptores();
 ColaConSuscriptores* obtenerCola(TipoCola colaClave);
 void agregarSuscriptor(TipoCola colaClave, int nuevoSuscriptor);
-void agregarMensaje(TipoCola colaClave, Mensaje mensaje);
+void agregarMensaje(TipoCola colaClave, MensajeEnCola mensaje);
 t_list* obtenerSuscriptoresPorCola(TipoCola colaClave);
 
 #endif /* BROKERCOLAS_H_ */

@@ -8,20 +8,21 @@
 #ifndef CACHE_DYNAMICCACHE_H_
 #define CACHE_DYNAMICCACHE_H_
 
+#include "commons/config.h"
+#include <string.h>
+#include <stdlib.h>
+
 char *algoritmoEleccionDeParticionLibre;
 char *algoritmoEleccionDeVictima;
 int frecuenciaCompactacion;
 int tableSize;
 int tamanioCache, tamanioParticionMinima;
-
-#include "commons/config.h";
-
-
+t_dynamic_table_entry tablaElementos[tableSize], tablaVacios[tableSize];
 
 typedef struct {
 	int position;
 	int size;
-	int id;
+	long id;
 	int isEmpty;
 	char* dateBorn;
 	char* dateLastUse;
@@ -32,9 +33,7 @@ void initializeTable(int tamanioCache, int tableSize,
 
 void initializeDataBasic(t_config* config);
 
-void agregarItem(	void* item, int tamanioItem,
-					t_dynamic_table_entry tablaElementos[],
-					t_dynamic_table_entry tablaVacios[]);
+void agregarItem(void* item, int tamanioItem);
 
 void eliminarItem(int id,
 					t_dynamic_table_entry tablaElementos[],
@@ -45,6 +44,7 @@ void compactarCache(t_dynamic_table_entry tablaACompactar[],
 
 void eliminarVictima(t_dynamic_table_entry tablaElementos[], t_dynamic_table_entry tablaVacios[]);
 
+void inicializarCache();
 /*
  *  - agregar part
  *  - leer partic
