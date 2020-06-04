@@ -12,13 +12,13 @@ int main(void) {
 	t_log* logger;
 	logger = iniciar_logger("loggerGameCard.log", "Broker");
 	inicializarData(logger);
-	administrarNewPokemon("Prueba", 0, 0, 1); //una posicion que existe
-	administrarNewPokemon("Prueba", 0, 1, 1);
-	administrarNewPokemon("Prueba", 0, 2, 1);
-	administrarNewPokemon("Prueba", 0, 3, 1);
-	administrarNewPokemon("Prueba", 0, 4, 1);
-	administrarNewPokemon("Prueba", 0, 5, 1);
-	administrarNewPokemon("Pikachu", 0, 0, 1);
+	administrarNewPokemon("Prueba", 0, 0, 1); //12
+	administrarNewPokemon("Prueba", 0, 1, 1); //24
+	administrarNewPokemon("Prueba", 0, 2, 1); //36
+	administrarNewPokemon("Prueba", 0, 3, 1); //48
+	administrarNewPokemon("Prueba", 0, 4, 1); //60
+	administrarNewPokemon("Prueba", 0, 5, 1); //72
+	administrarNewPokemon("Pikachu", 0, 0, 1); //12
 
 
 

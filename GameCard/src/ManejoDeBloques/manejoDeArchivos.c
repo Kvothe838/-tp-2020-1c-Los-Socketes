@@ -49,7 +49,7 @@ void inicializarData(t_log* logger) {
 
 		void* bitmapCont = malloc(blockCantBytes);
 		t_bitarray *bitmap = bitarray_create_with_mode(bitmapCont, blockCantBytes, LSB_FIRST);
-
+		system("mkdir -p Blocks");
 		for (int var = 0; var < blockCantBits; ++var){
 			bitarray_clean_bit(bitmap, var);
 			crearBloque(var+1);
@@ -200,7 +200,7 @@ int sumarDatos(pokemonMetadata* datosPokemon, pokemonDatoPosicion* nuevosDatosPo
 		if(espacioLeidoEnBloque % blockSize == 0 && tamanio != 0){
 			fclose(archivo);
 			pos++;
-			espacioLeidoEnBloque = 0;
+			espacioLeidoEnBloque = 4;
 			char path[1000] = "Blocks/";
 			strcat(path, datosPokemon->bloquesAsociados[pos]);
 			strcat(path, ".bin");
