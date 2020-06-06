@@ -29,7 +29,8 @@ typedef enum
 	SUSCRIBER = 1,
 	PUBLISHER,
 	ACK,
-	ID_MENSAJE
+	ID_MENSAJE,
+	NUEVO_MENSAJE_SUSCRIBER
 } OpCode;
 
 typedef struct
@@ -85,5 +86,13 @@ typedef struct
 	char* nombre;
 	uint32_t largoNombre;
 } GetPokemon;
+
+typedef struct {
+  long IDMensaje;
+  long IDMensajeCorrelativo;
+  TipoCola cola;
+  int sizeContenido;
+  void* contenido;
+} MensajeParaSuscriptor; //Mensaje que recibe el suscriptor de una cola.
 
 #endif

@@ -4,7 +4,7 @@
  *  Created on: 25 may. 2020
  *      Author: utnso
  */
-#include "basicCache.h";
+#include "basicCache.h"
 
 void initializeCache(int size){
 	mainCache = malloc(size);
@@ -12,23 +12,22 @@ void initializeCache(int size){
 }
 
 void setValue(void* value, int size, int position){
-	memcpy(mainCache+position, value, size);
+	memcpy(mainCache + position, value, size);
 }
 
 void setValueCompaction(void* value, int size, int position){
-	memcpy(alternativeCache+position, value, size);
+	memcpy(alternativeCache + position, value, size);
 }
-
 
 void* getValue(int size, int position){
 	void* result;
 	result = malloc(size);
-	memcpy(result, mainCache+position, size);
+	memcpy(result, mainCache + position, size);
 	return result;
 }
 
 void moveBlock(int size, int oldPosition, int newPosition){
-	void * result = getValue(size, oldPosition);
+	void* result = getValue(size, oldPosition);
 	setValueCompaction(result, size, newPosition);
 }
 

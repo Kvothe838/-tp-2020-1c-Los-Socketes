@@ -19,16 +19,37 @@ int main(void) {
 
 	int socket = crear_conexion_cliente(ip, puerto);
 
+	log_info(logger, "SOCKET GAMECARD: %d", socket);
+
 	mandarSuscripcion(socket, 3, NEW, GET, CAUGHT);
 	log_info(logger, "MANDADAS COLAS NEW, GET, CAUGHT");
 
-	TipoCola cola;
+	MensajeParaSuscriptor* mensaje = (MensajeParaSuscriptor*)malloc(sizeof(MensajeParaSuscriptor));
+
 	while(1){
-		recv(socket, &cola, sizeof(TipoCola), 0);
-		log_info(logger, "RECIBÍ COLA %d", cola);
-		int recibido = 1;
-		send(socket, &recibido, sizeof(int), 0);
+		recv(socket, &mensaje->IDMensaje, sizeof(long), 0);
+		log_info(logger, "RECIBÍ MENSAJE CON ID %d", mensaje->IDMensaje);
+		recv(socket, &mensaje->IDMensajeCorrelativo, sizeof(long), 0);
+		log_info(logger, "RECIBÍ MENSAJE CON ID CORRELATIVO %d", mensaje->IDMensajeCorrelativo);
+		recv(socket, &mensaje->cola, sizeof(TipoCola), 0);
+		log_info(logger, "RECIBÍ MENSAJE DE COLA %s", tipoColaToString(mensaje->cola));
+		recv(socket, &mensaje->sizeContenido, sizeof(int), 0);
+		log_info(logger, "EL SIZE ES DE %d", mensaje->sizeContenido);
+		recv(socket, &mensaje->contenido, mensaje->sizeContenido, 0);
+		log_info(logger, "RECIBÍ CONTENIDO");
+
+		Paquete* paquete = malloc(sizeof(Paquete));
+
+		paquete->codigoOperacion = ACK;
+		paquete->buffer = (Buffer*)malloc(sizeof(Buffer));
+		paquete->buffer->size = sizeof(long);
+		paquete->buffer->stream = malloc(paquete->buffer->size);
+		memcpy(paquete->buffer->stream, &(mensaje->IDMensajeCorrelativo), sizeof(long));
+		int bytes;
+		void* respuesta = serializar_paquete(paquete, &bytes);
 		log_info(logger, "Envío confirmación");
+		send(socket, &respuesta, bytes, 0);
+		log_info(logger, "Confirmación enviada");
 	}
 
 	//iniciar_servidor(ip, puerto);

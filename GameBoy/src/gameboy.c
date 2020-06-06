@@ -62,6 +62,23 @@ if (strcmp(argv[1],"BROKER") == 0){
 
 		log_info(logger, "El mensaje enviado es: %s %s %s %d %d %d\n", argv[1], argv[2], pokemon->nombre, pokemon->posX, pokemon->posY, pokemon->cantidad);
 
+		OpCode code;
+		int idMensaje;
+		TipoCola cola;
+
+		recv(conexionBroker, &code, sizeof(OpCode), 0);
+
+		if(code == ID_MENSAJE){
+			log_info(logger, "RECIBÍ UN ID");
+			recv(conexionBroker, &idMensaje, sizeof(long), 0);
+			log_info(logger, "EL ID ES %d", idMensaje);
+			recv(conexionBroker, &cola, sizeof(TipoCola), 0);
+			log_info(logger, "LA COLA ES %d", tipoColaToString(cola));
+		}else {
+			log_info(logger, "TODO MAL. RECIBÍ OTRO CODE.");
+		}
+
+
 		liberar_conexion_cliente(conexionBroker);
 
 		free(pokemon);

@@ -1,23 +1,16 @@
-/*
- * dynamicCache.h
- *
- *  Created on: 25 may. 2020
- *      Author: utnso
- */
-
 #ifndef CACHE_DYNAMICCACHE_H_
 #define CACHE_DYNAMICCACHE_H_
 
 #include "commons/config.h"
 #include <string.h>
 #include <stdlib.h>
+#include "basicCache.h"
 
 char *algoritmoEleccionDeParticionLibre;
 char *algoritmoEleccionDeVictima;
 int frecuenciaCompactacion;
 int tableSize;
 int tamanioCache, tamanioParticionMinima;
-t_dynamic_table_entry tablaElementos[tableSize], tablaVacios[tableSize];
 
 typedef struct {
 	int position;
@@ -26,32 +19,17 @@ typedef struct {
 	int isEmpty;
 	char* dateBorn;
 	char* dateLastUse;
-} t_dynamic_table_entry;
+} DynamicTableEntry;
 
-void initializeTable(int tamanioCache, int tableSize,
-		t_dynamic_table_entry table[], int esVacio);
+DynamicTableEntry *tablaElementos, *tablaVacios; //contienen elementos del tipo DynamicTableEntry
 
-void initializeDataBasic(t_config* config);
-
-void agregarItem(void* item, int tamanioItem);
-
-void eliminarItem(int id,
-					t_dynamic_table_entry tablaElementos[],
-					t_dynamic_table_entry tablaVacios[]);
-
-void compactarCache(t_dynamic_table_entry tablaACompactar[],
-					t_dynamic_table_entry tablaFinal[]);
-
-void eliminarVictima(t_dynamic_table_entry tablaElementos[], t_dynamic_table_entry tablaVacios[]);
-
+void inicializarTabla(DynamicTableEntry **tabla, int esVacio);
+void inicializarDataBasica(t_config* config, t_log* logger);
+void agregarItem(void* item, int tamanioItem, int id);
+void eliminarItem(long id);
+void compactarCache();
+void eliminarVictima();
 void inicializarCache();
-/*
- *  - agregar part
- *  - leer partic
- *  - eliminar particint* tableSize
- *  - update part
- */
-
-
+void* obtenerItem(long id);
 
 #endif /* CACHE_DYNAMICCACHE_H_ */

@@ -24,15 +24,8 @@ typedef struct {
 typedef struct {
   long ID;
   long IDCorrelativo;
-  //TipoCola cola; Podría no ser útil
   void* contenido;
 } MensajeEnCola;
-
-typedef struct {
-  long IdMensaje;
-  TipoCola cola;
-  void* contenido;
-} IdMensajeConCola; //Mensaje que recibe el suscriptor de una cola.
 
 /*CACHÉ:
 
