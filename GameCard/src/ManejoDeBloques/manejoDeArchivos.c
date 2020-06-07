@@ -10,7 +10,7 @@
 char *ip, *puerto;
 t_config *configGameBoy, *metadata;
 uint32_t blockCantBits, blockCantBytes, blockSize;
-uint32_t reintentoConexion;
+uint32_t reintentoConexion, retardoDeOperacion;
 
 pokemonDatoPosicion * aComparar;
 
@@ -49,6 +49,7 @@ void inicializarData(t_log* logger) {
 	metadata = (t_config*)leer_config("Metadata/metadata.bin", logger);
 
 	reintentoConexion = config_get_int_value(configGameBoy, "TIEMPO_DE_REINTENTO_CONEXION");
+	retardoDeOperacion = config_get_int_value(configGameBoy, "TIEMPO_RETARDO_OPERACION");
 
 	blockCantBits = config_get_int_value(metadata, "BLOCKS");
 	blockCantBytes = blockCantBits / 8;
@@ -145,6 +146,7 @@ void modificarArchivos(t_list *listaFinal, char** listaDeBloques){
 		}
 	}
 	fclose(archivo);
+	sleep(retardoDeOperacion);
 }
 
 uint32_t obtenerDataFileSystem(uint32_t tamanio, pokemonMetadata* datosPokemon, t_list** listaFinal) {
@@ -277,6 +279,7 @@ void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t
 		modificarArchivos(lista, datosPokemon->bloquesAsociados);
 
 
+
 		cantidadDeBlocks++; //se le suma una para que las iteraciones se hagas correctamente
 
 		arrayStringToArrayConfig(cantidadDeBlocks, nuevoStringBloques, datosPokemon);
@@ -315,12 +318,11 @@ void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t
 
 
 uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
-	char path[1000] = "Files/Pokemon/";
+	t_log* logger = iniciar_logger("GAMECARD", "Catch");
 	uint32_t cantidadDeBlocks;
+	char path[1000] = "Files/Pokemon/";
 	strcat(path, pokemon);
 
-	char metadataString[] = "/Metadata.bin";
-	strcat(path, metadataString);
 
 	pokemonDatoPosicion *posicionPokemon = malloc(sizeof(pokemonDatoPosicion));
 	posicionPokemon->posX=posX;
@@ -329,6 +331,8 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 
 	pokemonMetadata* datosPokemon = malloc(sizeof(pokemonMetadata));
 	if(access(path, F_OK) != -1){
+			char metadataString[] = "/Metadata.bin";
+			strcat(path, metadataString);
 			t_config * configMetadata;
 
 			validarArchivoAbierto(path, &configMetadata, datosPokemon);
@@ -362,10 +366,6 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 
 					config_set_value(configMetadata, "BLOCKS", nuevoStringBloques);
 					config_set_value(configMetadata, "SIZE", intToString(datosPokemon->tamanio));
-
-
-
-
 				}
 
 				modificarArchivos(lista, datosPokemon->bloquesAsociados);
@@ -376,11 +376,15 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 
 				return 1;
 			}
+			else
+				log_info(logger, "No se encontró la posición %d - %d del pokemon %s", posX, posY, pokemon);
 
 			config_set_value(configMetadata, "OPEN", "Y");
 			config_save(configMetadata);
 			config_destroy(configMetadata);
 	}
+	else
+		log_info(logger, "No se encontró el archivo del pokemon %s", pokemon);
 
 	return 0;
 }

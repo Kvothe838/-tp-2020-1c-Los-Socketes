@@ -13,12 +13,13 @@ int main(void) {
 	logger = iniciar_logger("loggerGameCard.log", "GAMECARD");
 	inicializarData(logger);
 
-	for (int i = 0; i < 100; ++i) {
+	for (int i = 0; i < 2; ++i) {
 		administrarNewPokemon("Prueba", i, i, 1);
 	}
-	for (int i = 0; i < 100; ++i) {
+	for (int i = 0; i < 3; ++i) {
 		administrarCatchPokemon("Prueba", i, i);
 	}
+	administrarCatchPokemon("José", 7, 8);
 
 
 
