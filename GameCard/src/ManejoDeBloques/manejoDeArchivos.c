@@ -209,8 +209,7 @@ void validarArchivoAbierto(char path[1000], t_config** configPokemon, pokemonMet
 	config_save(*configPokemon);
 }
 
-void arrayStringToArrayConfig(uint32_t cantidadDeBlocks,
-		char nuevoStringBloques[1000], pokemonMetadata* datosPokemon) {
+void arrayStringToArrayConfig(uint32_t cantidadDeBlocks, char nuevoStringBloques[1000], pokemonMetadata* datosPokemon) {
 	char** listaString = malloc(100000);
 	for (int i = 0; i < cantidadDeBlocks; ++i) {
 		listaString[i] = malloc(100);
@@ -318,7 +317,7 @@ void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t
 
 
 uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
-	t_log* logger = iniciar_logger("GAMECARD", "Catch");
+	t_log* logger = iniciar_logger("GAMECARD.log", "Catch");
 	uint32_t cantidadDeBlocks;
 	char path[1000] = "Files/Pokemon/";
 	strcat(path, pokemon);
@@ -373,7 +372,7 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 				config_set_value(configMetadata, "OPEN", "Y");
 				config_save(configMetadata);
 				config_destroy(configMetadata);
-
+				log_destroy(logger);
 				return 1;
 			}
 			else
@@ -386,6 +385,65 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 	else
 		log_info(logger, "No se encontró el archivo del pokemon %s", pokemon);
 
+	log_destroy(logger);
 	return 0;
+}
+
+LocalizedPokemon * administrarGetPokemon(char* pokemon){
+	LocalizedPokemon * datosDePosicionPokemon = malloc(sizeof(LocalizedPokemon));
+
+	datosDePosicionPokemon->nombre = pokemon;
+	datosDePosicionPokemon->largoNombre = strlen(pokemon);
+	datosDePosicionPokemon->cantidadDePosiciones = 0; //para el caso que no encuentre
+	datosDePosicionPokemon->data = NULL;
+
+	uint32_t cantidadDeBlocks;
+	char path[1000] = "Files/Pokemon/";
+	strcat(path, pokemon);
+
+	char metadataString[] = "/Metadata.bin";
+	strcat(path, metadataString);
+
+
+	pokemonMetadata* datosPokemon = malloc(sizeof(pokemonMetadata));
+	if(access(path, F_OK) != -1){
+		t_config * configMetadata;
+
+		validarArchivoAbierto(path, &configMetadata, datosPokemon);
+
+		t_list * lista = list_create();
+		obtenerDataFileSystem(datosPokemon->tamanio, datosPokemon, &lista);
+
+		datosDePosicionPokemon->cantidadDePosiciones = (uint32_t)list_size(lista);
+
+		void* stream = malloc(sizeof(uint32_t) * 3 /* X, Y y cantidad*/ * datosDePosicionPokemon->cantidadDePosiciones);
+
+		t_list* listaAuxiliar = list_create();
+		//pokemonDatoPosicion* structADeserializar;
+		uint32_t offset = 0;
+
+		while(!list_is_empty(lista)){
+			listaAuxiliar = list_take_and_remove(lista, 1);
+			pokemonDatoPosicion* structADeserializar = malloc(sizeof(pokemonDatoPosicion));
+			structADeserializar = list_get(listaAuxiliar, 0);
+
+			memcpy(stream+offset, &(structADeserializar->posX), sizeof(uint32_t));
+			offset += sizeof(uint32_t);
+			memcpy(stream+offset, &(structADeserializar->posY), sizeof(uint32_t));
+			offset += sizeof(uint32_t);
+			memcpy(stream+offset, &(structADeserializar->cantidad), sizeof(uint32_t));
+			offset += sizeof(uint32_t);
+
+			list_clean_and_destroy_elements(listaAuxiliar, (void*)free);
+		}
+
+		datosDePosicionPokemon->data = stream;
+
+		config_set_value(configMetadata, "OPEN", "Y");
+		config_save(configMetadata);
+
+		config_destroy(configMetadata);
+	}
+	return datosDePosicionPokemon;
 }
 

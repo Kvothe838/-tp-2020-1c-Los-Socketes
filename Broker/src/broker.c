@@ -27,8 +27,11 @@ int main(void) {
 
 	log_info(logger, "IP %s y PUERTO %s", ip, puerto);
 
-	initializeDataBasic(config);
 	crearDiccionario();
+	iniciar_servidor(ip, puerto);
+
+	initializeDataBasic(config);
+
 
 	log_info(logger, "Tamaño cache %d y tamanio mínimo %d", tamanioCache, tamanioParticionMinima);
 

@@ -120,4 +120,12 @@ typedef struct
 	uint32_t largoNombre;
 } GetPokemon;
 
+typedef struct
+{
+	char* nombre;
+	uint32_t largoNombre;
+	uint32_t cantidadDePosiciones;
+	void* data; //formato: primero X, luego Y y al final cantidad, y así respectivamente dependiendo la cantidad de posiciones
+} LocalizedPokemon;
+
 #endif

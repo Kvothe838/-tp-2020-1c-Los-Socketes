@@ -9,10 +9,12 @@
 #define MANEJODEARCHIVOS_H_
 
 #include <commons/bitarray.h>
+#include <commons/log.h>
+#include <shared/structs.h>
 #include <sys/stat.h>
 #include <stdint.h>
 #include "../conexionBinario/conexionBinario.h";
-#include <commons/log.h>
+
 
 typedef struct {
 	uint32_t esDirectorio;
