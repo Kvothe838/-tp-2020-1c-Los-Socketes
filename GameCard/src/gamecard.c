@@ -13,42 +13,18 @@ int main(void) {
 	logger = iniciar_logger("loggerGameCard.log", "GAMECARD");
 	inicializarData(logger);
 
-	for (int i = 0; i < 5; ++i) {
+	for (int i = 0; i < 100; ++i) {
 		administrarNewPokemon("Prueba", i, i, 1);
 	}
-
-
-/*
-	FILE* fp = fopen("Blocks/1.bin", "wb");
-
-	int p[] = {3,4,5};
-	int pFrom1[3];
-
-	for(int i = 0; i < 3; i ++)
-		fwrite(&p, sizeof(int), 3, fp);
-	fclose(fp);
-
-	FILE* fp = fopen("Blocks/1.bin", "rb");
-
-	for(int i = 0; i < 3; i ++){
-		fread(&pFrom1, sizeof(int), 3, fp);
-		printf("P de archivo: %d, %d y %d", pFrom1[0], pFrom1[1], pFrom1[2]);
+	for (int i = 0; i < 100; ++i) {
+		administrarCatchPokemon("Prueba", i, i);
 	}
 
-	void * datos;
-	FILE* fp = fopen("Blocks/1.bin", "rb");
-	fread(datos, sizeof(int), 9, fp);
-	int primerDato;
-	memcpy(&primerDato, datos, sizeof(int));
-	printf("Primer dato: %d", primerDato);
-*/
 
 
-
-
-
-
-	//int socket = crear_conexion_cliente(ip, puerto);
+	/*char* ipBroker = "127.0.0.1";
+	char* puertoBroker = "6009";
+	int socket = crear_conexion_cliente(ipBroker, puertoBroker);*/
 
 	//////////////////////////////////////////////////
 	//mandarSuscripcion(socket, 3, NEW, GET, CAUGHT);
@@ -60,5 +36,6 @@ int main(void) {
 
 	return EXIT_SUCCESS;
 }
+
 
 

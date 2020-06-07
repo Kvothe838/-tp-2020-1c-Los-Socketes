@@ -21,3 +21,23 @@ t_bitarray* obtenerDatos(int tamanio){
 	fclose(fin);
 	return bitarray_create_with_mode(buffer, tamanio, LSB_FIRST);
 }
+
+uint32_t obtenerBloqueLibre(uint32_t blockCantBytes){
+	t_bitarray *bitmap = obtenerDatos(blockCantBytes);
+	uint32_t valor;
+	for(uint32_t i = 0; i < 5192/8; i++){
+		valor = bitarray_test_bit(bitmap, i);
+		if(valor == 0){
+			bitarray_set_bit(bitmap, i);
+			guardarDatos(bitmap);
+			return (i+1);
+		}
+	}
+}
+
+void limpiarBloque(uint32_t posicion, uint32_t blockCantBytes){
+	t_bitarray *bitmap = obtenerDatos(blockCantBytes);
+	bitarray_clean_bit(bitmap, posicion-1);
+	guardarDatos(bitmap);
+}
+
