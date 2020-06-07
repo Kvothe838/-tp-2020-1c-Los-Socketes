@@ -1,25 +1,21 @@
 #include <commons/log.h>
 #include <shared/utils.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include "conexionBinario/conexionBinario.h"
 #include "ManejoDeBloques/manejoDeArchivos.h"
+#include<stdlib.h>
 
 
 
 int main(void) {
 
 	t_log* logger;
-	logger = iniciar_logger("loggerGameCard.log", "Broker");
+	logger = iniciar_logger("loggerGameCard.log", "GAMECARD");
 	inicializarData(logger);
-	administrarNewPokemon("Prueba", 0, 0, 1); //12
-	administrarNewPokemon("Prueba", 0, 1, 1); //24
-	administrarNewPokemon("Prueba", 0, 2, 1); //36
-	administrarNewPokemon("Prueba", 0, 3, 1); //48
-	administrarNewPokemon("Prueba", 0, 4, 1); //60
-	administrarNewPokemon("Prueba", 0, 5, 1); //72
-	administrarNewPokemon("Pikachu", 0, 0, 1); //12
 
+	for (int i = 0; i < 5; ++i) {
+		administrarNewPokemon("Prueba", i, i, 1);
+	}
 
 
 /*

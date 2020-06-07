@@ -4,17 +4,25 @@
 #include <commons/config.h>
 #include <commons/collections/list.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 
 char *ip, *puerto;
 t_config *configGameBoy, *metadata;
-int blockCantBits, blockCantBytes, blockSize;
+uint32_t blockCantBits, blockCantBytes, blockSize;
+uint32_t reintentoConexion;
 
 pokemonDatoPosicion * aComparar;
 
 
 void imprimirNUmero(uint32_t numero){
 	printf("Numero %d\n", numero);
+}
+
+void imprimirStruct(pokemonDatoPosicion * numero){
+	printf("X %d\n", numero->posX);
+	printf("Y %d\n", numero->posY);
+	printf("Cantidad %d\n", numero->cantidad);
 }
 
 void crearBloque(int posicion){
@@ -29,7 +37,6 @@ void crearBloque(int posicion){
 	fclose(nuevoArchivo);
 }
 
-
 char* intToString(uint32_t bloque) {
 	char* str = malloc(10);
 	sprintf(str, "%d", bloque);
@@ -38,8 +45,11 @@ char* intToString(uint32_t bloque) {
 
 
 void inicializarData(t_log* logger) {
-	configGameBoy = leer_config("GameCard.config", logger);
-	metadata = leer_config("Metadata/metadata.bin", logger);
+	configGameBoy = (t_config*)leer_config("GameCard.config", logger);
+	metadata = (t_config*)leer_config("Metadata/metadata.bin", logger);
+
+	reintentoConexion = config_get_int_value(configGameBoy, "TIEMPO_DE_REINTENTO_CONEXION");
+
 	blockCantBits = config_get_int_value(metadata, "BLOCKS");
 	blockCantBytes = blockCantBits / 8;
 	blockSize = config_get_int_value(metadata, "BLOCK_SIZE");
@@ -68,26 +78,25 @@ bool mismaPosicion(pokemonDatoPosicion* a){
 	return (a->posX == aComparar->posX) && (a->posY == aComparar->posY);
 }
 
-void listNumToStructPos(t_list* listaNumero){
-	t_list* listaNueva = list_create();
-	t_list* listaAuxiliar = list_create();
-	pokemonDatoPosicion* posNueva;
+t_list* listNumToStructPos(t_list* listaNumero){
+	t_list * listaStruct = list_create();
+	t_list * listaTemporal;// = list_create();
 	while(!list_is_empty(listaNumero)){
-		listaAuxiliar = list_take_and_remove(listaNumero, 3);
-		posNueva = malloc(sizeof(pokemonDatoPosicion));
-		posNueva->posX = list_get(listaAuxiliar, 0);
-		posNueva->posY = list_get(listaAuxiliar, 1);
-		posNueva->cantidad = list_get(listaAuxiliar, 2);
-		list_clean(listaAuxiliar);
-		list_add(listaNueva, posNueva);
+		pokemonDatoPosicion* estructuraALista = malloc(sizeof(pokemonDatoPosicion));
+		listaTemporal = list_take_and_remove(listaNumero, 3);
+		estructuraALista->posX = (uint32_t)list_get(listaTemporal, 0);
+		estructuraALista->posY = (uint32_t)list_get(listaTemporal, 1);
+		estructuraALista->cantidad = (uint32_t)list_get(listaTemporal, 2);
+		list_add(listaStruct, estructuraALista);
+		list_clean(listaTemporal);
 	}
 
-	list_destroy(listaAuxiliar);
+	list_destroy_and_destroy_elements(listaNumero, (void*)free);
 
-	list_add_all(listaNumero, listaNueva);
+	return listaStruct;
 }
 
-void structPosToListNum(t_list* listaStruct){
+t_list* structPosToListNum(t_list* listaStruct){
 	t_list* listaNueva = list_create();
 	t_list* listaAuxiliar = list_create();
 	pokemonDatoPosicion* structADeserializar;
@@ -101,9 +110,10 @@ void structPosToListNum(t_list* listaStruct){
 		list_add(listaNueva, structADeserializar->cantidad);
 	}
 
-	list_destroy(listaAuxiliar);
+	list_destroy_and_destroy_elements(listaAuxiliar, (void*)free);
+	list_destroy_and_destroy_elements(listaStruct, (void*)free);
 
-	list_add_all(listaStruct, listaNueva);
+	return listaNueva;
 }
 
 uint32_t obtenerBloqueLibre(){
@@ -119,34 +129,14 @@ uint32_t obtenerBloqueLibre(){
 	}
 }
 
-//POR AHORA SIN USO
-uint32_t analizandoBloque(uint32_t* tamanio, char path[1000]) {
-	if (*tamanio == blockSize) {
-		int nuevoBloque = obtenerBloqueLibre();
-		char newPath[1000] = "Blocks/";
-		strcat(newPath, intToString(nuevoBloque));
-		strcat(newPath, ".bin");
-		strcpy(path, newPath);
-		*tamanio = 0;
-		return nuevoBloque;
-	}
-	return -1;
+void limpiarBloque(uint32_t posicion){
+	t_bitarray *bitmap = obtenerDatos(blockCantBytes);
+	bitarray_clean_bit(bitmap, posicion-1);
+	guardarDatos(bitmap);
 }
 
-//POR AHORA SIN USO
-void redefiniendoBloque(FILE* archivo, pokemonMetadata* datosPokemon, uint32_t *tamanio, uint32_t posActual, char path[1000]) {
-	uint32_t posibleNuevoBloque = -1;
-	*tamanio += sizeof(uint32_t);
-	if ((posibleNuevoBloque = analizandoBloque(tamanio, path)) != -1) {
-		fclose(archivo);
-		archivo = (path, "a+");
-		char str[12];
-		strcpy(str,intToString(posibleNuevoBloque));
-		datosPokemon->bloquesAsociados[posActual + 1] = str;
-	}
-}
-
-void modificarArchivos(t_list *listaFinal, uint32_t* listaDeBloques){
+void modificarArchivos(t_list *listaFinal, char** listaDeBloques){
+	t_list* listaNumeros = structPosToListNum(listaFinal);
 	uint32_t superaBloque = 0;
 	uint32_t pos = 0;
 	char path[1000] = "Blocks/";
@@ -155,8 +145,8 @@ void modificarArchivos(t_list *listaFinal, uint32_t* listaDeBloques){
 
 	FILE* archivo = fopen(path, "rb+");
 	uint32_t nroAGuardar;
-	while(!list_is_empty(listaFinal)){
-		nroAGuardar = list_remove(listaFinal, 0);
+	while(!list_is_empty(listaNumeros)){
+		nroAGuardar = (uint32_t)list_remove(listaNumeros, 0);
 		superaBloque += 4;
 		if(superaBloque <= blockSize){
 			fwrite(&nroAGuardar, sizeof(uint32_t), 1, archivo);
@@ -175,72 +165,70 @@ void modificarArchivos(t_list *listaFinal, uint32_t* listaDeBloques){
 	fclose(archivo);
 }
 
-int sumarDatos(pokemonMetadata* datosPokemon, pokemonDatoPosicion* nuevosDatosPosPokemon){
-	uint32_t tamanio = datosPokemon->tamanio;
+uint32_t obtenerDataFileSystem(uint32_t tamanio, pokemonMetadata* datosPokemon, t_list** listaFinal) {
+	uint32_t tamanioARestar = tamanio;
 	uint32_t pos = 0;
 	uint32_t espacioLeidoEnBloque = 0;
 	uint32_t valor;
-	uint32_t tamanioComparacion = tamanio;
-
 
 	char path[1000] = "Blocks/";
 	strcat(path, datosPokemon->bloquesAsociados[pos]);
 	strcat(path, ".bin");
 
-	t_list * listaValores = list_create();
 	FILE* archivo = fopen(path, "rb");
+	t_list* listaValores = list_create();
 
-	while(tamanio != 0){
-		tamanio -= 4;
+
+	while (tamanioARestar != 0) {
+
+		tamanioARestar -= 4;
 		espacioLeidoEnBloque += 4;
-		fread(&valor, sizeof(uint32_t), 1, archivo);
 
+		fread(&valor, sizeof(uint32_t), 1, archivo);
 		list_add(listaValores, valor);
 
-		if(espacioLeidoEnBloque % blockSize == 0 && tamanio != 0){
+		if (espacioLeidoEnBloque % blockSize == 0 && tamanio != 0) {
 			fclose(archivo);
 			pos++;
-			espacioLeidoEnBloque = 4;
+			espacioLeidoEnBloque = 0;
 			char path[1000] = "Blocks/";
 			strcat(path, datosPokemon->bloquesAsociados[pos]);
 			strcat(path, ".bin");
-
 			archivo = fopen(path, "rb");
 		}
 	}
+
+	*listaFinal = listNumToStructPos(listaValores);
+
 	fclose(archivo);
-
-	listNumToStructPos(listaValores);
-
-	aComparar = malloc(sizeof(aComparar));
-    memcpy(aComparar, nuevosDatosPosPokemon, sizeof(pokemonDatoPosicion));
-
-    pokemonDatoPosicion* ejemplo1 = list_find(listaValores, mismaPosicion);
-
-    if(ejemplo1 != NULL)
-    	ejemplo1->cantidad += nuevosDatosPosPokemon->cantidad;
-    else{
-    	datosPokemon->tamanio += 12;
-    	list_add(listaValores, nuevosDatosPosPokemon);
-    	if( datosPokemon->tamanio / blockSize > tamanioComparacion / blockSize){
-    		pos++;
-			uint32_t posBin = obtenerBloqueLibre();
-			//memcpy(datosPokemon->bloquesAsociados + (sizeof(uint32_t) * pos), &posBin, sizeof(uint32_t));
-			char str[10];
-			sprintf(str, "%d", posBin);
-			datosPokemon->bloquesAsociados[pos] = str;
-    	}
-    }
-
-    structPosToListNum(listaValores);
-
-    modificarArchivos(listaValores, datosPokemon->bloquesAsociados);
-
-    return pos + 1;
-
+	return pos;
 }
 
+
+
+void validarArchivoAbierto(char path[1000], t_config** configPokemon, pokemonMetadata* datosPokemon) {
+	do {
+		*configPokemon = config_create(path);
+		datosPokemon->esDirectorio = (strcmp(config_get_string_value(*configPokemon, "DIRECTORY"), "Y") == 0) ? 1 : 0;
+		datosPokemon->tamanio = config_get_int_value(*configPokemon, "SIZE");
+		datosPokemon->bloquesAsociados = malloc(1000);
+		datosPokemon->bloquesAsociados = config_get_array_value(*configPokemon,	"BLOCKS");
+		datosPokemon->abierto =	(strcmp(config_get_string_value(*configPokemon, "OPEN"), "Y") == 0) ? 1 : 0;
+
+		if (!datosPokemon->abierto) {
+			config_destroy(*configPokemon);
+			sleep(reintentoConexion);
+		}
+	} while (!datosPokemon->abierto);
+
+	//config_set_value(*configPokemon, "OPEN", "N");
+	//config_save(*configPokemon);
+}
+
+
+
 void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t cantidad){
+	uint32_t cantidadDeBlocks;
 	char path[1000] = "Files/Pokemon/";
 	strcat(path, pokemon);
 
@@ -252,40 +240,77 @@ void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t
 	posicionPokemon->posY=posY;
 	posicionPokemon->cantidad=cantidad;
 
-
 	pokemonMetadata* datosPokemon = malloc(sizeof(pokemonMetadata));
 	if(access(path, F_OK) != -1){
-		//SI entra acá el archivo existe
-		t_config* configPokemon = config_create(path);
+		char nuevoStringBloques[1000];
+		t_config * configMetadata;
 
-		datosPokemon->esDirectorio = config_get_int_value(configPokemon, "DIRECTORY") == 'Y' ? 1 : 0;
-		datosPokemon->tamanio = config_get_int_value(configPokemon, "SIZE");
-		datosPokemon->bloquesAsociados = malloc(1000);
-		datosPokemon->bloquesAsociados = config_get_array_value(configPokemon, "BLOCKS");
-		datosPokemon->abierto = config_get_int_value(configPokemon, "OPEN") == 'Y' ? 1 : 0;
+		validarArchivoAbierto(path, &configMetadata, datosPokemon);
 
-		int iteraciones = sumarDatos(datosPokemon, posicionPokemon);
+		t_list * lista = list_create();
+		cantidadDeBlocks = obtenerDataFileSystem(datosPokemon->tamanio, datosPokemon, &lista);
+
+		aComparar = posicionPokemon;
+
+		pokemonDatoPosicion *valorEncontrado = (pokemonDatoPosicion*)list_find(lista, (bool*)mismaPosicion);
+
+		if(valorEncontrado != NULL) //Si encuentra el valor
+			valorEncontrado->cantidad += posicionPokemon->cantidad;
+		else{
+			uint32_t tamanio = datosPokemon->tamanio;
+			datosPokemon->tamanio += 12;
+			list_add(lista, posicionPokemon);
+			if(datosPokemon->tamanio / blockSize > tamanio / blockSize)
+			{
+				uint32_t nuevoBloque = obtenerBloqueLibre();
+
+				cantidadDeBlocks++;
+
+				char str[12];
+				snprintf(str, 12, "%d", nuevoBloque);
+				datosPokemon->bloquesAsociados[cantidadDeBlocks] = str;
+
+			}
+		}
+		modificarArchivos(lista, datosPokemon->bloquesAsociados);
 
 
-		char nuevoStringBloques[1000] = "[";
-		for(int i = 0; i < iteraciones; i++){
-			strcat(nuevoStringBloques, datosPokemon->bloquesAsociados[i]);
-			if(i + 1 != iteraciones)
+		cantidadDeBlocks++; //se le suma una para que las iteraciones se hagas correctamente
+
+		char** listaString = malloc(100000);
+		for (int i = 0; i < cantidadDeBlocks; ++i) {
+			listaString[i] = malloc(100);
+			strcpy(listaString[i], (datosPokemon->bloquesAsociados)[i]);
+		}
+
+		char* numero = malloc(1000);
+
+		strcpy(nuevoStringBloques, "[");
+		for(int i = 0; i < cantidadDeBlocks; i++){
+			strcpy(numero,listaString[i]);
+			strcat(nuevoStringBloques, numero);
+			if(i + 1 != cantidadDeBlocks)
 				strcat(nuevoStringBloques, ",");
 		}
 		strcat(nuevoStringBloques, "]");
 
-		/*char tamanioCHar[50];
-		strcpy(tamanioCHar, intToString(datosPokemon->tamanio));*/
+		for (int i = 0; i < cantidadDeBlocks; ++i) {
+			free(listaString[i]);
+		}
+
+		free(listaString);
+
+		free(numero);
 
 
-		config_set_value(configPokemon, "BLOCKS", nuevoStringBloques);
-		config_set_value(configPokemon, "SIZE", intToString(datosPokemon->tamanio));
-		config_save(configPokemon);
+		config_set_value(configMetadata, "BLOCKS", nuevoStringBloques);
+		config_set_value(configMetadata, "SIZE", intToString(datosPokemon->tamanio));
+		config_save(configMetadata);
 
-		config_destroy(configPokemon);
-	}
-	else{
+		config_destroy(configMetadata);
+
+
+	}else{
 		//SI entra acá es para crear el archivo
 		char command[1000] = "mkdir -p Files/Pokemon/";
 		strcat(command, pokemon);
@@ -299,7 +324,7 @@ void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t
 
 		char datosBasico[1000] = "DIRECTORY=N\nSIZE=0\nBLOCKS=[";
 		strcat(datosBasico, str);
-		strcat(datosBasico, "]\nOPEN=N");
+		strcat(datosBasico, "]\nOPEN=Y");
 
 		FILE* nuevoArchivo = fopen(path, "w");
 
@@ -308,3 +333,4 @@ void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t
 		administrarNewPokemon(pokemon, posX, posY, cantidad);
 	}
 }
+
