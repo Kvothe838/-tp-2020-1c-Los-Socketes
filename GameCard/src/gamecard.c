@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include "conexionBinario/conexionBinario.h"
 #include "ManejoDeBloques/manejoDeArchivos.h"
-#include<stdlib.h>
+#include <stdlib.h>
 
 
 
@@ -13,11 +13,17 @@ int main(void) {
 	logger = iniciar_logger("GAMECARD.log", "GAMECARD");
 	inicializarData(logger);
 
-	for (int i = 0; i < 5; ++i) {
-		administrarNewPokemon("Prueba", i, i, 15);
+
+
+	for (int i = 0; i < 30; ++i) {
+		administrarNewPokemon("Testeo", i, i, 1);
 	}
-	administrarCatchPokemon("José", 7, 8);
-	LocalizedPokemon * datosRecibidos = administrarGetPokemon("Prueba");
+
+	administrarCatchPokemon("Testeo", 6, 6);
+	administrarCatchPokemon("Testeo", 17, 17);
+	administrarCatchPokemon("Testeo", 29, 29);
+
+	LocalizedPokemon * datosRecibidos = administrarGetPokemon("Testeo");
 	printf("%s\n", datosRecibidos->nombre);
 	printf("%d\n", datosRecibidos->cantidadDePosiciones);
 
@@ -28,13 +34,13 @@ int main(void) {
 		ciclos--;
 
 		memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-		printf("%d\n", data);
+		printf("X:%d - ", data);
 		offset += sizeof(uint32_t);
 		memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-		printf("%d\n", data);
+		printf("Y:%n - ", data);
 		offset += sizeof(uint32_t);
 		memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-		printf("%d\n", data);
+		printf("Cantidad%d\n", data);
 		offset += sizeof(uint32_t);
 
 	}
@@ -54,6 +60,8 @@ int main(void) {
 
 	return EXIT_SUCCESS;
 }
+
+
 
 
 
