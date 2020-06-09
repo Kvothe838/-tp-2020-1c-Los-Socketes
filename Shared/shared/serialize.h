@@ -15,4 +15,7 @@ void* serializarCaught(CaughtPokemon* pokemon, int* bytes, TipoCola colaMensaje)
 void* serializarGet(GetPokemon* pokemon, int* bytes, TipoCola colaMensaje);
 void* serializarStreamIdMensajePublisher(long ID, TipoCola cola);
 
+void* deseralizarDato(void* mensaje,int* tamanioMensaje);
+
+
 #endif

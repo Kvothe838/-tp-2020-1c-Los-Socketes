@@ -102,4 +102,12 @@ typedef struct {
   void* contenido;
 } MensajeParaSuscriptor; //Mensaje que recibe el suscriptor de una cola.
 
+typedef struct
+{
+	char* nombre;
+	uint32_t largoNombre;
+	uint32_t cantidadDePosiciones;
+	void* data; //formato: primero X, luego Y y al final cantidad, y así respectivamente dependiendo la cantidad de posiciones
+} LocalizedPokemon;
+
 #endif

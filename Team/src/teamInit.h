@@ -52,7 +52,7 @@ typedef struct{
 typedef Entrenador** Team;
 
 //carga el configTeam
-void cargarConfig(Config* conexionConfig);
+void cargarConfig(Config* conexionConfig, t_config* config);
 
 //inizializar
 void iniciar_entrenador(Entrenador** entrenador);

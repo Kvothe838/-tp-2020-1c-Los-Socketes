@@ -83,6 +83,7 @@ void* serializarDato(void* mensaje, int tamanioMensaje, TipoCola colaMensaje){
 			return NULL;
 			break;
 	}
+
 }
 //Acá hay que hacer una función para cada estructura de cola que se quiera serializar (6 estructuras).
 
@@ -255,8 +256,7 @@ GetPokemon* deserializarGet(void* msj, int* bytes){
 
 	return pokemon;
 }
-void* deseralizarDato(void* msj,int* bytes){
-
+void* deserializarDato(void* msj,int* bytes){
 	TipoCola tipo;
 
 	memcpy(&tipo, msj , sizeof(TipoCola));
@@ -284,7 +284,7 @@ void* deseralizarDato(void* msj,int* bytes){
 }
 
 void* serializarStreamIdMensajePublisher(long ID, TipoCola cola){
-	void* stream;
+	void* stream = malloc(sizeof(long) + sizeof(TipoCola));
 
 	memcpy(stream, &ID, sizeof(long));
 	memcpy(stream + sizeof(long), &cola, sizeof(TipoCola));
