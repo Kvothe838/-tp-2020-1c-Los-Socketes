@@ -43,23 +43,17 @@ void manejarMensaje(void* msj, t_log* logger,int size){
 	offset+= sizeof(int);
 	log_trace(logger,"X: %d",pokemon->y);
 
-
-	log_trace(logger, "sizeeeeeeeeeeeee : %d",msj+offset);
 	memcpy(&(largoNombre), msj+offset, sizeof(int));
 	offset += sizeof(int);
-	char* xd ;
+
+	char* nombre;
 	log_trace(logger,"Largo: %d",largoNombre);
-	memcpy(pokemon->nombre, msj+offset , largoNombre +1);
+	memcpy(nombre, msj+offset , largoNombre +1);
+	pokemon->nombre = nombre;
 	log_trace(logger, "Nombre : %s",pokemon->nombre);
 
-	log_trace(logger, "sizeeeeeeeeeeeee : %d",msj+8);
 
 
-/*
-	memcpy(&(pokemon->nombre),&xd,sizeof(xd));
-
-	log_trace(logger, "sad : %s",pokemon->nombre);
-*/
 	free(pokemon);
 	//obtenerData(tipoCola,msj,size,logger);
 }

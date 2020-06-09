@@ -9,14 +9,14 @@ int main(void) {
 	Config* configTeam = malloc(sizeof(Config));
 	cargarConfig(configTeam, config);
 
+	log_info(logger, "IP %s y PUERTO %s", configTeam->ip, configTeam->puerto);
+	iniciar_servidor(configTeam->ip,configTeam->puerto);
+
 /*	Team team = inicializarTeam(configTeam->posiciones,configTeam->pertenecientes,configTeam->objetivos);
 	planificacion_fifo(team);
 	free(configTeam);
 	liberarMemoria(team);
 */
-	log_info(logger, "IP %s y PUERTO %s", configTeam->ip, configTeam->puerto);
-
-	iniciar_servidor(configTeam->ip,configTeam->puerto);
 
 
 	terminar_programa(logger, config);
