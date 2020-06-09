@@ -28,9 +28,9 @@ void agregarSuscriptor(TipoCola colaClave, int nuevoSuscriptor){
 	list_add(colaEspecifica->suscriptores, (void*)nuevoSuscriptor);
 }
 
-void agregarMensaje(TipoCola colaClave, MensajeEnCola mensaje){
+void agregarMensaje(TipoCola colaClave, MensajeEnCola* mensaje){
 	ColaConSuscriptores* colaEspecifica = obtenerCola(colaClave);
-	list_add(colaEspecifica->mensajes, &mensaje);
+	list_add(colaEspecifica->mensajes, mensaje);
 }
 
 void imprimir(int a){

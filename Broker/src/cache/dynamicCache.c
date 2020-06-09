@@ -6,56 +6,56 @@ int esTiempoMasAntiguo(char* masAntiguo, char* masNuevo){
 
 int calcularBestFit(int desiredSize) {
 	int found = -1;
-	int bestPosition, *bestDifference = NULL;
+	int bestposicion, *bestDifference = NULL;
 
-	for(int i = 0; i < tableSize; i++){
-		DynamicTableEntry currentEntry = tablaVacios[i];
+	for(int i = 0; i < tamanioTabla; i++){
+		ItemTablaDinamica currentEntry = tablaVacios[i];
 
-		if(!currentEntry.isEmpty && currentEntry.size >= desiredSize){
-			int diff = currentEntry.size - desiredSize;
+		if(!currentEntry.estaVacio && currentEntry.tamanio >= desiredSize){
+			int diff = currentEntry.tamanio - desiredSize;
 			if(bestDifference >= 0 && (bestDifference == NULL || diff < *bestDifference)){
 				*bestDifference = diff;
-				bestPosition = i;
+				bestposicion = i;
 				found = 1;
 			}
 		}
 	}
 
-	return found >= 0 ? bestPosition : found;
+	return found >= 0 ? bestposicion : found;
 }
 
 int calcularFIFO(){
-	int oldestPosition = 0;
+	int oldestposicion = 0;
 	char* oldestDate = "";
 
-	for(int i = 0; i < tableSize; i++){
-		DynamicTableEntry current = tablaElementos[i];
+	for(int i = 0; i < tamanioTabla; i++){
+		ItemTablaDinamica current = tablaElementos[i];
 
-		if(!current.isEmpty && esTiempoMasAntiguo(oldestDate, current.dateBorn)){
-			oldestDate = current.dateBorn;
-			oldestPosition = i;
+		if(!current.estaVacio && esTiempoMasAntiguo(oldestDate, current.fechaCreacion)){
+			oldestDate = current.fechaCreacion;
+			oldestposicion = i;
 		}
 	}
 
-	return tablaElementos[oldestPosition].id;
+	return tablaElementos[oldestposicion].ID;
 }
 
 int calcularLRU(){
-	int oldestPosition = 0;
-	char* oldestDate = tablaElementos[0].dateBorn;
+	int oldestposicion = 0;
+	char* oldestDate = tablaElementos[0].fechaCreacion;
 
-	if(tableSize > 1){
-		for(int i = 1; i < tableSize; i++){
-			DynamicTableEntry current = tablaElementos[i];
+	if(tamanioTabla > 1){
+		for(int i = 1; i < tamanioTabla; i++){
+			ItemTablaDinamica current = tablaElementos[i];
 
-			if(!current.isEmpty && esTiempoMasAntiguo(oldestDate, current.dateLastUse)){
-				oldestDate = current.dateBorn;
-				oldestPosition = i;
+			if(!current.estaVacio && esTiempoMasAntiguo(oldestDate, current.fechaUltimoUso)){
+				oldestDate = current.fechaCreacion;
+				oldestposicion = i;
 			}
 		}
 	}
 
-	return tablaElementos[oldestPosition].id;
+	return tablaElementos[oldestposicion].ID;
 }
 
 void eliminarVictima(){
@@ -69,8 +69,8 @@ void eliminarVictima(){
 int hayEspacio(int espacioRequerido, int *posicion){
 	//int posEspacioMinimo = 0;
 	if(strcmp(algoritmoEleccionDeParticionLibre, "FF") == 0){
-		for(*posicion = 0; *posicion < tableSize; (*posicion)++){
-			if(!tablaVacios[*posicion].isEmpty && tablaVacios[*posicion].size >= espacioRequerido)
+		for(*posicion = 0; *posicion < tamanioTabla; (*posicion)++){
+			if(!tablaVacios[*posicion].estaVacio && tablaVacios[*posicion].tamanio >= espacioRequerido)
 				return 1;
 		}
 	} else {
@@ -87,9 +87,9 @@ int hayEspacio(int espacioRequerido, int *posicion){
 	return 0;
 }
 
-int obtenerPrimeraParticion(DynamicTableEntry tabla[], int esVacio){
-	for(int i = 0; i < tableSize; i++){
-		if(tabla[i].isEmpty == esVacio)
+int obtenerPrimeraParticion(ItemTablaDinamica *tabla, int esVacio){
+	for(int i = 0; i < tamanioTabla; i++){
+		if(tabla[i].estaVacio == esVacio)
 			return i;
 	}
 
@@ -100,55 +100,50 @@ int obtenerDesplazamientoMinimo(int tamanioParticionMinima, int espacioRequerido
 	return espacioRequerido < tamanioParticionMinima ? tamanioParticionMinima : espacioRequerido;
 }
 
-void modificarTablaVacio(DynamicTableEntry *tabla, int espacioRequerido, int posicionVector,
+void modificarTablaVacio(ItemTablaDinamica *tabla, int espacioRequerido, int posicionVector,
 		int tamanioParticionMinima){
 	int desplazamiento = obtenerDesplazamientoMinimo(tamanioParticionMinima, espacioRequerido);
-	if((tabla[posicionVector].size -= desplazamiento) <= 0){
-		tabla[posicionVector].position = 0;
-		tabla[posicionVector].id = -1;
-		tabla[posicionVector].isEmpty = 1;
-		tabla[posicionVector].size = 0;
+	if((tabla[posicionVector].tamanio -= desplazamiento) <= 0){
+		tabla[posicionVector].posicion = 0;
+		tabla[posicionVector].ID = -1;
+		tabla[posicionVector].estaVacio = 1;
+		tabla[posicionVector].tamanio = 0;
 		/*
 		 * si llega acá es porque el hayEspacio dio true, entonces puede ocurrir el caso
-		 * que haya un lugar de espacio que el size de negativo
+		 * que haya un lugar de espacio que el tamanio de negativo
 		 *
 		*/
 	}
 	else{
-		tabla[posicionVector].position += desplazamiento;
+		tabla[posicionVector].posicion += desplazamiento;
 	}
 }
 
-int obtenerPosicionPorId(int id){
-	for(int i = 0; i < tableSize; i++){
-		if(tablaElementos[i].id == id)
+int obtenerPosicionPorID(int ID){
+	for(int i = 0; i < tamanioTabla; i++){
+		if(tablaElementos[i].ID == ID)
 			return i;
 	}
 
 	return -1;
 }
 
-void inicializarTabla(DynamicTableEntry **tabla, int esVacio){
-	*tabla = (DynamicTableEntry*)malloc(tableSize * sizeof(DynamicTableEntry));
+void inicializarTabla(ItemTablaDinamica **tabla, int esVacio){
+	*tabla = (ItemTablaDinamica*)malloc(tamanioTabla * sizeof(ItemTablaDinamica));
 
 	if(esVacio){
-		(*tabla)[0].id = 0;
-		(*tabla)[0].position = 0;
-		(*tabla)[0].size = tamanioCache;
-		(*tabla)[0].isEmpty = 0;
+		(*tabla)[0].ID = 0;
+		(*tabla)[0].posicion = 0;
+		(*tabla)[0].tamanio = tamanioCache;
+		(*tabla)[0].estaVacio = 0;
 	}
 
-	for(int i = esVacio; i < tableSize; i++){
-		(*tabla)[i].id = -1;
-		(*tabla)[i].position = 0;
-		(*tabla)[i].size = 0;
-		(*tabla)[i].isEmpty = 1;
+	for(int i = esVacio; i < tamanioTabla; i++){
+		(*tabla)[i].ID = -1;
+		(*tabla)[i].posicion = 0;
+		(*tabla)[i].tamanio = 0;
+		(*tabla)[i].estaVacio = 1;
 	}
-}
-
-void inicializarCache(){
-	inicializarTabla(&tablaElementos, 0);
-	inicializarTabla(&tablaVacios, 1);
 }
 
 void inicializarDataBasica(t_config* config, t_log* loggerParaAsignar) {
@@ -157,105 +152,119 @@ void inicializarDataBasica(t_config* config, t_log* loggerParaAsignar) {
 	algoritmoEleccionDeParticionLibre = config_get_string_value(config,"ALGORITMO_PARTICION_LIBRE");
 	algoritmoEleccionDeVictima = config_get_string_value(config,"ALGORITMO_REEMPLAZO");
 	frecuenciaCompactacion = (int)config_get_string_value(config, "FRECUENCIA_COMPACTACION");
-	tableSize = tamanioCache / tamanioParticionMinima;
+	tamanioTabla = tamanioCache / tamanioParticionMinima;
 	logger = loggerParaAsignar;
 
-	inicializarCache();
+	inicializarTabla(&tablaElementos, 0);
+	inicializarTabla(&tablaVacios, 1);
+	inicializarCache(tamanioCache);
 }
 
-void agregarElementoValido(int posicionVacioAModificar, int tamanioItem, void* item, int id) {
+void agregarElementoValido(int posicionVacioAModificar, int tamanioItem, void* item, int ID) {
 	int posicionElementoAModificar = obtenerPrimeraParticion(tablaElementos, 1);
-	tablaElementos[posicionElementoAModificar].position = tablaVacios[posicionVacioAModificar].position;
-	tablaElementos[posicionElementoAModificar].size = tamanioItem;
-	tablaElementos[posicionElementoAModificar].isEmpty = 0;
-	tablaElementos[posicionElementoAModificar].id = id; //Provisional, debería ser el id del mensaje
+	tablaElementos[posicionElementoAModificar].posicion = tablaVacios[posicionVacioAModificar].posicion;
+	tablaElementos[posicionElementoAModificar].tamanio = tamanioItem;
+	tablaElementos[posicionElementoAModificar].estaVacio = 0;
+	tablaElementos[posicionElementoAModificar].ID = ID;
 
-	tablaElementos[posicionElementoAModificar].dateBorn = temporal_get_string_time();
-	tablaElementos[posicionElementoAModificar].dateLastUse = temporal_get_string_time();
-	modificarTablaVacio(tablaVacios, tamanioItem, posicionVacioAModificar,tamanioParticionMinima);
-	setValue(item, tamanioItem,	tablaElementos[posicionElementoAModificar].position);
+	tablaElementos[posicionElementoAModificar].fechaCreacion = temporal_get_string_time();
+	tablaElementos[posicionElementoAModificar].fechaUltimoUso = temporal_get_string_time();
+	modificarTablaVacio(tablaVacios, tamanioItem, posicionVacioAModificar, tamanioParticionMinima);
+	guardarValor(item, tamanioItem,	tablaElementos[posicionElementoAModificar].posicion);
 }
 
-void agregarItem(void* item, int tamanioItem, int id){
+void agregarItem(void* item, int tamanioItem, int ID){
 	int posicionVacioAModificar;
-	//Las inicializo para que no me tire warnings. Ariel te voy a matar.
 
 	if(hayEspacio(tamanioItem, &posicionVacioAModificar)){
-		agregarElementoValido(posicionVacioAModificar, tamanioItem, item, id);
+		agregarElementoValido(posicionVacioAModificar, tamanioItem, item, ID);
 	} else {
 		int seAgrego = 0;
+
 		for(int i = 0; i < frecuenciaCompactacion && !seAgrego; i++)
 		{
 			compactarCache();
+
 			if(hayEspacio(tamanioItem, &posicionVacioAModificar)){
-				agregarElementoValido(posicionVacioAModificar, tamanioItem, item, id);
+				agregarElementoValido(posicionVacioAModificar, tamanioItem, item, ID);
 				seAgrego = 1;
-			}
-			else
+			} else {
 				eliminarVictima();
+			}
 		}
 	}
 }
 
-void* obtenerItem(long id){
+void* obtenerItem(long ID){
 	int i = -1;
 	do {
 		i++;
-		if(tablaElementos[i].id == id){
-			free(tablaElementos[i].dateLastUse);
-			tablaElementos[i].dateLastUse = temporal_get_string_time();
-			return getValue(tablaElementos[i].size, tablaElementos[i].position);
+
+		if(tablaElementos[i].ID == ID){
+			free(tablaElementos[i].fechaUltimoUso);
+			tablaElementos[i].fechaUltimoUso = temporal_get_string_time();
+			return obtenerValor(tablaElementos[i].tamanio, tablaElementos[i].posicion);
 		}
-	} while(tablaElementos[i].id != id);
+	} while(tablaElementos[i].ID != ID && i < tamanioTabla);
 
 	return NULL;
 }
 
-void eliminarItem(long id){
-	int posDatoAEliminar = obtenerPosicionPorId(id);
+void eliminarItem(long ID){
+	int posDatoAEliminar = obtenerPosicionPorID(ID);
 	int posNuevoVacio = obtenerPrimeraParticion(tablaVacios, 1);
-	int espacioVacio = obtenerDesplazamientoMinimo(tamanioParticionMinima, tablaElementos[posDatoAEliminar].size);
+	int espacioVacio = obtenerDesplazamientoMinimo(tamanioParticionMinima, tablaElementos[posDatoAEliminar].tamanio);
 
-	tablaVacios[posNuevoVacio].id = posNuevoVacio;
-	tablaVacios[posNuevoVacio].position = tablaElementos[posDatoAEliminar].position;
-	tablaVacios[posNuevoVacio].isEmpty = 0;
-	tablaVacios[posNuevoVacio].size = espacioVacio;
+	tablaVacios[posNuevoVacio].ID = posNuevoVacio;
+	tablaVacios[posNuevoVacio].posicion = tablaElementos[posDatoAEliminar].posicion;
+	tablaVacios[posNuevoVacio].estaVacio = 0;
+	tablaVacios[posNuevoVacio].tamanio = espacioVacio;
 
-	tablaElementos[posDatoAEliminar].id = 0;
-	tablaElementos[posDatoAEliminar].position = 0;
-	tablaElementos[posDatoAEliminar].isEmpty = 1;
-	tablaElementos[posDatoAEliminar].size = 0;
+	tablaElementos[posDatoAEliminar].ID = 0;
+	tablaElementos[posDatoAEliminar].posicion = 0;
+	tablaElementos[posDatoAEliminar].estaVacio = 1;
+	tablaElementos[posDatoAEliminar].tamanio = 0;
 
 }
 
 void compactarCache(){
-	DynamicTableEntry *tablaCompactada = NULL, *tablaNuevoVacio = NULL;
+	ItemTablaDinamica *tablaCompactada = NULL, *tablaNuevoVacio = NULL;
 	int posicionNueva = 0, posicionVieja;
 
 	inicializarTabla(&tablaCompactada, 0);
 	inicializarTabla(&tablaNuevoVacio, 1);
 
-	for(int i = 0; i < tableSize; i++)
+	for(int i = 0; i < tamanioTabla; i++)
 	{
-		DynamicTableEntry elementoActual = tablaElementos[i];
+		ItemTablaDinamica elementoActual = tablaElementos[i];
 
-		if(!elementoActual.isEmpty)
+		if(!elementoActual.estaVacio)
 		{
-			tablaCompactada[i].id = elementoActual.id;
-			tablaCompactada[i].size = elementoActual.size;
-			tablaCompactada[i].dateBorn = elementoActual.dateBorn;
-			tablaCompactada[i].dateLastUse = elementoActual.dateLastUse;
-			posicionVieja = elementoActual.position;
-			tablaCompactada[i].position = posicionNueva;
-			tablaCompactada[i].isEmpty = 0;
-			moveBlock(elementoActual.size, posicionVieja, posicionNueva);
-			posicionNueva += obtenerDesplazamientoMinimo(tamanioParticionMinima, elementoActual.size);
+			tablaCompactada[i].ID = elementoActual.ID;
+			tablaCompactada[i].tamanio = elementoActual.tamanio;
+			tablaCompactada[i].fechaCreacion = elementoActual.fechaCreacion;
+			tablaCompactada[i].fechaUltimoUso = elementoActual.fechaUltimoUso;
+			posicionVieja = elementoActual.posicion;
+			tablaCompactada[i].posicion = posicionNueva;
+			tablaCompactada[i].estaVacio = 0;
+			moverBloque(elementoActual.tamanio, posicionVieja, posicionNueva);
+			posicionNueva += obtenerDesplazamientoMinimo(tamanioParticionMinima, elementoActual.tamanio);
 		}
 	}
 
-	modificarTablaVacio(tablaNuevoVacio, posicionNueva, 0 /*al principio*/, tamanioParticionMinima);
-	memcpy(tablaElementos, tablaCompactada, sizeof(DynamicTableEntry) * tableSize);
-	memcpy(tablaVacios, tablaNuevoVacio, sizeof(DynamicTableEntry) * tableSize);
+	modificarTablaVacio(tablaNuevoVacio, posicionNueva, 0, tamanioParticionMinima);
+	memcpy(tablaElementos, tablaCompactada, sizeof(ItemTablaDinamica) * tamanioTabla);
+	memcpy(tablaVacios, tablaNuevoVacio, sizeof(ItemTablaDinamica) * tamanioTabla);
+}
+
+void imprimirTabla(ItemTablaDinamica tabla[], t_log* logger){
+	log_info(logger, "MOSTRANDO ELEMENTOS");
+	for(int i = 0; i < tamanioTabla; i++){
+		if(!tabla[i].estaVacio){
+			log_info(logger, "Elemento ID %d, posicion %d,  espacio %d, fecha %s",
+					tabla[i].ID, tabla[i].posicion, tabla[i].tamanio, tabla[i].fechaUltimoUso);
+		}
+	}
 }
 
 

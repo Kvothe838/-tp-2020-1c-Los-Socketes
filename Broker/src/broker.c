@@ -3,16 +3,6 @@
 #include "conexionBroker.h"
 #include "cache/dynamicCache.h"
 
-void imprimirTabla(DynamicTableEntry tabla[], t_log* logger){
-	log_info(logger, "MOSTRANDO ELEMENTOS");
-	for(int i = 0; i < tableSize; i++){
-		if(!tabla[i].isEmpty){
-			log_info(logger, "Elemento ID %d, posicion %d,  espacio %d, fecha %s",
-					tabla[i].id, tabla[i].position, tabla[i].size, tabla[i].dateLastUse);
-		}
-	}
-}
-
 int main(void) {
 	char* ip, *puerto;
 	t_config* config;
@@ -27,7 +17,7 @@ int main(void) {
 
 	inicializarDataBasica(config, logger);
 	crearDiccionario();
-	iniciar_servidor(ip, puerto);
+	iniciarServidor(ip, puerto);
 	terminar_programa(logger, config);
 
 	return 0;

@@ -1,37 +1,31 @@
-/*
- * basicCache.c
- *
- *  Created on: 25 may. 2020
- *      Author: utnso
- */
 #include "basicCache.h"
 
-void initializeCache(int size){
-	mainCache = malloc(size);
-	alternativeCache = malloc(size);
+void guardarValorCompactacion(void* valor, int tamanio, int posicion){
+	memcpy(cacheAlternativa + posicion, valor, tamanio);
 }
 
-void setValue(void* value, int size, int position){
-	memcpy(mainCache + position, value, size);
+void inicializarCache(int tamanio){
+	cachePrincipal = (CacheBasica*)malloc(tamanio);
+	cacheAlternativa = (CacheBasica*)malloc(tamanio);
 }
 
-void setValueCompaction(void* value, int size, int position){
-	memcpy(alternativeCache + position, value, size);
+void guardarValor(void* valor, int tamanio, int posicion){
+	memcpy(cachePrincipal + posicion, valor, tamanio);
 }
 
-void* getValue(int size, int position){
-	void* result;
-	result = malloc(size);
-	memcpy(result, mainCache + position, size);
-	return result;
+void* obtenerValor(int tamanio, int posicion){
+	void* resultado = malloc(tamanio);
+	memcpy(resultado, cachePrincipal + posicion, tamanio);
+
+	return resultado;
 }
 
-void moveBlock(int size, int oldPosition, int newPosition){
-	void* result = getValue(size, oldPosition);
-	setValueCompaction(result, size, newPosition);
+void moverBloque(int tamanio, int posicionVieja, int posicionNueva){
+	void* item = obtenerValor(tamanio, posicionVieja);
+	guardarValorCompactacion(item, tamanio, posicionNueva);
 }
 
-void replaceCache(int tamanioCache){
-	memcpy(mainCache, alternativeCache, tamanioCache);
+void reemplazarCache(int tamanioCache){
+	memcpy(cachePrincipal, cacheAlternativa, tamanioCache);
 }
 

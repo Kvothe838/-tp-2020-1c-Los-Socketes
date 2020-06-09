@@ -6,7 +6,7 @@ int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, TipoCola
 {
 	int bytes = 0,
 		resultado = 0;
-	void* mensaje_serializado;
+	void* mensajeSerializado;
 
 	Paquete* paquete = NULL;
 	paquete = malloc(sizeof(Paquete));
@@ -30,18 +30,18 @@ int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, TipoCola
 
 	paquete->buffer->stream = stream;
 
-	mensaje_serializado = serializar_paquete(paquete, &bytes);
+	mensajeSerializado = serializarPaquete(paquete, &bytes);
 
 	free(paquete->buffer->stream);
 	free(paquete->buffer);
 	free(paquete);
 
-	if(send(socket_cliente, mensaje_serializado, bytes, 0) == -1){
+	if(send(socket_cliente, mensajeSerializado, bytes, 0) == -1){
 		printf("Error enviando mensaje.\n");
 		resultado = -1;
 	}
 
-	free(mensaje_serializado);
+	free(mensajeSerializado);
 	return resultado;
 }
 
@@ -121,3 +121,75 @@ char* tipoColaToString(TipoCola tipoCola){
 
 	return "";
 }
+
+TipoModulo argvToTipoModulo(char* modulo)
+{
+	if(strcmp(modulo,"BROKER") == 0)
+		return BROKER;
+	else if(strcmp(modulo,"TEAM") == 0)
+		return TEAM;
+	else if(strcmp(modulo,"GAMECARD") == 0)
+		return GAMECARD;
+	else if(strcmp(modulo,"SUSCRIPTOR") == 0)
+		return SUSCRIPTOR;
+	else
+		return -1;
+}
+
+TipoCola argvToTipoCola(char* cola)
+{
+	if(strcmp(cola,"NEW_POKEMON") == 0)
+		return NEW;
+	else if(strcmp(cola,"APPEARED_POKEMON") == 0)
+		return APPEARED;
+	else if(strcmp(cola,"CATCH_POKEMON") == 0)
+		return CATCH;
+	else if(strcmp(cola,"CAUGHT_POKEMON") == 0)
+		return CAUGHT;
+	else if(strcmp(cola,"GET_POKEMON") == 0)
+		return GET;
+	else
+		return -1;
+}
+
+NewPokemon* getNewPokemon(char* nombre, int posX, int posY, int cantidad){
+	NewPokemon* pokemon = malloc(sizeof(NewPokemon));
+	pokemon->nombre = nombre;
+	pokemon->largoNombre = strlen(pokemon->nombre);
+	pokemon->posX = posX;
+	pokemon->posY = posY;
+	pokemon->cantidad = cantidad;
+	return pokemon;
+}
+
+AppearedPokemon* getAppearedPokemon(char* nombre, int posX, int posY){
+	AppearedPokemon* pokemon = malloc(sizeof(AppearedPokemon));
+	pokemon->nombre = nombre;
+	pokemon->largoNombre = strlen(pokemon->nombre);
+	pokemon->posX = posX;
+	pokemon->posY = posY;
+	return pokemon;
+}
+
+CatchPokemon* getCatchPokemon(char* nombre, int posX, int posY){
+	CatchPokemon* pokemon = malloc(sizeof(CatchPokemon));
+	pokemon->nombre = nombre;
+	pokemon->largoNombre = strlen(pokemon->nombre);
+	pokemon->posX = posX;
+	pokemon->posY = posY;
+	return pokemon;
+}
+
+CaughtPokemon* getCaughtPokemon(int loAtrapo){
+	CaughtPokemon* pokemon = malloc(sizeof(CaughtPokemon));
+	pokemon->loAtrapo = loAtrapo; //si se pudo o no atrapar al pokemon (0 o 1)
+	return pokemon;
+}
+
+GetPokemon* getGetPokemon(char* nombre){
+	GetPokemon* pokemon = malloc(sizeof(GetPokemon));
+	pokemon->nombre = nombre;
+	pokemon->largoNombre = strlen(pokemon->nombre);
+	return pokemon;
+}
+

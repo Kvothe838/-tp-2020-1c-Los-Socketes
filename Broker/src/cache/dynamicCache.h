@@ -9,21 +9,21 @@
 char *algoritmoEleccionDeParticionLibre;
 char *algoritmoEleccionDeVictima;
 int frecuenciaCompactacion;
-int tableSize;
+int tamanioTabla;
 int tamanioCache, tamanioParticionMinima;
 
 typedef struct {
-	int position;
-	int size;
-	long id;
-	int isEmpty;
-	char* dateBorn;
-	char* dateLastUse;
-} DynamicTableEntry;
+	int posicion;
+	int tamanio;
+	long ID;
+	int estaVacio;
+	char* fechaCreacion;
+	char* fechaUltimoUso;
+} ItemTablaDinamica;
 
-DynamicTableEntry *tablaElementos, *tablaVacios; //contienen elementos del tipo DynamicTableEntry
+ItemTablaDinamica *tablaElementos, *tablaVacios;
 
-void inicializarTabla(DynamicTableEntry **tabla, int esVacio);
+void inicializarTabla(ItemTablaDinamica **tabla, int esVacio);
 void inicializarDataBasica(t_config* config, t_log* logger);
 void agregarItem(void* item, int tamanioItem, int id);
 void eliminarItem(long id);
@@ -31,5 +31,6 @@ void compactarCache();
 void eliminarVictima();
 void inicializarCache();
 void* obtenerItem(long id);
+void imprimirTabla(ItemTablaDinamica tabla[], t_log* logger);
 
 #endif /* CACHE_DYNAMICCACHE_H_ */

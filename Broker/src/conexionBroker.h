@@ -16,10 +16,11 @@
 #include <string.h>
 #include <pthread.h>
 #include <shared/connection.h>
+#include <shared/commonsExtensions.h>
 
 pthread_t thread;
 t_log* logger;
 
-void iniciar_servidor(char *ip, char* puerto);
+void iniciarServidor(char *ip, char* puerto);
 
 #endif

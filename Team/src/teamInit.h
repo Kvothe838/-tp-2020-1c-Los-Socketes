@@ -1,12 +1,17 @@
 #ifndef TEAMINIT_H_
 #define TEAMINIT_H_
 
+
 #include <stdlib.h>
 #include <stdio.h>
+
 #include <commons/collections/list.h>
+#include <pthread.h>
 #include <shared/utils.h>
+#include <semaphore.h>
 
 t_list* OBJETIVO_GLOBAL;
+
 typedef enum {
 	NUEVO,
 	LISTO,
@@ -27,10 +32,12 @@ typedef struct {
 typedef struct {
 	int idEntrenador;
 	int posicion[2];
+	int movimiento[2];
 	t_list* mios;
 	Estado estado;
 	t_list* objetivos;
 	t_list* objetivosActuales;
+	sem_t activador;
 }Entrenador;
 
 typedef struct{
@@ -48,6 +55,8 @@ typedef Entrenador** Team;
 void cargarConfig(Config* conexionConfig);
 
 //inizializar
+void iniciar_entrenador(Entrenador** entrenador);
+
 Pokemon* crearPokemon(char* nombre,int x, int y);
 PokemonFantasia* crearObjetivo(char* nombre);
 int cant_entrenadores(char** posiciones);
