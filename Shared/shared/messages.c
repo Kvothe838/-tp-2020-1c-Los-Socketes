@@ -6,7 +6,7 @@ int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, TipoCola
 {
 	int bytes = 0,
 		resultado = 0;
-	void* mensaje_serializado;
+	void* mensajeSerializado;
 
 	Paquete* paquete = NULL;
 	paquete = malloc(sizeof(Paquete));
@@ -22,7 +22,7 @@ int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, TipoCola
 			stream = serializarSuscripcion(mensaje, tamanioMensaje, stream);
 			break;
 		case PUBLISHER:
-			stream = serializarDato(mensaje, tamanioMensaje, stream, colaMensaje);
+			stream = serializarDato(mensaje, tamanioMensaje, colaMensaje);
 			break;
 		default:
 			break;
@@ -30,18 +30,18 @@ int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, TipoCola
 
 	paquete->buffer->stream = stream;
 
-	mensaje_serializado = serializar_paquete(paquete, &bytes);
+	mensajeSerializado = serializarPaquete(paquete, &bytes);
 
 	free(paquete->buffer->stream);
 	free(paquete->buffer);
 	free(paquete);
 
-	if(send(socket_cliente, mensaje_serializado, bytes, 0) == -1){
+	if(send(socket_cliente, mensajeSerializado, bytes, 0) == -1){
 		printf("Error enviando mensaje.\n");
 		resultado = -1;
 	}
 
-	free(mensaje_serializado);
+	free(mensajeSerializado);
 	return resultado;
 }
 

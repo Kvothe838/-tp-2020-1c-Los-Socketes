@@ -8,6 +8,7 @@
 
 int main(int argc, char **argv){
 	
+<<<<<<< HEAD
 	//Simulamos el ingreso de los argumentos por consola a modo de prueba.
 	//Eliminar luego de testear.
 	argv[1] = "GAMECARD";
@@ -16,6 +17,22 @@ int main(int argc, char **argv){
 	argv[4] = "2";
 	argv[5] = "3";
 	argv[6] = "3";
+=======
+	//Para usar si se quiere probar rápido.
+	/*argv[1] = "BROKER";
+	argv[2] = "NEW_POKEMON";
+	argv[3] = "Pikachu";
+	argv[4] = "5";
+	argv[5] = "10";
+	argv[6] = "2";*/
+	
+	/*argv[1] = "TEAM";
+	argv[2] = "APPEARED_POKEMON";
+	argv[3] = "Pikachu";
+	argv[4] = "5";
+	argv[5] = "10";
+	argv[6] = "1";*/
+>>>>>>> 4dee40f77ddd571e9128b806f465e905082aaf86
 
 	argc = 7;
 
@@ -29,19 +46,19 @@ int main(int argc, char **argv){
 	t_log* logger;
 	t_config* config;
 
-	logger = iniciar_logger("GameBoy.log", "GAMEBOY");
-	config = leer_config("GameBoy.config", logger);
+	logger = iniciar_logger("loggerGameBoy.log", "GameBoy");
+	config = leer_config("configGameBoy.config", logger);
 
-    printf("El nombre del programa es: %s\n",argv[0]); 
+    printf("El nombre del programa es: %s\n",argv[0]);
     if(argc == 1){
         printf("\nNo se ha ingresado ningún argumento de línea de comando adicional que no sea el nombre del programa\n");
 		printf("Formato de ejecución: ./gameboy [BROKER|GAMECARD|TEAM] [NEW_POKEMON|APPEARED_POKEMON|CATCH_POKEMON|CAUGHT_POKEMON|GET_POKEMON] [ARGUMENTOS]*\n");
 		abort();
 	}
-    if(argc >= cantidadMinArgc && argc <= cantidadMaxArgc) 
-    { 
-        printf("\nNumero de argumentos ingresados: %d",argc); 
-        printf("\n----Los siguientes son los argumentos de la línea de comando ingresados----"); 
+    if(argc >= cantidadMinArgc && argc <= cantidadMaxArgc)
+    {
+        printf("\nNumero de argumentos ingresados: %d",argc);
+        printf("\n----Los siguientes son los argumentos de la línea de comando ingresados----");
         for(int counter = 0;counter<argc;counter++)
             printf("\nargv[%d]: %s",counter,argv[counter]);
 	}
@@ -49,8 +66,13 @@ int main(int argc, char **argv){
 		printf("\nPor favor, revise que está ingresando como MINIMO %d argumentos, y como MAXIMO %d argumentos, y vuelva a intentar\n", cantidadMinArgc, cantidadMaxArgc);
 		abort();
 	}
+<<<<<<< HEAD
 	
 	printf("\n\n");
+=======
+
+printf("\n\n");
+>>>>>>> 4dee40f77ddd571e9128b806f465e905082aaf86
 
 
 	switch(argvToTipoModulo(argv[1]))
@@ -95,7 +117,30 @@ int main(int argc, char **argv){
 				{
 					AppearedPokemon* pokemon = getAppearedPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 
+<<<<<<< HEAD
 					int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
+=======
+				OpCode code;
+				long idMensaje;
+				TipoCola cola;
+				int size;
+
+				recv(conexionBroker, &code, sizeof(OpCode), 0);
+
+				if(code == ID_MENSAJE){
+					log_info(logger, "RECIBÍ ALGO");
+					recv(conexionBroker, &size, sizeof(int), 0);
+					log_info(logger, "EL SIZE ES %d", size);
+					recv(conexionBroker, &idMensaje, sizeof(long), 0);
+					log_info(logger, "EL ID ES %d", idMensaje);
+					recv(conexionBroker, &cola, sizeof(TipoCola), 0);
+					log_info(logger, "LA COLA ES %s", tipoColaToString(cola));
+				}else {
+					log_info(logger, "TODO MAL. RECIBÍ OTRO CODE.");
+				}
+				
+				liberar_conexion_cliente(conexionBroker);
+>>>>>>> 4dee40f77ddd571e9128b806f465e905082aaf86
 
 					if(enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, conexionBroker) == -1)
 					{

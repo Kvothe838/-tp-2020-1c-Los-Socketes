@@ -2,18 +2,18 @@
 #define CACHE_BASICCACHE_H_
 
 #include <commons/temporal.h>
+#include <stdlib.h>
+#include <string.h>
+#include <commons/log.h>
 
+typedef void* CacheBasica;
+CacheBasica* cachePrincipal;
+CacheBasica* cacheAlternativa; //Sólo para compactar.
+t_log* logger;
 
-typedef void* t_basicCache;
-t_basicCache mainCache;
-t_basicCache alternativeCache;
-
-void initializeCache (int size);
-
-void setValue (void* value, int size, int position);
-
-void* getValue (int size, int position);
-
-void moveBlock(int size, int oldPosition, int newPosition);
+void inicializarCache(int tamanio);
+void guardarValor(void* valor, int tamanio, int posicion);
+void* obtenerValor(int tamanio, int posicion);
+void moverBloque(int tamanio, int posicionVieja, int posicionNueva);
 
 #endif

@@ -1,6 +1,6 @@
 #include "../shared/serialize.h"
 //serializar_get
-void* serializar_paquete(Paquete* paquete, int *bytes)
+void* serializarPaquete(Paquete* paquete, int *bytes)
 {
 	*bytes = sizeof(paquete->codigoOperacion) + sizeof(paquete->buffer->size) + paquete->buffer->size;
 	void* a_enviar = malloc(*bytes);
@@ -14,6 +14,27 @@ void* serializar_paquete(Paquete* paquete, int *bytes)
 	offset += paquete->buffer->size;
 
 	return a_enviar;
+}
+
+Paquete* armarPaquete(OpCode codigoOperacion, int tamanio, void* stream){
+	Paquete* paquete = malloc(sizeof(Paquete));
+
+	paquete->codigoOperacion = codigoOperacion;
+	paquete->buffer = malloc(sizeof(Buffer));
+	paquete->buffer->size = tamanio;
+	paquete->buffer->stream = stream;
+
+	return paquete;
+}
+
+void* armarPaqueteYSerializar(OpCode codigoOperacion, int tamanio, void* stream, int* bytes){
+	Paquete* paquete = armarPaquete(codigoOperacion, tamanio, stream);
+	void* paqueteSerializado = serializarPaquete(paquete, bytes);
+
+	free(paquete->buffer);
+	free(paquete);
+
+	return paqueteSerializado;
 }
 
 void* serializarSuscripcion(Suscripcion* suscripto, int tamanio, void* stream){
@@ -41,7 +62,7 @@ void* serializarSuscripcion(Suscripcion* suscripto, int tamanio, void* stream){
 	return stream;
 }
 
-void* serializarDato(void* mensaje, int tamanioMensaje, void* stream, TipoCola colaMensaje){
+void* serializarDato(void* mensaje, int tamanioMensaje, TipoCola colaMensaje){
 	switch(colaMensaje){
 		case NEW:
 			return serializarNew(mensaje, &tamanioMensaje, colaMensaje);
@@ -59,8 +80,10 @@ void* serializarDato(void* mensaje, int tamanioMensaje, void* stream, TipoCola c
 			return serializarGet(mensaje, &tamanioMensaje, colaMensaje);
 			break;
 		default:
+			return NULL;
 			break;
 	}
+
 }
 //Acá hay que hacer una función para cada estructura de cola que se quiera serializar (6 estructuras).
 
@@ -265,8 +288,7 @@ GetPokemon* deserializarGet(void* msj, int* bytes){
 
 	return pokemon;
 }
-void* deseralizarDato(void* msj,int* bytes){
-
+void* deserializarDato(void* msj,int* bytes){
 	TipoCola tipo;
 
 	memcpy(&tipo, msj , sizeof(TipoCola));
@@ -288,6 +310,16 @@ void* deseralizarDato(void* msj,int* bytes){
 				return deserializarGet(msj,bytes);
 				break;
 			default:
+				return NULL;
 				break;
 		}
+}
+
+void* serializarStreamIdMensajePublisher(long ID, TipoCola cola){
+	void* stream = malloc(sizeof(long) + sizeof(TipoCola));
+
+	memcpy(stream, &ID, sizeof(long));
+	memcpy(stream + sizeof(long), &cola, sizeof(TipoCola));
+
+	return stream;
 }
