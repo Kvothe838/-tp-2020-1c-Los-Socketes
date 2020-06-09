@@ -12,14 +12,7 @@ int main(void) {
 	t_log* logger;
 	t_config* config;
 
-<<<<<<< HEAD
 	iniciar_servidor("127.0.0.1", "5001");
-=======
-	logger = iniciar_logger("loggerGameCard.log", "GameCard");
-	config = leer_config("configGameCard.config", logger);
-	ip = config_get_string_value(config, "IP_BROKER");
-	puerto = config_get_string_value(config, "PUERTO_BROKER");
->>>>>>> 4dee40f77ddd571e9128b806f465e905082aaf86
 
 	/*
 	inicializarData(logger);
@@ -32,7 +25,6 @@ int main(void) {
 	administrarNewPokemon("Pikachu", 0, 0, 1); //12
 	
 
-<<<<<<< HEAD
 	/*
 	 * administrarCatchPokemon() //devuelve un boolean para usarlo en CAUGHT_POKEMON
 	 * administrarGetPokemon() //devuelve un localized y lo manda al broker
@@ -40,23 +32,6 @@ int main(void) {
 	 *
 	 *
 	 * */
-=======
-	for (int i = 0; i < 30; ++i) {
-		administrarNewPokemon("Testeo", i, i, 1);
-	}
-
-	void * datos;
-	FILE* fp = fopen("Blocks/1.bin", "rb");
-	fread(datos, sizeof(int), 9, fp);
-	int primerDato;
-	memcpy(&primerDato, datos, sizeof(int));
-	printf("Primer dato: %d", primerDato);
-*/
-	
-	administrarCatchPokemon("Testeo", 6, 6);
-	administrarCatchPokemon("Testeo", 17, 17);
-	administrarCatchPokemon("Testeo", 29, 29);
->>>>>>> 4dee40f77ddd571e9128b806f465e905082aaf86
 
 	/*
 	LocalizedPokemon * datosRecibidos = administrarGetPokemon("Testeo");
