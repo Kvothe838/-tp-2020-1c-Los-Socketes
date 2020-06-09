@@ -80,7 +80,7 @@ typedef struct
 
 typedef struct
 {
-	TipoCola codigoOperacion;
+	OpCode codigoOperacion;
 	Buffer* buffer;
 } Paquete;
 

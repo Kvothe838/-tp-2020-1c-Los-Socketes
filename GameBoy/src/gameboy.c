@@ -9,12 +9,12 @@ int main(int argc, char **argv){
 	
 	//Simulamos el ingreso de los argumentos por consola a modo de prueba.
 	//Eliminar luego de testear.
-	argv[1] = "BROKER";
-	argv[2] = "NEW_POKEMON";
+	argv[1] = "TEAM";
+	argv[2] = "APPEARED_POKEMON";
 	argv[3] = "Pikachu";
 	argv[4] = "5";
 	argv[5] = "10";
-	argv[6] = "2";
+	argv[6] = "1";
 
 	argc = 7;
 

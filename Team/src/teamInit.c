@@ -15,11 +15,9 @@ void iniciar_entrenador(Entrenador** entrenador){
 	pthread_exit(NULL);
 }
 
-void cargarConfig(Config* conexionConfig){
-	t_log* logger;
-	t_config* config;
-	logger = iniciar_logger("Team.log", "Team");
-	config = leer_config("configTeam.config", logger);
+void cargarConfig(Config* conexionConfig, t_config* config){
+
+
 	conexionConfig->posiciones = config_get_array_value(config,"POSICIONES_ENTRENADORES"); // lista de strings, ultimo elemento nulo
 	conexionConfig->pertenecientes = config_get_array_value(config,"POKEMON_ENTRENADORES");
 	conexionConfig->objetivos = config_get_array_value(config,"OBJETIVOS_ENTRENADORES");

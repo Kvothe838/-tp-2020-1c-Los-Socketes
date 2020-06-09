@@ -19,4 +19,7 @@ void* serializarCaught(CaughtPokemon* pokemon, int* bytes, TipoCola colaMensaje)
 
 void* serializarGet(GetPokemon* pokemon, int* bytes, TipoCola colaMensaje);
 
+void* deseralizarDato(void* mensaje,int* tamanioMensaje);
+
+
 #endif
