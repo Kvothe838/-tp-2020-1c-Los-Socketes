@@ -8,16 +8,6 @@
 
 int main(int argc, char **argv){
 	
-<<<<<<< HEAD
-	//Simulamos el ingreso de los argumentos por consola a modo de prueba.
-	//Eliminar luego de testear.
-	argv[1] = "GAMECARD";
-	argv[2] = "GET_POKEMON";
-	argv[3] = "NoTengoNumeros";
-	argv[4] = "2";
-	argv[5] = "3";
-	argv[6] = "3";
-=======
 	//Para usar si se quiere probar rápido.
 	/*argv[1] = "BROKER";
 	argv[2] = "NEW_POKEMON";
@@ -32,7 +22,6 @@ int main(int argc, char **argv){
 	argv[4] = "5";
 	argv[5] = "10";
 	argv[6] = "1";*/
->>>>>>> 4dee40f77ddd571e9128b806f465e905082aaf86
 
 	argc = 7;
 
@@ -66,13 +55,7 @@ int main(int argc, char **argv){
 		printf("\nPor favor, revise que está ingresando como MINIMO %d argumentos, y como MAXIMO %d argumentos, y vuelva a intentar\n", cantidadMinArgc, cantidadMaxArgc);
 		abort();
 	}
-<<<<<<< HEAD
-	
-	printf("\n\n");
-=======
-
 printf("\n\n");
->>>>>>> 4dee40f77ddd571e9128b806f465e905082aaf86
 
 
 	switch(argvToTipoModulo(argv[1]))

@@ -209,7 +209,7 @@ uint32_t enviarMensajeASuscriptor(uint32_t socketSuscriptor, long IDCorrelativo,
 	memcpy(mensajeAEnviar + offset, &tamanioData, sizeof(long));
 	offset += sizeof(long);
 
-	datoSerializado = serializarDato(data, tamanioData, data, colaDeSalida);
+	datoSerializado = serializarDato(data, tamanioData, colaDeSalida);
 
 	memcpy(mensajeAEnviar + offset, datoSerializado, sizeof(TipoCola) + tamanioData);
 	offset += tamanioData;
