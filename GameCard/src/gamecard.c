@@ -4,6 +4,7 @@
 #include "conexionBinario/conexionBinario.h"
 #include "ManejoDeBloques/manejoDeArchivos.h"
 #include <stdlib.h>
+#include "conexionGamecard.h";
 
 
 
@@ -13,16 +14,18 @@ int main(void) {
 	logger = iniciar_logger("GAMECARD.log", "GAMECARD");
 	inicializarData(logger);
 
+	iniciar_servidor("127.0.0.1", "5001");
 
 
-	for (int i = 0; i < 30; ++i) {
-		administrarNewPokemon("Testeo", i, i, 1);
-	}
+	/*
+	 * administrarCatchPokemon() //devuelve un boolean para usarlo en CAUGHT_POKEMON
+	 * administrarGetPokemon() //devuelve un localized y lo manda al broker
+	 * administrarNewPokemon() //devuelve un APPEARED_POKEMON, nombre, X e Y
+	 *
+	 *
+	 * */
 
-	administrarCatchPokemon("Testeo", 6, 6);
-	administrarCatchPokemon("Testeo", 17, 17);
-	administrarCatchPokemon("Testeo", 29, 29);
-
+	/*
 	LocalizedPokemon * datosRecibidos = administrarGetPokemon("Testeo");
 	printf("%s\n", datosRecibidos->nombre);
 	printf("%d\n", datosRecibidos->cantidadDePosiciones);
@@ -37,13 +40,13 @@ int main(void) {
 		printf("X:%d - ", data);
 		offset += sizeof(uint32_t);
 		memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-		printf("Y:%n - ", data);
+		printf("Y:%d - ", data);
 		offset += sizeof(uint32_t);
 		memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-		printf("Cantidad%d\n", data);
+		printf("Cantidad:%d\n", data);
 		offset += sizeof(uint32_t);
 
-	}
+	}*/
 
 
 	/*char* ipBroker = "127.0.0.1";

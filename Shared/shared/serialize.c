@@ -114,10 +114,10 @@ void* serializarAppeared(AppearedPokemon* pokemon, int* bytes, TipoCola colaMens
 
 void* serializarCatch(CatchPokemon* pokemon, int* bytes, TipoCola colaMensaje){
 
-	void* stream =  malloc(*bytes);
+	void* stream =  malloc(*bytes + sizeof(TipoCola));
 	int offset = 0;
 
-	memcpy(stream + offset,&colaMensaje, sizeof(TipoCola));
+	memcpy(stream + offset, &colaMensaje, sizeof(TipoCola));
 	offset += sizeof(TipoCola);
 
 	memcpy(stream + offset, &pokemon->posX, sizeof(uint32_t));
@@ -130,6 +130,11 @@ void* serializarCatch(CatchPokemon* pokemon, int* bytes, TipoCola colaMensaje){
 	offset += sizeof(uint32_t);
 
 	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre + 1);
+
+	char* a = malloc(100);
+	memcpy(a, stream + offset, pokemon->largoNombre + 1);
+
+	printf("El nombre es %s\n", a);
 
 	return stream;
 }
@@ -150,7 +155,7 @@ void* serializarCaught(CaughtPokemon* pokemon, int* bytes, TipoCola colaMensaje)
 
 void* serializarGet(GetPokemon* pokemon, int* bytes, TipoCola colaMensaje){
 
-	void* stream =  malloc(*bytes);
+	void* stream =  malloc(*bytes + sizeof(TipoCola));
 	int offset = 0;
 
 	memcpy(stream + offset,&colaMensaje, sizeof(TipoCola));
@@ -159,7 +164,7 @@ void* serializarGet(GetPokemon* pokemon, int* bytes, TipoCola colaMensaje){
 	memcpy(stream + offset, &pokemon->largoNombre, sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
-	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre + 1);
+	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre + 5);
 
 	return stream;
 }
@@ -178,7 +183,13 @@ NewPokemon* deserializarNew(void* msj, int* bytes){
 	pos += sizeof(uint32_t);
 	memcpy(&pokemon->largoNombre, msj+pos, sizeof(uint32_t));
 	pos += sizeof(uint32_t);
-	memcpy(pokemon->nombre, msj+pos, pokemon->largoNombre + 1);
+
+	char* stringRecibido = malloc(pokemon->largoNombre+1);
+	memcpy(stringRecibido, msj+pos, pokemon->largoNombre+1);
+
+	pokemon->nombre = malloc(pokemon->largoNombre);
+	strncpy(pokemon->nombre, stringRecibido, pokemon->largoNombre);
+	pokemon->nombre[pokemon->largoNombre] = '\0';
 
 	return pokemon;
 }
@@ -212,12 +223,24 @@ CatchPokemon* deserializarCatch(void* msj, int* bytes){
 	CatchPokemon* pokemon = malloc(sizeof(CatchPokemon));
 	uint32_t pos = 0;
 	memcpy(&pokemon->posX, msj, sizeof(uint32_t));
+
 	pos += sizeof(uint32_t);
 	memcpy(&pokemon->posY, msj+pos, sizeof(uint32_t));
+
 	pos += sizeof(uint32_t);
 	memcpy(&pokemon->largoNombre, msj+pos, sizeof(uint32_t));
+
 	pos += sizeof(uint32_t);
-	memcpy(pokemon->nombre, msj+pos, pokemon->largoNombre + 1);
+
+	char* stringRecibido = malloc(pokemon->largoNombre+1);
+	memcpy(stringRecibido, msj+pos, pokemon->largoNombre+1);
+
+	pokemon->nombre = malloc(pokemon->largoNombre);
+	strncpy(pokemon->nombre, stringRecibido, pokemon->largoNombre);
+	pokemon->nombre[pokemon->largoNombre] = '\0';
+
+	free(stringRecibido);
+
 
 	return pokemon;
 }
@@ -229,7 +252,16 @@ GetPokemon* deserializarGet(void* msj, int* bytes){
 	uint32_t pos = 0;
 	memcpy(&pokemon->largoNombre, msj, sizeof(uint32_t));
 	pos += sizeof(uint32_t);
-	memcpy(pokemon->nombre, msj+pos, pokemon->largoNombre + 1);
+
+	char* stringRecibido = malloc(pokemon->largoNombre+1);
+
+	memcpy(stringRecibido, msj+pos, pokemon->largoNombre+1);
+
+	pokemon->nombre = malloc(pokemon->largoNombre);
+	strncpy(pokemon->nombre, stringRecibido, pokemon->largoNombre);
+	pokemon->nombre[pokemon->largoNombre] = '\0';
+
+	free(stringRecibido);
 
 	return pokemon;
 }

@@ -16,4 +16,5 @@ AppearedPokemon* getAppearedPokemon(char* nombre, int posX, int posY);
 CatchPokemon* getCatchPokemon(char* nombre, int posX, int posY);
 CaughtPokemon* getCaughtPokemon(int loAtrapo);
 GetPokemon* getGetPokemon(char* nombre);
+uint32_t enviarMensajeASuscriptor(uint32_t socket_suscriptor, long IDCorrelativo, TipoCola colaDeSalida, void* data, uint32_t tamanioData);
 #endif
