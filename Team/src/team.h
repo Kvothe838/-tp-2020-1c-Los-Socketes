@@ -6,6 +6,5 @@
 
 #include "teamInit.h"
 #include "planificacion.h"
-#include "conexionTeam.h"
 
 #endif /* TEAM_H_ */
