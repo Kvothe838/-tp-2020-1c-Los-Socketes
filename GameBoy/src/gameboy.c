@@ -120,6 +120,7 @@ printf("\n\n");
 				}
 				
 				liberar_conexion_cliente(conexionBroker);
+					int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
 
 					if(enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, conexionBroker) == -1)
 					{
