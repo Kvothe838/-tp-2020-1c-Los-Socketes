@@ -13,7 +13,6 @@
 #include<commons/string.h>
 #include<commons/config.h>
 #include<pthread.h>
-//#include<inttypes.h>
 
 typedef enum{
 	BROKER = 1,
@@ -35,36 +34,11 @@ typedef enum
 typedef enum
 {
 	SUSCRIBER = 1,
-	PUBLISHER
+	PUBLISHER,
+	ACK,
+	ID_MENSAJE,
+	NUEVO_MENSAJE_SUSCRIBER
 } OpCode;
-
-
-/*
-
-
- * SUSCRIPCION (se suscribe a una cola)
-	opCode queCarajoHace; //SUSCRIBER o PUBLISHER
-	uint32_t size;
-	typedef struct
-	{
-		int cantidadQueMeSuscribo;
-		tipoCola* cantidad;
-	} inscripcion;
-
-
-
- * PUBLISHER (manda un mensaje a una cola)
-	opCode queCarajoHace;
-	uint32_t size;
-	typedef struct{
-		tipoCola aQueCOla;
-		... //resto de datos
-		... //resto de datos
-		... //resto de datos
-	} especifica;
-
-
-*/
 
 typedef struct
 {
@@ -80,7 +54,7 @@ typedef struct
 
 typedef struct
 {
-	TipoCola codigoOperacion;
+	OpCode codigoOperacion;
 	Buffer* buffer;
 } Paquete;
 
@@ -119,6 +93,14 @@ typedef struct
 	char* nombre;
 	uint32_t largoNombre;
 } GetPokemon;
+
+typedef struct {
+  long IDMensaje;
+  long IDMensajeCorrelativo;
+  TipoCola cola;
+  int sizeContenido;
+  void* contenido;
+} MensajeParaSuscriptor; //Mensaje que recibe el suscriptor de una cola.
 
 typedef struct
 {
