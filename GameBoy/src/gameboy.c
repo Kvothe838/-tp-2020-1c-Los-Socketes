@@ -60,7 +60,7 @@ printf("\n\n");
 
 	switch(argvToTipoModulo(argv[1]))
 	{
-		/*case BROKER:
+		case BROKER:
 		{
 			ipBroker = config_get_string_value(config, "IP_BROKER");
 			puertoBroker = config_get_string_value(config, "PUERTO_BROKER");
@@ -100,9 +100,6 @@ printf("\n\n");
 				{
 					AppearedPokemon* pokemon = getAppearedPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 
-<<<<<<< HEAD
-					int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
-=======
 				OpCode code;
 				long idMensaje;
 				TipoCola cola;
@@ -123,7 +120,6 @@ printf("\n\n");
 				}
 				
 				liberar_conexion_cliente(conexionBroker);
->>>>>>> 4dee40f77ddd571e9128b806f465e905082aaf86
 
 					if(enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, conexionBroker) == -1)
 					{
@@ -210,9 +206,9 @@ printf("\n\n");
 				}
 			}
 		break;
-		}*/
+		}
 
-		/*case TEAM:
+		case TEAM:
 		{
 			ipTeam = config_get_string_value(config, "IP_TEAM");
 			puertoTeam = config_get_string_value(config, "PUERTO_TEAM");
@@ -257,7 +253,7 @@ printf("\n\n");
 				}
 			}
 		break;
-		}*/
+		}
 
 		case GAMECARD:
 		{
@@ -315,7 +311,7 @@ printf("\n\n");
 
 					liberar_conexion_cliente(conexionGamecard);
 
-					//free(pokemon);
+					free(pokemon);
 
 					break;
 				}

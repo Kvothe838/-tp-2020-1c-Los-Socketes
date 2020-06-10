@@ -9,8 +9,10 @@
 
 int main(void) {
 	char *ip, *puerto;
-	t_log* logger;
+	t_log* logger = iniciar_logger("gamecard.log", "GAMECARD");
 	t_config* config;
+
+	inicializarData(logger);
 
 	iniciar_servidor("127.0.0.1", "5001");
 
