@@ -6,18 +6,137 @@
  * pthread_mutex_unlock(&sumar);
  */
 
+int verificar_deadlock(Entrenador* entrenador){//1 true, 0 false
+	int deadlock=0;
+	if(list_size(entrenador->objetivosActuales) > 0){
+		if(list_size(entrenador->objetivos) == list_size(entrenador->mios)){
+			deadlock=1;
+		}
+	}
+	return deadlock;
+}
+
+int verificar_finalizacion(Entrenador* entrenador){
+	int fin=0;
+	if(list_size(entrenador->objetivosActuales)==0){
+		fin=1;
+	}
+	return fin;
+}
+
+void actualizar_estado(Entrenador* persona){
+	if(list_size(persona->objetivosActuales)==0){
+		persona->estado=SALIR;
+	}else{
+		if(persona->estado!=NUEVO){
+			persona->estado=BLOQUEADO;
+		}
+	}
+}
+
+void atrapar(Entrenador* persona){
+	// aca se deberia hacer una conexion y preguntar si atrapó o no al pokemon, es bloqueante.
+	list_add(persona->mios,persona->intentar_atrapar);
+	int i=0;
+	int encontrado=0;
+	while((i<list_size(persona->objetivosActuales))&&(encontrado==0)){
+		if(strcmp(retornarNombreFantasia(list_get(persona->objetivosActuales,i)),retornarNombrePosta(persona->intentar_atrapar))==0){
+			encontrado=1;
+			list_remove(persona->objetivosActuales,i);
+		}
+		i++;
+	}
+	persona->intentar_atrapar = NULL;
+}
+
+void moverse(Entrenador* persona){
+	//printf("\n[Entrenador %d] X INICIAL: %d, Y INICIAL: %d",persona->idEntrenador,persona->posicion[0],persona->posicion[1]);
+	while(persona->movimiento[0]!=0 || persona->movimiento[1]!=0){
+		if(persona->movimiento[0]==0){}else{
+			if(persona->movimiento[0] < 0){
+				persona->movimiento[0] += 1;
+				persona->posicion[0] -= 1;
+			}else{
+				persona->movimiento[0] -= 1;
+				persona->posicion[0] += 1;
+			}
+		}
+		if(persona->movimiento[1]==0){}else{
+			if(persona->movimiento[1] < 0){
+				persona->movimiento[1] += 1;
+				persona->posicion[1] -= 1;
+			}else{
+				persona->movimiento[1] -= 1;
+				persona->posicion[1] += 1;
+			}
+		}
+	}
+	//printf("\n[Entrenador %d] X FINAL: %d, Y FINAL: %d",persona->idEntrenador,persona->posicion[0],persona->posicion[1]);
+}
+
+void ingreso_a_colas_entrenador(Entrenador* persona){
+	actualizar_estado(persona);
+	switch(persona->estado){
+		case NUEVO:
+			pthread_mutex_lock(&modificar_cola_disponibles);
+			queue_push(DISPONIBLES,persona);
+			pthread_mutex_unlock(&modificar_cola_disponibles);
+			break;
+		case BLOQUEADO:
+			if(verificar_deadlock(persona) == 0){
+				pthread_mutex_lock(&modificar_cola_disponibles);
+				queue_push(DISPONIBLES,persona);
+				pthread_mutex_unlock(&modificar_cola_disponibles);
+
+			}
+			else{
+				pthread_mutex_lock(&modificar_cola_deadlocks);
+				queue_push(DEADLOCKS,persona);
+				pthread_mutex_unlock(&modificar_cola_deadlocks);
+			}
+			break;
+		case LISTO:
+			pthread_mutex_lock(&modificar_cola_preparados);
+			queue_push(PREPARADOS,persona);
+			pthread_mutex_unlock(&modificar_cola_preparados);
+			break;
+		default:
+			printf("\nentrenador %d finalizo su mision",persona->idEntrenador);
+	}
+}
+
 void iniciar_entrenador(Entrenador** entrenador){
-	while(1){
-		printf("\nhola soy %d y me trabe",(*entrenador)->idEntrenador);
+	while(verificar_finalizacion(*entrenador)==0){
 		sem_wait(&((*entrenador)->activador));
-		printf("\nhola soy %d y me destrabe",(*entrenador)->idEntrenador);
+		printf("\n%d se mueve %d en el eje X, %d en el eje Y\n",(*entrenador)->idEntrenador,(*entrenador)->movimiento[0],(*entrenador)->movimiento[1]);
+		moverse(*entrenador);
+		atrapar(*entrenador);
+		ingreso_a_colas_entrenador(*entrenador);
+
+		sem_post(&ya_termine);
 	}
 	pthread_exit(NULL);
 }
+/*
+ * ------------------------------------------------------------------------------------------
+ * ------------------------------------------------------------------------------------------
+ * ------------------------------------------------------------------------------------------
+ * ------------------------------------------------------------------------------------------
+ * ------------------------------------------------------------------------------------------
+ */
+int get_posicion(Entrenador* persona,int eje){
+	if(eje==0){
+		return (persona->posicion[0]);
+	}else{
+		return (persona->posicion[1]);
+	}
+}
 
-void cargarConfig(Config* conexionConfig, t_config* config){
-
-
+void cargarConfig(Config* conexionConfig){
+	t_log* logger;
+	t_config* config;
+	logger = iniciar_logger("Team.log", "Team");
+	config = leer_config("configTeam.config", logger);
 	conexionConfig->posiciones = config_get_array_value(config,"POSICIONES_ENTRENADORES"); // lista de strings, ultimo elemento nulo
 	conexionConfig->pertenecientes = config_get_array_value(config,"POKEMON_ENTRENADORES");
 	conexionConfig->objetivos = config_get_array_value(config,"OBJETIVOS_ENTRENADORES");
@@ -31,13 +150,11 @@ Pokemon* crearPokemon(char *nombre,int x, int y) {
     new->x=x;
     return new;
 }
-
 PokemonFantasia* crearObjetivo(char *nombre) {
 	PokemonFantasia *new = malloc(sizeof(PokemonFantasia));
     new->nombre = strdup(nombre);
     return new;
 }
-
 
 int cant_entrenadores(char** posiciones){
 	int cantidad = 0;
@@ -133,7 +250,6 @@ char* retornarNombreFantasia(PokemonFantasia* p){
 	return p->nombre;
 }
 
-
 Entrenador* inicializarEntrenador(int id,char* posicion, char* pokePertenecientes , char* pokeObjetivos){
 	Entrenador* entrenador = (Entrenador*)malloc(sizeof(Entrenador));
 	entrenador->idEntrenador = id;
@@ -142,8 +258,14 @@ Entrenador* inicializarEntrenador(int id,char* posicion, char* pokePerteneciente
 	asignarObjetivos(entrenador,pokeObjetivos);
 	entrenador->estado = NUEVO;
 	asignarObjetivosActuales(entrenador);
-	sem_init(&(entrenador->activador),0,0);
-	entrenador->movimiento[0]=0;entrenador->movimiento[1]=0;
+	if(verificar_deadlock(entrenador)==1){
+		entrenador->estado = BLOQUEADO;
+	}
+	if(verificar_finalizacion(entrenador)==0){
+		entrenador->movimiento[0]=0;entrenador->movimiento[1]=0;
+		entrenador->intentar_atrapar=NULL;
+		sem_init(&(entrenador->activador),0,0);
+	}
 
 	mostrarEntrenador(entrenador);
 	return entrenador;
@@ -153,7 +275,6 @@ int getCantEntrenadores(Team team){
 	return sizeof(team)-1;
 }
 void getObjetivosGlobales(Team team){
-	//printf("\n ------------------- \n");
 	for(int i = 0 ;i<getCantEntrenadores(team);i++){
 		for(int j = 0 ; j<list_size(team[i]->objetivosActuales);j++){
 			list_add(OBJETIVO_GLOBAL,list_get(team[i]->objetivosActuales,j));
@@ -161,14 +282,21 @@ void getObjetivosGlobales(Team team){
 	}
 }
 
-
 Team inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeObjetivos){
 	Entrenador** team = (Entrenador**)(malloc(sizeof(Entrenador)));
 	OBJETIVO_GLOBAL = list_create();
-	int cant = sizeof(posiciones) - 1;
-	pthread_t hilo[cant];
-	for(int i=0 ; i<cant ; i++){
+	PREPARADOS = queue_create();
+	DISPONIBLES = queue_create();
+	DEADLOCKS = queue_create();
+	pthread_mutex_init(&modificar_cola_preparados,NULL);
+	pthread_mutex_init(&modificar_cola_disponibles,NULL);
+	pthread_mutex_init(&modificar_cola_deadlocks,NULL);
+	sem_init(&progreso,0,1);
+
+	pthread_t hilo[sizeof(posiciones) - 1];
+	for(int i=0 ; i<sizeof(posiciones) - 1 ; i++){
 		team[i] = inicializarEntrenador(i,posiciones[i],pokePertenecientes[i],pokeObjetivos[i]);
+		ingreso_a_colas_entrenador(team[i]);
 		pthread_create(&hilo[i],NULL,(void*)iniciar_entrenador,&(team[i]));
 		pthread_detach(hilo[i]);
 	}
@@ -190,13 +318,11 @@ void asignarObjetivosActuales(Entrenador* persona){
 		repetido=1;
 		noRepetido=0;
 		while((indicePertenecientes<list_size(nombresPertenecientes))&&(repetido)){
-			//printf("comparo objetivo nro %d: %s con perteneciente nro %d: %s \n",indiceObjetivos,list_get(nombresObjetivos,indiceObjetivos),indicePertenecientes,list_get(nombresPertenecientes,indicePertenecientes));
 			if(!strcmp(list_get(nombresObjetivos,indiceObjetivos),list_get(nombresPertenecientes,indicePertenecientes))){
 				repetido=0;
 				list_remove(nombresObjetivos,indiceObjetivos);
 				list_remove(nombresPertenecientes,indicePertenecientes);
 				indiceObjetivos--;
-				//printf("saco 2 elementos \n");
 			}else{
 				noRepetido++;
 			}

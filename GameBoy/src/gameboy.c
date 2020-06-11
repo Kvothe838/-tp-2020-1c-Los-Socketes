@@ -8,8 +8,10 @@
 
 int main(int argc, char **argv){
 	
-	//Para usar si se quiere probar rápido.
-	/*argv[1] = "BROKER";
+	//Simulamos el ingreso de los argumentos por consola a modo de prueba.
+	//Eliminar luego de testear.
+	/*
+	argv[1] = "BROKER";
 	argv[2] = "NEW_POKEMON";
 	argv[3] = "Pikachu";
 	argv[4] = "5";
@@ -24,6 +26,14 @@ int main(int argc, char **argv){
 	argv[6] = "1";*/
 
 	argc = 7;
+	*/
+	argv[1] = "SUSCRIPTOR";
+	argv[2] = "NEW_POKEMON";
+	argv[3] = "10";
+
+	argc = 4;
+
+
 
 	int const cantidadMinArgc = 4, cantidadMaxArgc = 20;
 
@@ -41,7 +51,7 @@ int main(int argc, char **argv){
     printf("El nombre del programa es: %s\n",argv[0]);
     if(argc == 1){
         printf("\nNo se ha ingresado ningún argumento de línea de comando adicional que no sea el nombre del programa\n");
-		printf("Formato de ejecución: ./gameboy [BROKER|GAMECARD|TEAM] [NEW_POKEMON|APPEARED_POKEMON|CATCH_POKEMON|CAUGHT_POKEMON|GET_POKEMON] [ARGUMENTOS]*\n");
+		printf("Formato de ejecución: ./gameboy [BROKER|GAMECARD|TEAM|SUSCRIPTOR] [NEW_POKEMON|APPEARED_POKEMON|CATCH_POKEMON|CAUGHT_POKEMON|GET_POKEMON] [ARGUMENTOS]*\n");
 		abort();
 	}
     if(argc >= cantidadMinArgc && argc <= cantidadMaxArgc)
@@ -348,13 +358,49 @@ printf("\n\n");
 		break;
 		}
 
-		case SUSCRIPTOR:
-		{
-			printf("./gameboy SUSCRIPTOR [COLA_DE_MENSAJES] [TIEMPO]\n");
+	case SUSCRIPTOR:
+	{
+		// ./gameboy SUSCRIPTOR [COLA_DE_MENSAJES] [TIEMPO]
+		//   argv[0]   argv[1]      argv[2]         argv[3]
 
-			//mandarSuscripcion(conexionBroker, 1, stringToCola(argv[2]));
-			break;
+		TipoCola colaDeMensaje;
+
+		ipBroker = config_get_string_value(config, "IP_BROKER");
+		puertoBroker = config_get_string_value(config, "PUERTO_BROKER");
+		log_info(logger, "IP_BROKER   %s y PUERTO_BROKER   %s", ipBroker, puertoBroker);
+
+		conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
+		if(conexionBroker == 0)
+		{
+			log_info(logger, "ERROR - No se pudo crear la conexión con BROKER");
+			abort();
 		}
+
+		log_info(logger, "OK - Se estableció correctamente la conexión con el BROKER");
+
+		if((colaDeMensaje = argvToTipoCola(argv[2])) == -1)
+		{
+			log_info(logger, "ERROR - No se reconoce el tipo de cola ingresada.");
+			abort();
+		}
+
+		int tiempo = atoi(argv[3]);
+		time_t start = time(0);
+
+		while ((time(0) - start) <= tiempo )
+		{
+
+			mandarSuscripcion(conexionBroker, 1, colaDeMensaje);
+
+			//recibir mensaje
+			char *mensaje = recibirMensaje(conexionBroker);
+
+			//loguear mensaje recibido
+			log_info(logger, "El mensaje recibido de la cola de mensajes %s es: %s\n", tipoColaToString(colaDeMensaje), mensaje);
+		}
+
+		break;
+	}
 
 		default:
 		{

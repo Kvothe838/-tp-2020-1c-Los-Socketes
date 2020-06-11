@@ -9,8 +9,28 @@
 #include <pthread.h>
 #include <shared/utils.h>
 #include <semaphore.h>
+#include <commons/collections/queue.h>
+
 
 t_list* OBJETIVO_GLOBAL;
+t_queue* PREPARADOS;
+t_queue* DISPONIBLES;
+t_queue* POKEMONS;
+t_queue* DEADLOCKS;
+
+sem_t s_match;
+sem_t s_ejecucion;
+sem_t s_intercambio;
+sem_t progreso;
+sem_t mas_pokemons;
+sem_t ya_termine;
+sem_t siguiente;
+sem_t rellenar_colas;
+
+pthread_mutex_t modificar_cola_preparados;
+pthread_mutex_t modificar_cola_disponibles;
+pthread_mutex_t modificar_cola_pokemons;
+pthread_mutex_t modificar_cola_deadlocks;
 
 typedef enum {
 	NUEVO,
@@ -18,7 +38,6 @@ typedef enum {
 	EJECUTANDO,
 	BLOQUEADO,
 	SALIR,
-	PUNTOMUERTO
 }Estado;
 
 typedef struct {
@@ -38,6 +57,7 @@ typedef struct {
 	t_list* objetivos;
 	t_list* objetivosActuales;
 	sem_t activador;
+	Pokemon* intentar_atrapar;
 }Entrenador;
 
 typedef struct{
@@ -47,36 +67,40 @@ typedef struct{
 	char* ip;
 	char* puerto;
 }Config;
-
-
 typedef Entrenador** Team;
 
-//carga el configTeam
-void cargarConfig(Config* conexionConfig, t_config* config);
-
-//inizializar
-void iniciar_entrenador(Entrenador** entrenador);
-
-Pokemon* crearPokemon(char* nombre,int x, int y);
-PokemonFantasia* crearObjetivo(char* nombre);
+// RETORNOS
+char* retornarNombrePosta(Pokemon* p);
+char* retornarNombreFantasia(PokemonFantasia* p);
+int get_posicion(Entrenador* persona,int eje);
+void mostrarEntrenador(Entrenador* entrenador);
+void mostarObjetivosActualesDe(Entrenador* entrenador);
 int cant_entrenadores(char** posiciones);
+Entrenador* getEntrenador(int id,Team team);
+void getObjetivosGLobales(Team team);
+int verificar_deadlock(Entrenador* persona);
+
+
+// INICIALIZAR Y CONFIGURAR
+void cargarConfig(Config* conexionConfig);
+void iniciar_entrenador(Entrenador** entrenador);
+Entrenador* inicializarEntrenador(int id,char*posicion ,char* pokePertenecientes, char* pokeObjetivos);
+Entrenador** inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeObjetivos);
 void asignarPosicion(Entrenador* persona,char* posicion);
 void asignarPertenecientes(Entrenador* persona,char* pokemons);
 void asignarObjetivos(Entrenador* persona,char* pokemons);
-void inicializar_entrenadores(int indice, Entrenador entrenador,char* posicion,char* pertenecientes,char* objetivos);
-Entrenador* inicializarEntrenador(int id,char*posicion ,char* pokePertenecientes, char* pokeObjetivos);
-Entrenador** inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeObjetivos);
 void asignarObjetivosActuales(Entrenador* persona);
-void mostarObjetivosActualesDe(Entrenador* entrenador);
-void mostrarEntrenador(Entrenador* entrenador);
-Entrenador* getEntrenador(int id,Team team);
-void getObjetivosGLobales(Team team);
-//cambiar el nombre
+void actualizar_estado(Entrenador* persona);
+void ingreso_a_colas_entrenador(Entrenador* persona);
 
-char* retornarNombrePosta(Pokemon* p);
-char* retornarNombreFantasia(PokemonFantasia* p);
+// CREACIONES
+Pokemon* crearPokemon(char* nombre,int x, int y);
+PokemonFantasia* crearObjetivo(char* nombre);
 
-// funciones para evitar Memory Leask
+
+
+
+// EVITAR MEMORY LEAKS
 void liberarTeam(Team team);
 void liberarMemoria(Team team);
 
