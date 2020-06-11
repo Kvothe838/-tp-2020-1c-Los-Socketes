@@ -3,14 +3,12 @@
 
 void manejarSuscriptor(void* contenido, int socketCliente){
 	int offset = 0;
-	int tamanio, idCorrelativo = 0;
+	int tamanio;
 	TipoCola colaASuscribirse;
-	memcpy(&idCorrelativo, contenido, sizeof(long));
-	log_info(logger, "ID correlativo: %d", idCorrelativo);
-	offset += sizeof(long);
-	memcpy(&tamanio, contenido, sizeof(int));
-	log_info(logger, "TAMANIO: %d", tamanio);
+	memcpy(&tamanio, contenido + offset, sizeof(int));
 	offset += sizeof(int);
+
+	log_info(logger, "TAMAÑO: %d", tamanio);
 
 	for(int i = 0; i < tamanio; i++){
 		memcpy(&colaASuscribirse, contenido + offset, sizeof(TipoCola));
@@ -40,10 +38,11 @@ void manejarPublisher(void* contenido, int socketCliente){
 	MensajeEnCola* nuevoMensaje = (MensajeEnCola*)malloc(sizeof(MensajeEnCola));
 	MensajeEnCache* mensajeEnCache = (MensajeEnCache*)malloc(sizeof(MensajeEnCache));
 	void *buffer, *stream;
-	int bytes, tamanio;
+	int bytes, tamanio, idCorrelativo;
 
 	//Creo el nuevo MensajeEnCola y lo agrego a la cola correspondiente.
-	memcpy(&colaAGuardar, contenido, sizeof(TipoCola));
+	memcpy(&idCorrelativo, contenido, sizeof(long));
+	memcpy(&colaAGuardar, contenido + sizeof(long), sizeof(TipoCola));
 	nuevoMensaje->contenido = contenido;
 	nuevoMensaje->ID = generarIDMensaje();
 	nuevoMensaje->IDCorrelativo = -1;
@@ -91,7 +90,6 @@ void processRequest(int codOp, int socketCliente){
 	switch (codOp) {
 		case SUSCRIBER:
 			msg = recibirMensajeServidor(socketCliente, &size);
-			log_info(logger, "SIZE: %d", size);
 			manejarSuscriptor(msg, socketCliente);
 
 			break;
@@ -118,8 +116,6 @@ void serveClient(int* socketCliente){
 	if(recv(*socketCliente, &cod_op, sizeof(int), MSG_WAITALL) == -1){
 		cod_op = -1;
 	}
-
-	log_info(logger, "COD OP: %d", cod_op);
 
 	processRequest(cod_op, *socketCliente);
 }

@@ -4,9 +4,9 @@
 
 int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codigoOperacion, TipoCola colaMensaje, long* IDCorrelativo, int socket_cliente)
 {
-	int bytes, offset = 0, resultado = 0;
+	int bytes, offset = 0, resultado = 0, tamanioTotal = tamanioMensaje;
 	void *mensajeSerializado, *streamMensajeEspecifico;
-	void * stream = malloc(tamanioMensaje);
+	void * stream;
 
 	switch(codigoOperacion){
 		case SUSCRIBER:
@@ -19,11 +19,24 @@ int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codigoOperacion, Tip
 			break;
 	}
 
-	memcpy(stream + offset, IDCorrelativo, sizeof(long));
-	offset += sizeof(long);
+	if (IDCorrelativo != NULL){
+		stream = malloc(tamanioMensaje + sizeof(long));
+		memcpy(stream + offset, IDCorrelativo, sizeof(long));
+		offset += sizeof(long);
+		tamanioTotal += sizeof(long);
+	} else if (IDCorrelativo == NULL && codigoOperacion == PUBLISHER){
+		stream = malloc(tamanioMensaje + sizeof(long));
+		long IDCorrelativoVacio = -1;
+		memcpy(stream + offset, &IDCorrelativoVacio, sizeof(long));
+		offset += sizeof(long);
+		tamanioTotal += sizeof(long);
+	} else {
+		stream = malloc(tamanioMensaje);
+	}
+
 	memcpy(stream + offset, streamMensajeEspecifico, tamanioMensaje);
 
-	mensajeSerializado = armarPaqueteYSerializar(codigoOperacion, tamanioMensaje, stream, &bytes);
+	mensajeSerializado = armarPaqueteYSerializar(codigoOperacion, tamanioTotal, stream, &bytes);
 
 	if(send(socket_cliente, mensajeSerializado, bytes, 0) == -1){
 		printf("Error enviando mensaje.\n");

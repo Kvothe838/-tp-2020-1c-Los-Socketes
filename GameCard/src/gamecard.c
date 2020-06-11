@@ -13,9 +13,9 @@ int main(void) {
 
 	/*inicializarData(logger);
 
-	iniciar_servidor("127.0.0.1", "5001");*/
+	iniciar_servidor("127.0.0.1", "5001");
 
-	/*
+
 	inicializarData(logger);
 	administrarNewPokemon("Prueba", 0, 0, 1); //12
 	administrarNewPokemon("Prueba", 0, 1, 1); //24
@@ -26,15 +26,14 @@ int main(void) {
 	administrarNewPokemon("Pikachu", 0, 0, 1); //12
 	
 
-	/*
 	 * administrarCatchPokemon() //devuelve un boolean para usarlo en CAUGHT_POKEMON
 	 * administrarGetPokemon() //devuelve un localized y lo manda al broker
 	 * administrarNewPokemon() //devuelve un APPEARED_POKEMON, nombre, X e Y
 	 *
 	 *
-	 * */
+	 *
 
-	/*
+
 	LocalizedPokemon * datosRecibidos = administrarGetPokemon("Testeo");
 	printf("%s\n", datosRecibidos->nombre);
 	printf("%d\n", datosRecibidos->cantidadDePosiciones);
@@ -77,20 +76,21 @@ int main(void) {
 			int bytes;
 
 			recv(socketCliente, &size, sizeof(int), 0);
+			recv(socketCliente, &mensaje->ID, sizeof(long), 0);
 			recv(socketCliente, &mensaje->IDMensajeCorrelativo, sizeof(long), 0);
 			recv(socketCliente, &mensaje->cola, sizeof(TipoCola), 0);
 			recv(socketCliente, &mensaje->sizeContenido, sizeof(int), 0);
 			recv(socketCliente, &mensaje->contenido, mensaje->sizeContenido, 0);
 
-			log_info(logger, "Nuevo mensaje recibido con ID correlativo %d de cola %s", mensaje->IDMensajeCorrelativo, tipoColaToString(mensaje->cola));
+			log_info(logger, "Nuevo mensaje recibido con ID %d de cola %s", mensaje->ID, tipoColaToString(mensaje->cola));
 
 			stream = malloc(sizeof(long));
-			memcpy(stream, &(mensaje->IDMensajeCorrelativo), sizeof(long));
+			memcpy(stream, &(mensaje->ID), sizeof(long));
 			respuesta = armarPaqueteYSerializar(ACK, sizeof(long), stream, &bytes);
 
 			send(socketCliente, &respuesta, bytes, 0);
 
-			log_info(logger, "ACK enviado para mensaje con ID correlativo %d", mensaje->IDMensajeCorrelativo);
+			log_info(logger, "ACK enviado para mensaje con ID %d", mensaje->ID);
 		}
 	}
 

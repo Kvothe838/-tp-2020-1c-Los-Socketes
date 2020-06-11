@@ -16,23 +16,22 @@ int main(int argc, char **argv){
 	argv[3] = "Pikachu";
 	argv[4] = "5";
 	argv[5] = "10";
-	argv[6] = "2";*/
+	argv[6] = "2";
 	
-	/*argv[1] = "TEAM";
+	argv[1] = "TEAM";
 	argv[2] = "APPEARED_POKEMON";
 	argv[3] = "Pikachu";
 	argv[4] = "5";
 	argv[5] = "10";
-	argv[6] = "1";*/
+	argv[6] = "1";
 
 	argc = 7;
-	*/
 	argv[1] = "SUSCRIPTOR";
 	argv[2] = "NEW_POKEMON";
 	argv[3] = "10";
 
 	argc = 4;
-
+	*/
 
 
 	int const cantidadMinArgc = 4, cantidadMaxArgc = 20;
@@ -89,7 +88,7 @@ printf("\n\n");
 				{
 					NewPokemon* pokemon = getNewPokemon(argv[3], atoi(argv[4]), atoi(argv[5]), atoi(argv[6])); //usa malloc, entonces hay que hacer un free
 
-					int tamanio = sizeof(uint32_t) * 4 + pokemon->largoNombre + sizeof(TipoCola);
+					int tamanio = sizeof(uint32_t) * 4 + pokemon->largoNombre + 1 + sizeof(TipoCola);
 
 					if(enviarMensaje(pokemon, tamanio, PUBLISHER, NEW, NULL, conexionBroker) == -1)
 					{
