@@ -32,5 +32,6 @@ void eliminarVictima();
 void inicializarCache();
 void* obtenerItem(long id);
 void imprimirTabla(ItemTablaDinamica tabla[], t_log* logger);
+int obtenerPosicionPorID(int ID);
 
 #endif /* CACHE_DYNAMICCACHE_H_ */

@@ -21,21 +21,6 @@ typedef struct {
   t_list* suscriptoresEnviados;
 } MensajeEnCache;
 
-typedef struct {
-  long ID;
-  long IDCorrelativo;
-  void* contenido;
-} MensajeEnCola;
-
-/*CACHÉ:
-
-  Identificador único del mensaje dentro del sistema.
-  El tipo de mensaje (a que cola de mensajes pertenece).
-  Los suscriptores a los cuales ya se envió el mensaje.
-  Los suscriptores que retornaron el ACK del mismo.
-
-*/
-
 void crearDiccionario();
 ColaConSuscriptores* crearColaConSuscriptores();
 ColaConSuscriptores* obtenerCola(TipoCola colaClave);

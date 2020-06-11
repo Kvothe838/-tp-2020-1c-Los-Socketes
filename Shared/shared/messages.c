@@ -2,39 +2,28 @@
 #include "../shared/serialize.h"
 #include "../shared/structs.h"
 
-int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, TipoCola colaMensaje, int socket_cliente)
+int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codigoOperacion, TipoCola colaMensaje, long* IDCorrelativo, int socket_cliente)
 {
-	int bytes = 0,
-		resultado = 0;
-	void* mensajeSerializado;
+	int bytes, offset = 0, resultado = 0;
+	void *mensajeSerializado, *streamMensajeEspecifico;
+	void * stream = malloc(tamanioMensaje);
 
-	Paquete* paquete = NULL;
-	paquete = malloc(sizeof(Paquete));
-
-	paquete->codigoOperacion = codMensaje;
-	paquete->buffer = malloc(sizeof(Buffer));
-	paquete->buffer->size = tamanioMensaje;
-	paquete->buffer->stream = malloc(paquete->buffer->size);
-	void * stream = malloc(paquete->buffer->size);
-
-	switch(codMensaje){
+	switch(codigoOperacion){
 		case SUSCRIBER:
-			stream = serializarSuscripcion(mensaje, tamanioMensaje, stream);
+			streamMensajeEspecifico = serializarSuscripcion(mensaje, tamanioMensaje);
 			break;
 		case PUBLISHER:
-			stream = serializarDato(mensaje, tamanioMensaje, colaMensaje);
+			streamMensajeEspecifico = serializarDato(mensaje, tamanioMensaje, colaMensaje);
 			break;
 		default:
 			break;
 	}
 
-	paquete->buffer->stream = stream;
+	memcpy(stream + offset, IDCorrelativo, sizeof(long));
+	offset += sizeof(long);
+	memcpy(stream + offset, streamMensajeEspecifico, tamanioMensaje);
 
-	mensajeSerializado = serializarPaquete(paquete, &bytes);
-
-	free(paquete->buffer->stream);
-	free(paquete->buffer);
-	free(paquete);
+	mensajeSerializado = armarPaqueteYSerializar(codigoOperacion, tamanioMensaje, stream, &bytes);
 
 	if(send(socket_cliente, mensajeSerializado, bytes, 0) == -1){
 		printf("Error enviando mensaje.\n");
@@ -49,20 +38,18 @@ void mandarSuscripcion(int socket_server, int cantidadColasASuscribir, ...){
 	va_list colas;
 	va_start(colas, cantidadColasASuscribir);
 	Suscripcion* suscripcion = malloc(sizeof(Suscripcion));
-	int offset = 0, tamanioFinal;
 	suscripcion->cantidadColas = cantidadColasASuscribir;
-	void *auxiliar = malloc(sizeof(TipoCola) * suscripcion->cantidadColas);
+	suscripcion->colas = malloc(sizeof(TipoCola) * cantidadColasASuscribir);
 
 	for(int i = 0; i < cantidadColasASuscribir; i++){
 		TipoCola cola = va_arg(colas, TipoCola);
-		memcpy(auxiliar + offset, &cola, sizeof(int));
-		offset += sizeof(int);
+		(suscripcion->colas)[i] = cola;
 	}
 
 	va_end(colas);
-	suscripcion->colas = auxiliar;
-	tamanioFinal = cantidadColasASuscribir*sizeof(int) + sizeof(int);
-	int resultado = enviarMensaje(suscripcion, tamanioFinal, SUSCRIBER, 0, socket_server);
+
+	int tamanioFinal = sizeof(TipoCola) * cantidadColasASuscribir + sizeof(int);
+	int resultado = enviarMensaje(suscripcion, tamanioFinal, SUSCRIBER, 0, NULL, socket_server);
 
 	if(resultado == -1)
 		printf("ERROR");
@@ -194,33 +181,30 @@ GetPokemon* getGetPokemon(char* nombre){
 	return pokemon;
 }
 
-uint32_t enviarMensajeASuscriptor(uint32_t socketSuscriptor, long IDCorrelativo, TipoCola colaDeSalida, void* data, uint32_t tamanioData){
-	uint32_t tamanioFinal = tamanioData + sizeof(long) + sizeof(TipoCola) + sizeof(uint32_t);
-	uint32_t resultado = 1;
+int enviarMensajeASuscriptor(uint32_t socketSuscriptor, long* IDCorrelativo, TipoCola cola, void* data, uint32_t tamanioData){
+	uint32_t tamanioFinal = sizeof(long) + sizeof(uint32_t) + sizeof(TipoCola) + tamanioData;
+	int resultado = 1;
 
 	void* mensajeAEnviar = malloc(tamanioFinal);
-	void* datoSerializado = NULL;
+	void* datoSerializado;
 	uint32_t offset = 0;
 
-
-	memcpy(mensajeAEnviar, &IDCorrelativo, sizeof(uint32_t));
+	memcpy(mensajeAEnviar, IDCorrelativo, sizeof(long));
 	offset += sizeof(uint32_t);
 
-	memcpy(mensajeAEnviar + offset, &tamanioData, sizeof(long));
+	memcpy(mensajeAEnviar + offset, &tamanioData, sizeof(uint32_t));
 	offset += sizeof(long);
 
-	datoSerializado = serializarDato(data, tamanioData, colaDeSalida);
+	datoSerializado = serializarDato(data, sizeof(TipoCola) + tamanioData, cola);
 
 	memcpy(mensajeAEnviar + offset, datoSerializado, sizeof(TipoCola) + tamanioData);
 	offset += tamanioData;
 
 	if(send(socketSuscriptor, mensajeAEnviar, tamanioFinal, 0) == -1){
-		printf("Error enviando mensaje.\n");
 		resultado = 0;
 	}
 
 	free(mensajeAEnviar);
-	//free(datoSerializado);
 
 	return resultado;
 }
