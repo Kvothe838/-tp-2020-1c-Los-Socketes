@@ -3,16 +3,21 @@
 #include <stdio.h>
 #include "conexionBinario/conexionBinario.h"
 #include "ManejoDeBloques/manejoDeArchivos.h"
-#include "conexionGameCard.h"
 #include <stdlib.h>
-#include "conexionGamecard.h";
+#include "conexionGameCard.h"
 
 int main(void) {
+<<<<<<< HEAD
 	//char *ip, *puerto;
 	t_log* logger = iniciar_logger("gamecard.log", "GAMECARD");
 	//t_config* config;
+=======
+	char *ip, *puerto;
+	t_log* logger = iniciar_logger("loggerGameCard.log", "GameCard");
+	t_config* config = leer_config("configGameCard.config", logger);
+>>>>>>> 64635bbe451f9b2c99c9ae0c2ae33514eea33a97
 
-	inicializarData(logger);
+	/*inicializarData(logger);
 
 	//administrarNewPokemon("Pikachu", 15, 10, 1);
 
@@ -38,7 +43,11 @@ int main(void) {
 	}*/
 	iniciar_servidor("127.0.0.1", "5001");
 
+<<<<<<< HEAD
 		/*
+=======
+
+>>>>>>> 64635bbe451f9b2c99c9ae0c2ae33514eea33a97
 	inicializarData(logger);
 	administrarNewPokemon("Prueba", 0, 0, 1); //12
 	administrarNewPokemon("Prueba", 0, 1, 1); //24
@@ -49,15 +58,14 @@ int main(void) {
 	administrarNewPokemon("Pikachu", 0, 0, 1); //12
 	
 
-	/*
 	 * administrarCatchPokemon() //devuelve un boolean para usarlo en CAUGHT_POKEMON
 	 * administrarGetPokemon() //devuelve un localized y lo manda al broker
 	 * administrarNewPokemon() //devuelve un APPEARED_POKEMON, nombre, X e Y
 	 *
 	 *
-	 * */
+	 *
 
-	/*
+
 	LocalizedPokemon * datosRecibidos = administrarGetPokemon("Testeo");
 	printf("%s\n", datosRecibidos->nombre);
 	printf("%d\n", datosRecibidos->cantidadDePosiciones);
@@ -82,10 +90,11 @@ int main(void) {
 
 	//Para pruebas de suscripción con Broker. Comentar si no se usa pero no borrar plis.
 
-	/*
-	log_info(logger, "SOCKET GAMECARD: %d", socket);
-	int socket = crear_conexion_cliente(ip, puerto);
-	mandarSuscripcion(socket, 3, NEW, GET, CAUGHT);
+
+	ip = config_get_string_value(config, "IP_BROKER");
+	puerto = config_get_string_value(config, "PUERTO_BROKER");
+	int socketCliente = crear_conexion_cliente(ip, puerto);
+	mandarSuscripcion(socketCliente, 3, NEW, GET, CAUGHT);
 	log_info(logger, "MANDADAS COLAS NEW, GET, CAUGHT");
 
 	MensajeParaSuscriptor* mensaje = (MensajeParaSuscriptor*)malloc(sizeof(MensajeParaSuscriptor));
@@ -93,26 +102,29 @@ int main(void) {
 	int size;
 
 	while(1){
-		recv(socket, &codigo, sizeof(OpCode), 0);
+		recv(socketCliente, &codigo, sizeof(OpCode), 0);
 		if(codigo == NUEVO_MENSAJE_SUSCRIBER){
 			void *stream, *respuesta;
 			int bytes;
 
-			recv(socket, &size, sizeof(int), 0);
-			recv(socket, &mensaje->IDMensaje, sizeof(long), 0);
-			recv(socket, &mensaje->IDMensajeCorrelativo, sizeof(long), 0);
-			recv(socket, &mensaje->cola, sizeof(TipoCola), 0);
-			recv(socket, &mensaje->sizeContenido, sizeof(int), 0);
-			recv(socket, &mensaje->contenido, mensaje->sizeContenido, 0);
+			recv(socketCliente, &size, sizeof(int), 0);
+			recv(socketCliente, &mensaje->ID, sizeof(long), 0);
+			recv(socketCliente, &mensaje->IDMensajeCorrelativo, sizeof(long), 0);
+			recv(socketCliente, &mensaje->cola, sizeof(TipoCola), 0);
+			recv(socketCliente, &mensaje->sizeContenido, sizeof(int), 0);
+			recv(socketCliente, &mensaje->contenido, mensaje->sizeContenido, 0);
+
+			log_info(logger, "Nuevo mensaje recibido con ID %d de cola %s", mensaje->ID, tipoColaToString(mensaje->cola));
 
 			stream = malloc(sizeof(long));
-			memcpy(stream, &(mensaje->IDMensajeCorrelativo), sizeof(long));
+			memcpy(stream, &(mensaje->ID), sizeof(long));
 			respuesta = armarPaqueteYSerializar(ACK, sizeof(long), stream, &bytes);
 
-			send(socket, &respuesta, bytes, 0);
+			send(socketCliente, &respuesta, bytes, 0);
+
+			log_info(logger, "ACK enviado para mensaje con ID %d", mensaje->ID);
 		}
 	}
-	*/
 
 	liberarVariablesGlobales();
 

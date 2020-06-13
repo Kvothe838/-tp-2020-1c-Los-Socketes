@@ -37,26 +37,16 @@ void* armarPaqueteYSerializar(OpCode codigoOperacion, int tamanio, void* stream,
 	return paqueteSerializado;
 }
 
-void* serializarSuscripcion(Suscripcion* suscripto, int tamanio, void* stream){
-	stream = malloc(tamanio);
-	void *prueba = malloc(tamanio);
-	int ayuda, offset = 0, imprimir;
-	memcpy(stream, &suscripto->cantidadColas, sizeof(int));
+void* serializarSuscripcion(Suscripcion* suscripcion, int tamanio){
+	void* stream = malloc(tamanio);
+	int offset = 0;
 
-	memcpy(&ayuda, stream, sizeof(int));
+	memcpy(stream, &suscripcion->cantidadColas, sizeof(int));
+	offset += sizeof(int);
 
-	printf("CANTIDAD DE COLAS: %d\n", ayuda);
-
-	offset += sizeof(TipoCola);
-	memcpy(&ayuda, stream, sizeof(int));
-
-	prueba = malloc(sizeof(int) * ayuda);
-	memcpy(prueba, (suscripto->colas), sizeof(int) * ayuda);
-
-	for(int i = 0; i < ayuda; i++){
-		memcpy(stream + offset, (prueba + offset - sizeof(int)), sizeof(int));
-		memcpy(&imprimir, stream + offset, sizeof(int));
-		offset += sizeof(int);
+	for(int i = 0; i < suscripcion->cantidadColas; i++){
+		memcpy(stream + offset, &((suscripcion->colas)[i]), sizeof(TipoCola));
+		offset += sizeof(TipoCola);
 	}
 
 	return stream;
@@ -85,8 +75,6 @@ void* serializarDato(void* mensaje, int tamanioMensaje, TipoCola colaMensaje){
 	}
 
 }
-//Acá hay que hacer una función para cada estructura de cola que se quiera serializar (6 estructuras).
-
 
 void* serializarNew(NewPokemon* pokemon, int* bytes, TipoCola colaMensaje){
 
@@ -109,6 +97,7 @@ void* serializarNew(NewPokemon* pokemon, int* bytes, TipoCola colaMensaje){
 	offset += sizeof(uint32_t);
 
 	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre + 1);
+	offset += pokemon->largoNombre + 1;
 
 	return stream;
 }
@@ -131,6 +120,7 @@ void* serializarAppeared(AppearedPokemon* pokemon, int* bytes, TipoCola colaMens
 	offset += sizeof(uint32_t);
 
 	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre + 1);
+	offset += pokemon->largoNombre + 1;
 
 	return stream;
 }
@@ -153,11 +143,7 @@ void* serializarCatch(CatchPokemon* pokemon, int* bytes, TipoCola colaMensaje){
 	offset += sizeof(uint32_t);
 
 	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre + 1);
-
-	char* a = malloc(100);
-	memcpy(a, stream + offset, pokemon->largoNombre + 1);
-
-	printf("El nombre es %s\n", a);
+	offset += pokemon->largoNombre + 1;
 
 	return stream;
 }
@@ -187,12 +173,11 @@ void* serializarGet(GetPokemon* pokemon, int* bytes, TipoCola colaMensaje){
 	memcpy(stream + offset, &pokemon->largoNombre, sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
-	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre + 5);
+	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre + 1);
+	offset += pokemon->largoNombre + 1;
 
 	return stream;
 }
-
-
 
 NewPokemon* deserializarNew(void* msj, int* bytes){
 
@@ -320,6 +305,36 @@ void* serializarStreamIdMensajePublisher(long ID, TipoCola cola){
 
 	memcpy(stream, &ID, sizeof(long));
 	memcpy(stream + sizeof(long), &cola, sizeof(TipoCola));
+
+	return stream;
+}
+
+void* serializarMensajeSuscriptor(MensajeEnCola mensajeEnCola, TipoCola tipoCola){
+	MensajeParaSuscriptor mensajeParaSuscriptor;
+
+	mensajeParaSuscriptor.ID = mensajeEnCola.ID;
+	mensajeParaSuscriptor.IDMensajeCorrelativo = mensajeEnCola.IDCorrelativo;
+	mensajeParaSuscriptor.cola = tipoCola;
+	mensajeParaSuscriptor.sizeContenido = sizeof(mensajeEnCola.contenido);
+	mensajeParaSuscriptor.contenido = mensajeEnCola.contenido;
+
+	void* stream =  malloc(sizeof(MensajeParaSuscriptor));
+	int offset = 0;
+
+	memcpy(stream + offset,&(mensajeParaSuscriptor.ID), sizeof(long));
+	offset += sizeof(long);
+
+	memcpy(stream + offset,&(mensajeParaSuscriptor.IDMensajeCorrelativo), sizeof(long));
+	offset += sizeof(long);
+
+	memcpy(stream + offset,&(mensajeParaSuscriptor.cola), sizeof(TipoCola));
+	offset += sizeof(TipoCola);
+
+	memcpy(stream + offset,&(mensajeParaSuscriptor.sizeContenido), sizeof(int));
+	offset += sizeof(int);
+
+	memcpy(stream + offset,&(mensajeParaSuscriptor.contenido), mensajeParaSuscriptor.sizeContenido);
+	offset += mensajeParaSuscriptor.sizeContenido;
 
 	return stream;
 }

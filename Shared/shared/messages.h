@@ -5,7 +5,7 @@
 #include "../shared/structs.h"
 
 void mandarSuscripcion(int socket_server, int cantidadColasASuscribir, ...);
-int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codMensaje, TipoCola colaMensaje, int socket_cliente);
+int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codigoOperacion, TipoCola colaMensaje, long* IDCorrelativo, int socket_cliente);
 void* recibirMensaje(int socket_cliente);
 
 /**
@@ -24,5 +24,5 @@ AppearedPokemon* getAppearedPokemon(char* nombre, int posX, int posY);
 CatchPokemon* getCatchPokemon(char* nombre, int posX, int posY);
 CaughtPokemon* getCaughtPokemon(int loAtrapo);
 GetPokemon* getGetPokemon(char* nombre);
-uint32_t enviarMensajeASuscriptor(uint32_t socket_suscriptor, long IDCorrelativo, TipoCola colaDeSalida, void* data, uint32_t tamanioData);
+int enviarMensajeASuscriptor(uint32_t socketSuscriptor, long* IDCorrelativo, TipoCola cola, void* data, uint32_t tamanioData);
 #endif

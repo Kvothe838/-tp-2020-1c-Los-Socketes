@@ -225,6 +225,8 @@ void eliminarItem(long ID){
 	tablaElementos[posDatoAEliminar].estaVacio = 1;
 	tablaElementos[posDatoAEliminar].tamanio = 0;
 
+	//Log obligatorio.
+	log_info(logger, "Eliminada partición con posición de inicio %d.", posDatoAEliminar);
 }
 
 void compactarCache(){
@@ -255,6 +257,9 @@ void compactarCache(){
 	modificarTablaVacio(tablaNuevoVacio, posicionNueva, 0, tamanioParticionMinima);
 	memcpy(tablaElementos, tablaCompactada, sizeof(ItemTablaDinamica) * tamanioTabla);
 	memcpy(tablaVacios, tablaNuevoVacio, sizeof(ItemTablaDinamica) * tamanioTabla);
+
+	//Log obligatorio.
+	log_info(logger, "Ejecución de compactación.");
 }
 
 void imprimirTabla(ItemTablaDinamica tabla[], t_log* logger){

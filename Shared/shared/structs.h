@@ -95,11 +95,11 @@ typedef struct
 } GetPokemon;
 
 typedef struct {
-  long IDMensaje;
-  long IDMensajeCorrelativo;
-  TipoCola cola;
-  int sizeContenido;
-  void* contenido;
+	long ID;
+	long IDMensajeCorrelativo;
+	TipoCola cola;
+	int sizeContenido;
+	void* contenido;
 } MensajeParaSuscriptor; //Mensaje que recibe el suscriptor de una cola.
 
 typedef struct
@@ -109,5 +109,11 @@ typedef struct
 	uint32_t cantidadDePosiciones;
 	void* data; //formato: primero X, luego Y y al final cantidad, y así respectivamente dependiendo la cantidad de posiciones
 } LocalizedPokemon;
+
+typedef struct {
+  long ID;
+  long IDCorrelativo;
+  void* contenido;
+} MensajeEnCola;
 
 #endif

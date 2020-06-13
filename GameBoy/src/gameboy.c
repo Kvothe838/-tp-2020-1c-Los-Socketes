@@ -16,23 +16,34 @@ int main(int argc, char **argv){
 	argv[3] = "Pikachu";
 	argv[4] = "5";
 	argv[5] = "10";
-	argv[6] = "2";*/
+	argv[6] = "2";
 	
-	/*argv[1] = "TEAM";
+	argv[1] = "TEAM";
 	argv[2] = "APPEARED_POKEMON";
 	argv[3] = "Pikachu";
 	argv[4] = "5";
 	argv[5] = "10";
+<<<<<<< HEAD
 	argv[6] = "1";*/
 	/*
 	argc = 7;
 
+=======
+	argv[6] = "1";
+
+	argc = 7;
+>>>>>>> 64635bbe451f9b2c99c9ae0c2ae33514eea33a97
 	argv[1] = "SUSCRIPTOR";
 	argv[2] = "NEW_POKEMON";
 	argv[3] = "10";
 
+<<<<<<< HEAD
 	argc = 4;*/
 
+=======
+	argc = 4;
+	*/
+>>>>>>> 64635bbe451f9b2c99c9ae0c2ae33514eea33a97
 
 
 	int const cantidadMinArgc = 4, cantidadMaxArgc = 20;
@@ -89,9 +100,9 @@ printf("\n\n");
 				{
 					NewPokemon* pokemon = getNewPokemon(argv[3], atoi(argv[4]), atoi(argv[5]), atoi(argv[6])); //usa malloc, entonces hay que hacer un free
 
-					int tamanio = sizeof(uint32_t) * 4 + pokemon->largoNombre + sizeof(TipoCola);
+					int tamanio = sizeof(uint32_t) * 4 + pokemon->largoNombre + 1 + sizeof(TipoCola);
 
-					if(enviarMensaje(pokemon, tamanio, PUBLISHER, NEW, conexionBroker) == -1)
+					if(enviarMensaje(pokemon, tamanio, PUBLISHER, NEW, NULL, conexionBroker) == -1)
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
 						abort();
@@ -132,7 +143,7 @@ printf("\n\n");
 				liberar_conexion_cliente(conexionBroker);
 					int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
 
-					if(enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, conexionBroker) == -1)
+					if(enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, NULL, conexionBroker) == -1)
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
 						abort();
@@ -153,7 +164,7 @@ printf("\n\n");
 
 					int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
 
-					if(enviarMensaje(pokemon, tamanio, PUBLISHER, CATCH, conexionBroker) == -1)
+					if(enviarMensaje(pokemon, tamanio, PUBLISHER, CATCH, NULL, conexionBroker) == -1)
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %d %d", argv[1], argv[2], argv[3], argv[4], argv[5]);
 						abort();
@@ -174,7 +185,7 @@ printf("\n\n");
 
 					int tamanio = sizeof(uint32_t) + sizeof(TipoCola);
 
-					if(enviarMensaje(pokemon, tamanio, PUBLISHER, CAUGHT, conexionBroker) == -1 )
+					if(enviarMensaje(pokemon, tamanio, PUBLISHER, CAUGHT, NULL, conexionBroker) == -1 )
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %d", argv[1], argv[2], argv[3]);
 						abort();
@@ -195,7 +206,7 @@ printf("\n\n");
 
 					int tamanio = sizeof(uint32_t) + pokemon->largoNombre + sizeof(TipoCola);
 
-					if(enviarMensaje(pokemon, tamanio, PUBLISHER, GET, conexionBroker) == -1)
+					if(enviarMensaje(pokemon, tamanio, PUBLISHER, GET, NULL, conexionBroker) == -1)
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s", argv[1], argv[2], argv[3]);
 						abort();
@@ -242,7 +253,7 @@ printf("\n\n");
 
 					int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
 
-					if(enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, conexionTeam) == -1)
+					if(enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, NULL, conexionTeam) == -1)
 					{
 						log_info(logger, "ERROR. No se pudo enviar el mensaje %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
 						abort();

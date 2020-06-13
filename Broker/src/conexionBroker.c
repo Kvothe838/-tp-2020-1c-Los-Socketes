@@ -3,15 +3,22 @@
 
 void manejarSuscriptor(void* contenido, int socketCliente){
 	int offset = 0;
-	int tamanio, numeroActual;
-	memcpy(&tamanio, contenido, sizeof(int));
+	int tamanio;
+	TipoCola colaASuscribirse;
+	memcpy(&tamanio, contenido + offset, sizeof(int));
 	offset += sizeof(int);
 
+	log_info(logger, "TAMAÑO: %d", tamanio);
+
 	for(int i = 0; i < tamanio; i++){
-		memcpy(&numeroActual, contenido + offset, sizeof(int));
-		TipoCola colaASuscribirse = (TipoCola)numeroActual;
+		memcpy(&colaASuscribirse, contenido + offset, sizeof(TipoCola));
+		log_info(logger, "COLA: %s", tipoColaToString(colaASuscribirse));
 		agregarSuscriptor(colaASuscribirse, socketCliente);
-		offset += sizeof(int);
+
+		//Log obligatorio.
+		log_info(logger, "Suscripción de proceso a cola %s.", tipoColaToString(colaASuscribirse));
+
+		offset += sizeof(TipoCola);
 	}
 }
 
@@ -31,15 +38,19 @@ void manejarPublisher(void* contenido, int socketCliente){
 	MensajeEnCola* nuevoMensaje = (MensajeEnCola*)malloc(sizeof(MensajeEnCola));
 	MensajeEnCache* mensajeEnCache = (MensajeEnCache*)malloc(sizeof(MensajeEnCache));
 	void *buffer, *stream;
-	int bytes, tamanio;
+	int bytes, tamanio, idCorrelativo;
 
 	//Creo el nuevo MensajeEnCola y lo agrego a la cola correspondiente.
-	memcpy(&colaAGuardar, contenido, sizeof(TipoCola));
+	memcpy(&idCorrelativo, contenido, sizeof(long));
+	memcpy(&colaAGuardar, contenido + sizeof(long), sizeof(TipoCola));
 	nuevoMensaje->contenido = contenido;
 	nuevoMensaje->ID = generarIDMensaje();
 	nuevoMensaje->IDCorrelativo = -1;
 
 	agregarMensaje(colaAGuardar, nuevoMensaje);
+
+	//Log obligatorio.
+	log_info(logger, "Llegada de nuevo mensaje con ID %d a cola %s", nuevoMensaje->ID, tipoColaToString(colaAGuardar));
 
 	//Creo el nuevo MensajeEnCache y lo agrego a la caché.
 	mensajeEnCache->ID = nuevoMensaje->ID;
@@ -48,6 +59,9 @@ void manejarPublisher(void* contenido, int socketCliente){
 	mensajeEnCache->suscriptoresRecibidos = list_create();
 
 	agregarItem(mensajeEnCache, sizeof(MensajeEnCache), mensajeEnCache->ID);
+
+	//Log obligatorio.
+	log_info(logger, "Almacenado mensaje con ID %d y posición de inicio de partición %d.", mensajeEnCache->ID, obtenerPosicionPorID(mensajeEnCache->ID));
 
 	//Le devuelvo el id del mensaje y el tipo de cola al cliente.
 	tamanio = sizeof(long) + sizeof(TipoCola);
@@ -64,6 +78,9 @@ void manejarACK(void* contenido, int suscriptor){
 	memcpy(&idMensaje, contenido, sizeof(long));
 	mensaje = obtenerItem(idMensaje);
 	list_add(mensaje->suscriptoresRecibidos, &suscriptor);
+
+	//Log obligatorio.
+	log_info(logger, "Recepción del mensaje con ID %d.", idMensaje);
 }
 
 void processRequest(int codOp, int socketCliente){
@@ -112,38 +129,11 @@ void esperarCliente(int socket_servidor)
 	tam_direccion = sizeof(struct sockaddr_in);
 	socket_cliente = accept(socket_servidor, (void*)&dir_cliente, &tam_direccion);
 
+	//Log obligatorio.
+	log_info(logger, "Conexión de proceso %d a Broker.", socket_cliente);
+
 	pthread_create(&thread,NULL,(void*)serveClient,&socket_cliente);
 	pthread_join(thread, NULL);
-}
-
-void* serializarMensajeSuscriptor(MensajeEnCola mensajeEnCola, TipoCola tipoCola){
-	MensajeParaSuscriptor mensajeParaSuscriptor;
-
-	mensajeParaSuscriptor.IDMensaje = mensajeEnCola.ID;
-	mensajeParaSuscriptor.IDMensajeCorrelativo = mensajeEnCola.IDCorrelativo;
-	mensajeParaSuscriptor.cola = tipoCola;
-	mensajeParaSuscriptor.sizeContenido = sizeof(mensajeEnCola.contenido);
-	mensajeParaSuscriptor.contenido = mensajeEnCola.contenido;
-
-	void* stream =  malloc(sizeof(MensajeParaSuscriptor));
-	int offset = 0;
-
-	memcpy(stream + offset,&(mensajeParaSuscriptor.IDMensaje), sizeof(long));
-	offset += sizeof(long);
-
-	memcpy(stream + offset,&(mensajeParaSuscriptor.IDMensajeCorrelativo), sizeof(long));
-	offset += sizeof(long);
-
-	memcpy(stream + offset,&(mensajeParaSuscriptor.cola), sizeof(TipoCola));
-	offset += sizeof(TipoCola);
-
-	memcpy(stream + offset,&(mensajeParaSuscriptor.sizeContenido), sizeof(int));
-	offset += sizeof(int);
-
-	memcpy(stream + offset,&(mensajeParaSuscriptor.contenido), mensajeParaSuscriptor.sizeContenido);
-	offset += mensajeParaSuscriptor.sizeContenido;
-
-	return stream;
 }
 
 void enviarMensajesPorCola(TipoCola tipoCola){
@@ -165,6 +155,9 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 			free(stream);
 
 			if((send(suscriptor, paqueteSerializado, bytes, 0)) > 0){
+				//Log obligatorio.
+				log_info(logger, "Envío de mensaje con ID %d a suscriptor %d.", mensajeEnCola->ID, suscriptor);
+
 				int yaEnviado = list_contains_int(mensajeEnCache->suscriptoresEnviados, suscriptor);
 
 				if(!yaEnviado){
