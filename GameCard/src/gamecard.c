@@ -7,47 +7,10 @@
 #include "conexionGameCard.h"
 
 int main(void) {
-<<<<<<< HEAD
-	//char *ip, *puerto;
 	t_log* logger = iniciar_logger("gamecard.log", "GAMECARD");
-	//t_config* config;
-=======
-	char *ip, *puerto;
-	t_log* logger = iniciar_logger("loggerGameCard.log", "GameCard");
-	t_config* config = leer_config("configGameCard.config", logger);
->>>>>>> 64635bbe451f9b2c99c9ae0c2ae33514eea33a97
 
-	/*inicializarData(logger);
-
-	//administrarNewPokemon("Pikachu", 15, 10, 1);
-
-
-	/*for (int i = 0; i < 10; ++i) {
-		administrarNewPokemon("Pikachu", i, i, 1);
-	}
-
-	for (int i = 0; i < 10; ++i) {
-		administrarNewPokemon("Pepe", i, i, 1);
-	}
-
-
-	administrarCatchPokemon("JOsé", 5, 5);
-	administrarCatchPokemon("Pikachu", 5, 5);
-	administrarCatchPokemon("Pikachu", 5, 5);
-	LocalizedPokemon* poke = administrarGetPokemon("Pepe");
-	printf("%d",poke->cantidadDePosiciones);
-	free(poke->data);
-	free(poke);*/
-	/*for (int i = 0; i < 6; ++i) {
-		administrarCatchPokemon("Pikachu", i, i);
-	}*/
 	iniciar_servidor("127.0.0.1", "5001");
-
-<<<<<<< HEAD
-		/*
-=======
-
->>>>>>> 64635bbe451f9b2c99c9ae0c2ae33514eea33a97
+	/*
 	inicializarData(logger);
 	administrarNewPokemon("Prueba", 0, 0, 1); //12
 	administrarNewPokemon("Prueba", 0, 1, 1); //24
@@ -90,7 +53,7 @@ int main(void) {
 
 	//Para pruebas de suscripción con Broker. Comentar si no se usa pero no borrar plis.
 
-
+	/*
 	ip = config_get_string_value(config, "IP_BROKER");
 	puerto = config_get_string_value(config, "PUERTO_BROKER");
 	int socketCliente = crear_conexion_cliente(ip, puerto);
@@ -125,7 +88,7 @@ int main(void) {
 			log_info(logger, "ACK enviado para mensaje con ID %d", mensaje->ID);
 		}
 	}
-
+	*/
 	liberarVariablesGlobales();
 
 	log_destroy(logger);
