@@ -39,25 +39,32 @@ void process_request(long IDMensajeCorrelativo, int cliente_fd){
 
 			LocalizedPokemon * datosRecibidos = administrarGetPokemon(pokemonGet->nombre);
 
-			printf("%s\n", datosRecibidos->nombre);
-			printf("%d\n", datosRecibidos->cantidadDePosiciones);
+			log_trace(logger,"%s\n", datosRecibidos->nombre);
+			log_trace(logger,"%d\n", datosRecibidos->cantidadDePosiciones);
 
 			uint32_t offset = 0;
-			uint32_t *data;
+			uint32_t *X, *Y, *cantidad;
 			uint32_t ciclos = datosRecibidos->cantidadDePosiciones;
 			while(ciclos != 0){
 				ciclos--;
 
-				memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-				printf("X:%d - ", (int)data);
+				memcpy(&X, (datosRecibidos->data + offset), sizeof(uint32_t));
 				offset += sizeof(uint32_t);
-				memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-				printf("Y:%d - ", (int)data);
+
+				memcpy(&Y, (datosRecibidos->data + offset), sizeof(uint32_t));
 				offset += sizeof(uint32_t);
-				memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-				printf("Cantidad:%d\n", (int)data);
+
+				memcpy(&cantidad, (datosRecibidos->data + offset), sizeof(uint32_t));
 				offset += sizeof(uint32_t);
+
+				log_trace(logger,"X:%d - Y:%d - cantidad: %d", (int)X, (int)Y, (int)cantidad);
 			}
+
+			free(pokemonGet);
+			free(datosRecibidos);
+			/*free(X);
+			free(Y);
+			free(cantidad);*/
 
 			break;
 		case CATCH:
@@ -73,6 +80,8 @@ void process_request(long IDMensajeCorrelativo, int cliente_fd){
 
 			administrarCatchPokemon(pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
 
+			free(pokemonCatch);
+
 			break;
 
 		case NEW:
@@ -86,16 +95,20 @@ void process_request(long IDMensajeCorrelativo, int cliente_fd){
 			log_trace(logger, "Y: %d", pokemonNew->posY);
 			log_trace(logger, "Cantidad: %d", pokemonNew->cantidad);
 
-
 			administrarNewPokemon(pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY, pokemonNew->cantidad);
+
+			free(pokemonNew);
 
 			break;
 		case 0:
 			pthread_exit(NULL);
 		case -1:
 			pthread_exit(NULL);
-
 	}
+
+	log_destroy(logger);
+	free(msg);
+
 }
 
 void serve_client(int* socket)

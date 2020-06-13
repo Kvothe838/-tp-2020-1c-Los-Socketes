@@ -24,14 +24,14 @@ int main(int argc, char **argv){
 	argv[4] = "5";
 	argv[5] = "10";
 	argv[6] = "1";*/
-
+	/*
 	argc = 7;
-	*/
+
 	argv[1] = "SUSCRIPTOR";
 	argv[2] = "NEW_POKEMON";
 	argv[3] = "10";
 
-	argc = 4;
+	argc = 4;*/
 
 
 

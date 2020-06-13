@@ -8,15 +8,37 @@
 #include "conexionGamecard.h";
 
 int main(void) {
-	char *ip, *puerto;
+	//char *ip, *puerto;
 	t_log* logger = iniciar_logger("gamecard.log", "GAMECARD");
-	t_config* config;
+	//t_config* config;
 
 	inicializarData(logger);
 
+	//administrarNewPokemon("Pikachu", 15, 10, 1);
+
+
+	/*for (int i = 0; i < 10; ++i) {
+		administrarNewPokemon("Pikachu", i, i, 1);
+	}
+
+	for (int i = 0; i < 10; ++i) {
+		administrarNewPokemon("Pepe", i, i, 1);
+	}
+
+
+	administrarCatchPokemon("JOsé", 5, 5);
+	administrarCatchPokemon("Pikachu", 5, 5);
+	administrarCatchPokemon("Pikachu", 5, 5);
+	LocalizedPokemon* poke = administrarGetPokemon("Pepe");
+	printf("%d",poke->cantidadDePosiciones);
+	free(poke->data);
+	free(poke);*/
+	/*for (int i = 0; i < 6; ++i) {
+		administrarCatchPokemon("Pikachu", i, i);
+	}*/
 	iniciar_servidor("127.0.0.1", "5001");
 
-	/*
+		/*
 	inicializarData(logger);
 	administrarNewPokemon("Prueba", 0, 0, 1); //12
 	administrarNewPokemon("Prueba", 0, 1, 1); //24
@@ -92,10 +114,14 @@ int main(void) {
 	}
 	*/
 
-	terminar_programa(logger, config);
+	liberarVariablesGlobales();
+
+	log_destroy(logger);
+	//terminar_programa(logger, config);
 
 	return EXIT_SUCCESS;
 }
+
 
 
 

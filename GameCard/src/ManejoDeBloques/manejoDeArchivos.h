@@ -33,6 +33,7 @@ void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t
 uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY);
 LocalizedPokemon * administrarGetPokemon(char* pokemon);
 void inicializarData(t_log* logger);
+void liberarVariablesGlobales();
 char* intToString(uint32_t bloque);
 
 #endif /* MANEJODEARCHIVOS_H_ */

@@ -27,7 +27,9 @@ t_bitarray* obtenerDatos(int tamanio, char* puntoMontaje){
 	fread(buffer, 1, tamanio, fin);
 	fclose(fin);
 	free(final);
-	return bitarray_create_with_mode(buffer, tamanio, LSB_FIRST);
+	t_bitarray* bitmap = bitarray_create_with_mode(buffer, tamanio, LSB_FIRST);
+	//free(buffer);
+	return bitmap;
 }
 
 uint32_t obtenerBloqueLibre(uint32_t blockCantBytes, char* puntoMontaje){
@@ -38,6 +40,8 @@ uint32_t obtenerBloqueLibre(uint32_t blockCantBytes, char* puntoMontaje){
 		if(valor == 0){
 			bitarray_set_bit(bitmap, i);
 			guardarDatos(bitmap, puntoMontaje);
+			free(bitmap->bitarray);
+			bitarray_destroy(bitmap);
 			return (i+1);
 		}
 	}
@@ -47,5 +51,7 @@ void limpiarBloque(uint32_t posicion, uint32_t blockCantBytes, char* puntoMontaj
 	t_bitarray *bitmap = obtenerDatos(blockCantBytes, puntoMontaje);
 	bitarray_clean_bit(bitmap, posicion-1);
 	guardarDatos(bitmap, puntoMontaje);
+	free(bitmap->bitarray);
+	bitarray_destroy(bitmap);
 }
 
