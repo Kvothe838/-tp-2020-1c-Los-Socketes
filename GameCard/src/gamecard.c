@@ -2,54 +2,24 @@
 #include <shared/utils.h>
 #include <stdio.h>
 #include "conexionBinario/conexionBinario.h"
-#include "ManejoDeBloques/manejoDeArchivos.h"
+//#include "ManejoDeBloques/manejoDeArchivos.h"
 #include <stdlib.h>
 #include "conexionGameCard.h"
+#include "ManejoDeBloques/manejoDeArchivos.h"
 
 int main(void) {
 	t_log* logger = iniciar_logger("gamecard.log", "GAMECARD");
 
-	iniciar_servidor("127.0.0.1", "5001");
-	/*
-	inicializarData(logger);
-	administrarNewPokemon("Prueba", 0, 0, 1); //12
-	administrarNewPokemon("Prueba", 0, 1, 1); //24
-	administrarNewPokemon("Prueba", 0, 2, 1); //36
-	administrarNewPokemon("Prueba", 0, 3, 1); //48
-	administrarNewPokemon("Prueba", 0, 4, 1); //60
-	administrarNewPokemon("Prueba", 0, 5, 1); //72
-	administrarNewPokemon("Pikachu", 0, 0, 1); //12
+	//iniciar_servidor("127.0.0.1", "5001");
 	
+	inicializarData(logger);
 
-	 * administrarCatchPokemon() //devuelve un boolean para usarlo en CAUGHT_POKEMON
-	 * administrarGetPokemon() //devuelve un localized y lo manda al broker
-	 * administrarNewPokemon() //devuelve un APPEARED_POKEMON, nombre, X e Y
-	 *
-	 *
-	 *
+	/*for (int i = 1; i < 5; ++i)
+		administrarNewPokemon("TesteoLoco", i*100000000, i*100000000, 3);
+	administrarNewPokemon("TesteoLoco", 1, 1, 1);*/
 
-
-	LocalizedPokemon * datosRecibidos = administrarGetPokemon("Testeo");
-	printf("%s\n", datosRecibidos->nombre);
-	printf("%d\n", datosRecibidos->cantidadDePosiciones);
-
-	uint32_t offset = 0;
-	uint32_t *data;
-	uint32_t ciclos = datosRecibidos->cantidadDePosiciones;
-	while(ciclos != 0){
-		ciclos--;
-
-		memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-		printf("X:%d - ", data);
-		offset += sizeof(uint32_t);
-		memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-		printf("Y:%d - ", data);
-		offset += sizeof(uint32_t);
-		memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-		printf("Cantidad:%d\n", data);
-		offset += sizeof(uint32_t);
-
-	}*/
+	administrarCatchPokemon("TesteoLoco", 400000000, 400000000);
+	//administrarNewPokemon("jOSÉ", 1, 1, 1);
 
 	//Para pruebas de suscripción con Broker. Comentar si no se usa pero no borrar plis.
 
@@ -96,6 +66,9 @@ int main(void) {
 
 	return EXIT_SUCCESS;
 }
+
+
+
 
 
 

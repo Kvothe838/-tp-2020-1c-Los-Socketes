@@ -1,7 +1,7 @@
 /*
- * conexionBinario.h
+ * nuevoManejoDeArchivos.h
  *
- *  Created on: 1 jun. 2020
+ *  Created on: 14 jun. 2020
  *      Author: utnso
  */
 
@@ -10,11 +10,14 @@
 
 #include <commons/bitarray.h>
 #include <commons/log.h>
+#include <commons/collections/list.h>
+#include <commons/log.h>
+#include <commons/string.h>
 #include <shared/structs.h>
 #include <sys/stat.h>
 #include <stdint.h>
+#include <string.h>
 #include "../conexionBinario/conexionBinario.h"
-#include <commons/log.h>
 
 typedef struct {
 	uint32_t esDirectorio;
@@ -29,11 +32,18 @@ typedef struct {
 	uint32_t cantidad;
 } pokemonDatoPosicion;
 
+
+char *puntoDeMontaje;
+char *numeroMagico;
+uint32_t blockCantBits, blockCantBytes, blockSize;
+uint32_t reintentoConexion, retardoDeOperacion;
+
+pokemonDatoPosicion aComparar;
+
 void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t cantidad);
 uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY);
-LocalizedPokemon * administrarGetPokemon(char* pokemon);
-void inicializarData(t_log* logger);
+
 void liberarVariablesGlobales();
-char* intToString(uint32_t bloque);
+void inicializarData(t_log* logger);
 
 #endif /* MANEJODEARCHIVOS_H_ */

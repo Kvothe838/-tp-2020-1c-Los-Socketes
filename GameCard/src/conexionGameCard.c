@@ -25,7 +25,7 @@ void process_request(long IDMensajeCorrelativo, int cliente_fd){
 	recv(cliente_fd, &colaRecibida, sizeof(TipoCola), MSG_WAITALL);
 
 	switch (colaRecibida) {
-		case GET:
+		/*case GET:
 
 			log_trace(logger, "Llegó un GET");
 			msg = malloc(size);
@@ -59,7 +59,7 @@ void process_request(long IDMensajeCorrelativo, int cliente_fd){
 				offset += sizeof(uint32_t);
 			}
 
-			break;
+			break;*/
 		case CATCH:
 			log_trace(logger, "Llegó un CATCH");
 			msg = malloc(size);

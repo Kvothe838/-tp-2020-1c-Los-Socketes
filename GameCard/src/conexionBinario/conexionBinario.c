@@ -35,7 +35,7 @@ t_bitarray* obtenerDatos(int tamanio, char* puntoMontaje){
 uint32_t obtenerBloqueLibre(uint32_t blockCantBytes, char* puntoMontaje){
 	t_bitarray *bitmap = obtenerDatos(blockCantBytes, puntoMontaje);
 	uint32_t valor;
-	for(uint32_t i = 0; i < 5192/8; i++){
+	for(uint32_t i = 0; i < blockCantBytes; i++){
 		valor = bitarray_test_bit(bitmap, i);
 		if(valor == 0){
 			bitarray_set_bit(bitmap, i);
