@@ -10,16 +10,45 @@
 int main(void) {
 	t_log* logger = iniciar_logger("gamecard.log", "GAMECARD");
 
-	//iniciar_servidor("127.0.0.1", "5001");
-	
 	inicializarData(logger);
 
-	/*for (int i = 1; i < 5; ++i)
+	iniciar_servidor("127.0.0.1", "5001");
+	
+	/*inicializarData(logger);
+
+	for (int i = 1; i < 5; ++i)
 		administrarNewPokemon("TesteoLoco", i*100000000, i*100000000, 3);
-	administrarNewPokemon("TesteoLoco", 1, 1, 1);*/
+	administrarNewPokemon("TesteoLoco", 1, 1, 1);
 
 	administrarCatchPokemon("TesteoLoco", 400000000, 400000000);
-	//administrarNewPokemon("jOSÉ", 1, 1, 1);
+
+	for (int i = 1; i < 100; ++i)
+		administrarNewPokemon("Pikachu", i, i, 3);
+
+	LocalizedPokemon * datosRecibidos = administrarGetPokemon("Pikachu");
+
+	printf("%s\n", datosRecibidos->nombre);
+	printf("%d\n", datosRecibidos->cantidadDePosiciones);
+
+	uint32_t offset = 0;
+	uint32_t *data;
+	uint32_t ciclos = datosRecibidos->cantidadDePosiciones;
+	while(ciclos != 0){
+		ciclos--;
+
+		memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
+		printf("X:%d - ", (int)data);
+		offset += sizeof(uint32_t);
+		memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
+		printf("Y:%d - ", (int)data);
+		offset += sizeof(uint32_t);
+		memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
+		printf("Cantidad:%d\n", (int)data);
+		offset += sizeof(uint32_t);
+	}
+
+	free(datosRecibidos->data);
+	free(datosRecibidos);*/
 
 	//Para pruebas de suscripción con Broker. Comentar si no se usa pero no borrar plis.
 

@@ -42,6 +42,7 @@ pokemonDatoPosicion aComparar;
 
 void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t cantidad);
 uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY);
+LocalizedPokemon * administrarGetPokemon(char* pokemon);
 
 void liberarVariablesGlobales();
 void inicializarData(t_log* logger);
