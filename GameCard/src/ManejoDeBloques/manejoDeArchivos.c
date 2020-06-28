@@ -1,9 +1,3 @@
-/*
- * nuevoManejoDeArchivos.c
- *
- *  Created on: 14 jun. 2020
- *      Author: utnso
- */
 #include "manejoDeArchivos.h"
 
 pokemonDatoPosicion* obtenerDataDePosicion(char* stringData){
@@ -29,7 +23,7 @@ t_list * obtenerDataDeVariasPosiciones(char* stringDatas){
 	char** separaciones = string_split(stringDatas, "\n");
 	t_list * listaNueva = list_create();
 	int i = 0;
-	while(separaciones[i] != NULL && separaciones[i] != ""){
+	while(separaciones[i] != NULL /* && separaciones[i] != "" Usar strcmp (o algo así) porque sino el compilador chilla*/){
 		pokemonDatoPosicion* nuevaData = obtenerDataDePosicion(separaciones[i]);
 		list_add(listaNueva, nuevaData);
 		free(separaciones[i]);
@@ -111,7 +105,7 @@ void crearBloque(int posicion){
 }
 
 
-bool mismaPosicion(pokemonDatoPosicion* a){
+int mismaPosicion(pokemonDatoPosicion* a){
 	return (a->posX == aComparar.posX) && (a->posY == aComparar.posY);
 }
 
@@ -119,9 +113,6 @@ void inicializarData(t_log* logger) {
 	t_config *configGameBoy, *metadata;
 
 	configGameBoy = leer_config("GameCard.config", logger);
-
-
-
 
 	char* puntoDeMontajeTemporal = config_get_string_value(configGameBoy, "PUNTO_MONTAJE_TALLGRASS");
 	puntoDeMontaje = malloc(100);
@@ -384,7 +375,7 @@ void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t
 
 		aComparar = *posicionPokemon;
 
-		pokemonDatoPosicion *valorEncontrado = (pokemonDatoPosicion*)list_find(lista, (bool*)mismaPosicion);
+		pokemonDatoPosicion *valorEncontrado = (pokemonDatoPosicion*)list_find(lista, (void*)mismaPosicion);
 
 		if(valorEncontrado != NULL) //Si encuentra el valor
 		{
@@ -526,7 +517,7 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 
 			aComparar = *posicionPokemon;
 
-			pokemonDatoPosicion *valorEncontrado = (pokemonDatoPosicion *)list_find(lista, mismaPosicion);
+			pokemonDatoPosicion *valorEncontrado = (pokemonDatoPosicion *)list_find(lista, (void*)mismaPosicion);
 			if(valorEncontrado != NULL){ //Si encuentra el valor
 
 				char nuevoStringBloques[1000];
@@ -549,7 +540,7 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 						cantidadDeBlocks--; //se hace esto para no incluir el último valor del char**
 					}
 
-					list_remove_and_destroy_by_condition(lista, (bool*)mismaPosicion, (void*)free);
+					list_remove_and_destroy_by_condition(lista, (void*)mismaPosicion, (void*)free);
 
 					cantidadDeBlocks++; //se le suma una para que las iteraciones se hagas correctamente
 

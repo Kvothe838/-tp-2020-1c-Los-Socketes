@@ -10,22 +10,14 @@
 
 typedef struct {
 	t_list* suscriptores;
-	t_list* mensajes;
-	//t_queue* colaMensajes;
+	t_list* IDMensajes;
 } ColaConSuscriptores;
-
-typedef struct {
-  long ID;
-  TipoCola cola;
-  t_list* suscriptoresRecibidos; //ACK
-  t_list* suscriptoresEnviados;
-} MensajeEnCache;
 
 void crearDiccionario();
 ColaConSuscriptores* crearColaConSuscriptores();
 ColaConSuscriptores* obtenerCola(TipoCola colaClave);
-void agregarSuscriptor(TipoCola colaClave, int nuevoSuscriptor);
-void agregarMensaje(TipoCola colaClave, MensajeEnCola* mensaje);
+void agregarSuscriptor(TipoCola colaClave, Suscriptor nuevoSuscriptor);
+void agregarMensaje(TipoCola colaClave, int IDMensaje);
 t_list* obtenerSuscriptoresPorCola(TipoCola colaClave);
 
 #endif /* BROKERCOLAS_H_ */

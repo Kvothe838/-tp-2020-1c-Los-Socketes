@@ -9,10 +9,12 @@
 
 int main(void) {
 	t_log* logger = iniciar_logger("gamecard.log", "GAMECARD");
+	t_config* config = leer_config("GameCard.config", logger);
+	char *ip, *puerto;
 
 	inicializarData(logger);
 
-	iniciar_servidor("127.0.0.1", "5001");
+	//iniciar_servidor("127.0.0.1", "5001");
 	
 	/*inicializarData(logger);
 
@@ -52,11 +54,11 @@ int main(void) {
 
 	//Para pruebas de suscripción con Broker. Comentar si no se usa pero no borrar plis.
 
-	/*
+
 	ip = config_get_string_value(config, "IP_BROKER");
 	puerto = config_get_string_value(config, "PUERTO_BROKER");
 	int socketCliente = crear_conexion_cliente(ip, puerto);
-	mandarSuscripcion(socketCliente, 3, NEW, GET, CAUGHT);
+	mandarSuscripcion(socketCliente, GAMECARD, 3, NEW, GET, CAUGHT);
 	log_info(logger, "MANDADAS COLAS NEW, GET, CAUGHT");
 
 	MensajeParaSuscriptor* mensaje = (MensajeParaSuscriptor*)malloc(sizeof(MensajeParaSuscriptor));
@@ -73,22 +75,22 @@ int main(void) {
 			recv(socketCliente, &mensaje->ID, sizeof(long), 0);
 			recv(socketCliente, &mensaje->IDMensajeCorrelativo, sizeof(long), 0);
 			recv(socketCliente, &mensaje->cola, sizeof(TipoCola), 0);
-			recv(socketCliente, &mensaje->sizeContenido, sizeof(int), 0);
-			recv(socketCliente, &mensaje->contenido, mensaje->sizeContenido, 0);
+			recv(socketCliente, &mensaje->tamanioContenido, sizeof(int), 0);
+			recv(socketCliente, &mensaje->contenido, mensaje->tamanioContenido, 0);
 
 			log_info(logger, "Nuevo mensaje recibido con ID %d de cola %s", mensaje->ID, tipoColaToString(mensaje->cola));
 
 			stream = malloc(sizeof(long));
 			memcpy(stream, &(mensaje->ID), sizeof(long));
-			respuesta = armarPaqueteYSerializar(ACK, sizeof(long), stream, &bytes);
+			respuesta = armarPaqueteYSerializar(ACK, GAMECARD, sizeof(long), stream, &bytes);
 
 			send(socketCliente, &respuesta, bytes, 0);
 
 			log_info(logger, "ACK enviado para mensaje con ID %d", mensaje->ID);
 		}
 	}
-	*/
-	liberarVariablesGlobales();
+
+	//liberarVariablesGlobales();
 
 	log_destroy(logger);
 	//terminar_programa(logger, config);

@@ -15,7 +15,7 @@ void crearDiccionario(){
 ColaConSuscriptores* crearColaConSuscriptores(){
 	ColaConSuscriptores* cola = (ColaConSuscriptores*)malloc(sizeof(ColaConSuscriptores));
 	cola->suscriptores = list_create();
-	cola->mensajes = list_create();
+	cola->IDMensajes = list_create();
 	return cola;
 }
 
@@ -23,14 +23,14 @@ ColaConSuscriptores* obtenerCola(TipoCola colaClave){
 	return dictionary_get(diccionario, tipoColaToString(colaClave));
 }
 
-void agregarSuscriptor(TipoCola colaClave, int nuevoSuscriptor){
+void agregarSuscriptor(TipoCola colaClave, Suscriptor nuevoSuscriptor){
 	ColaConSuscriptores* colaEspecifica = obtenerCola(colaClave);
-	list_add(colaEspecifica->suscriptores, (void*)nuevoSuscriptor);
+	list_add(colaEspecifica->suscriptores, &nuevoSuscriptor);
 }
 
-void agregarMensaje(TipoCola colaClave, MensajeEnCola* mensaje){
+void agregarMensaje(TipoCola colaClave, int IDMensaje){
 	ColaConSuscriptores* colaEspecifica = obtenerCola(colaClave);
-	list_add(colaEspecifica->mensajes, mensaje);
+	list_add(colaEspecifica->IDMensajes, &IDMensaje);
 }
 
 void imprimir(int a){

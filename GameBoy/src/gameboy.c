@@ -88,9 +88,7 @@ printf("\n\n");
 				{
 					NewPokemon* pokemon = getNewPokemon(argv[3], atoi(argv[4]), atoi(argv[5]), atoi(argv[6])); //usa malloc, entonces hay que hacer un free
 
-					int tamanio = sizeof(uint32_t) * 4 + pokemon->largoNombre + 1 + sizeof(TipoCola);
-
-					if(enviarMensaje(pokemon, tamanio, PUBLISHER, NEW, NULL, conexionBroker) == -1)
+					if(enviarMensaje(pokemon, PUBLISHER, NEW, NULL, conexionBroker, GAMEBOY) == -1)
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
 						abort();
@@ -129,9 +127,7 @@ printf("\n\n");
 				}
 				
 				liberar_conexion_cliente(conexionBroker);
-					int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
-
-					if(enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, NULL, conexionBroker) == -1)
+					if(enviarMensaje(pokemon, PUBLISHER, APPEARED, NULL, conexionBroker, BROKER) == -1)
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
 						abort();
@@ -150,9 +146,7 @@ printf("\n\n");
 				{
 					CatchPokemon* pokemon = getCatchPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 
-					int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
-
-					if(enviarMensaje(pokemon, tamanio, PUBLISHER, CATCH, NULL, conexionBroker) == -1)
+					if(enviarMensaje(pokemon, PUBLISHER, CATCH, NULL, conexionBroker, GAMEBOY) == -1)
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %d %d", argv[1], argv[2], argv[3], argv[4], argv[5]);
 						abort();
@@ -171,9 +165,7 @@ printf("\n\n");
 				{
 					CaughtPokemon* pokemon = getCaughtPokemon(atoi(argv[3]));//usa malloc, entonces hay que hacer un free
 
-					int tamanio = sizeof(uint32_t) + sizeof(TipoCola);
-
-					if(enviarMensaje(pokemon, tamanio, PUBLISHER, CAUGHT, NULL, conexionBroker) == -1 )
+					if(enviarMensaje(pokemon, PUBLISHER, CAUGHT, NULL, conexionBroker, GAMEBOY) == -1)
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %d", argv[1], argv[2], argv[3]);
 						abort();
@@ -192,9 +184,7 @@ printf("\n\n");
 				{
 					GetPokemon* pokemon = getGetPokemon(argv[3]);//usa malloc, entonces hay que hacer un free
 
-					int tamanio = sizeof(uint32_t) + pokemon->largoNombre + sizeof(TipoCola);
-
-					if(enviarMensaje(pokemon, tamanio, PUBLISHER, GET, NULL, conexionBroker) == -1)
+					if(enviarMensaje(pokemon, PUBLISHER, GET, NULL, conexionBroker, GAMEBOY) == -1)
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s", argv[1], argv[2], argv[3]);
 						abort();
@@ -239,9 +229,7 @@ printf("\n\n");
 				{
 					AppearedPokemon* pokemon = getAppearedPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 
-					int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + sizeof(TipoCola);
-
-					if(enviarMensaje(pokemon, tamanio, PUBLISHER, APPEARED, NULL, conexionTeam) == -1)
+					if(enviarMensaje(pokemon, PUBLISHER, APPEARED, NULL, conexionTeam, GAMEBOY) == -1)
 					{
 						log_info(logger, "ERROR. No se pudo enviar el mensaje %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
 						abort();
@@ -285,10 +273,8 @@ printf("\n\n");
 				case CATCH:
 				{
 					CatchPokemon* pokemon = getCatchPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
-
-					int tamanio = sizeof(uint32_t) * 3 + pokemon->largoNombre + 1;// X, Y, int que guarda largoNombre y el largo del nombre;
-
-					if(!enviarMensajeASuscriptor(conexionGamecard, 0, CATCH, pokemon, tamanio))
+					long IDMensaje = 12345;
+					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, NULL, CATCH, pokemon))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
 						abort();
@@ -309,9 +295,9 @@ printf("\n\n");
 					GetPokemon* pokemon = getGetPokemon(argv[3]);//usa malloc, entonces hay que hacer un free
 					log_info(logger, "ENTRÓ A GET, manda a %s", pokemon->nombre);
 
-					int tamanio = sizeof(uint32_t) + pokemon->largoNombre;
+					long IDMensaje = 12345;
 
-					if(!enviarMensajeASuscriptor(conexionGamecard, 0, GET, pokemon, tamanio))
+					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, NULL, GET, pokemon))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s", argv[1], argv[2], argv[3]);
 						abort();
@@ -330,9 +316,9 @@ printf("\n\n");
 				{
 					NewPokemon* pokemon = getNewPokemon(argv[3], atoi(argv[4]), atoi(argv[5]), atoi(argv[6]));
 
-					int tamanio = sizeof(uint32_t) * 4 + pokemon->largoNombre;
+					long IDMensaje = 12345;
 
-					if(!enviarMensajeASuscriptor(conexionGamecard, 0, NEW, pokemon, tamanio))
+					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, NULL, NEW, pokemon))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s", argv[1], argv[2], argv[3]);
 						abort();

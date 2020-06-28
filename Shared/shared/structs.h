@@ -14,11 +14,13 @@
 #include<commons/config.h>
 #include<pthread.h>
 
-typedef enum{
+typedef enum
+{
 	BROKER = 1,
 	TEAM,
 	GAMECARD,
-	SUSCRIPTOR,
+	GAMEBOY,
+	SUSCRIPTOR
 } TipoModulo;
 
 typedef enum
@@ -55,6 +57,7 @@ typedef struct
 typedef struct
 {
 	OpCode codigoOperacion;
+	TipoModulo modulo;
 	Buffer* buffer;
 } Paquete;
 
@@ -96,9 +99,9 @@ typedef struct
 
 typedef struct {
 	long ID;
-	long IDMensajeCorrelativo;
+	long* IDMensajeCorrelativo;
 	TipoCola cola;
-	int sizeContenido;
+	int tamanioContenido;
 	void* contenido;
 } MensajeParaSuscriptor; //Mensaje que recibe el suscriptor de una cola.
 
@@ -110,10 +113,10 @@ typedef struct
 	void* data; //formato: primero X, luego Y y al final cantidad, y así respectivamente dependiendo la cantidad de posiciones
 } LocalizedPokemon;
 
-typedef struct {
-  long ID;
-  long IDCorrelativo;
-  void* contenido;
-} MensajeEnCola;
+typedef struct
+{
+	TipoModulo modulo;
+	int socket;
+} Suscriptor;
 
 #endif

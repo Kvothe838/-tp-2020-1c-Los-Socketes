@@ -1,10 +1,3 @@
-/*
- * nuevoManejoDeArchivos.h
- *
- *  Created on: 14 jun. 2020
- *      Author: utnso
- */
-
 #ifndef MANEJODEARCHIVOS_H_
 #define MANEJODEARCHIVOS_H_
 
@@ -14,6 +7,7 @@
 #include <commons/log.h>
 #include <commons/string.h>
 #include <shared/structs.h>
+#include <shared/utils.h>
 #include <sys/stat.h>
 #include <stdint.h>
 #include <string.h>

@@ -4,9 +4,11 @@
 #include <stdarg.h>
 #include "../shared/structs.h"
 
-void mandarSuscripcion(int socket_server, int cantidadColasASuscribir, ...);
-int enviarMensaje(void* mensaje, int tamanioMensaje, OpCode codigoOperacion, TipoCola colaMensaje, long* IDCorrelativo, int socket_cliente);
+void mandarSuscripcion(int socket_server, TipoModulo modulo, int cantidadColasASuscribir, ...);
+int enviarMensajeASuscriptor(int socketSuscriptor, long ID, long* IDCorrelativo, TipoCola cola, void* data);
 void* recibirMensaje(int socket_cliente);
+int enviarMensaje(void* mensaje, OpCode codigoOperacion, TipoCola cola, long* IDCorrelativo, int socket_cliente,
+		TipoModulo modulo);
 
 /**
  * Dado un Buffer con size y stream enviado desde socket_cliente, devuelve stream y asigna a size.
@@ -24,5 +26,5 @@ AppearedPokemon* getAppearedPokemon(char* nombre, int posX, int posY);
 CatchPokemon* getCatchPokemon(char* nombre, int posX, int posY);
 CaughtPokemon* getCaughtPokemon(int loAtrapo);
 GetPokemon* getGetPokemon(char* nombre);
-int enviarMensajeASuscriptor(uint32_t socketSuscriptor, long* IDCorrelativo, TipoCola cola, void* data, uint32_t tamanioData);
+
 #endif

@@ -6,7 +6,7 @@
  */
 
 #include<stdio.h>
-#include "conexionBinario.h";
+#include "conexionBinario.h"
 
 void guardarDatos(t_bitarray* bitarray, char* puntoMontaje){
 	char *final = malloc(1000);
@@ -45,6 +45,8 @@ uint32_t obtenerBloqueLibre(uint32_t blockCantBytes, char* puntoMontaje){
 			return (i+1);
 		}
 	}
+
+	return -1;
 }
 
 void limpiarBloque(uint32_t posicion, uint32_t blockCantBytes, char* puntoMontaje){
