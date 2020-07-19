@@ -1,14 +1,15 @@
 #ifndef MESSAGES_H_
 #define MESSAGES_H_
 
-#include <stdarg.h>
 #include "../shared/structs.h"
 
-void mandarSuscripcion(int socket_server, TipoModulo modulo, int cantidadColasASuscribir, ...);
+int enviarSuscripcion(int socket, TipoModulo modulo, int cantidadColasASuscribir, ...);
 int enviarMensajeASuscriptor(int socketSuscriptor, long ID, long* IDCorrelativo, TipoCola cola, void* data);
 void* recibirMensaje(int socket_cliente);
-int enviarMensaje(void* mensaje, OpCode codigoOperacion, TipoCola cola, long* IDCorrelativo, int socket_cliente,
-		TipoModulo modulo);
+int enviarPublisherSinIDCorrelativo(int socket, TipoModulo modulo, void* dato, TipoCola cola);
+int enviarPublisherConIDCorrelativo(int socket, TipoModulo modulo, void* dato, TipoCola cola, long IDCorrelativo);
+int recibirMensajeSuscriber(int socket, t_log* logger, TipoModulo modulo, MensajeParaSuscriptor* mensaje);
+int recibirIDMensajePublisher(int socket, IDMensajePublisher* mensaje);
 
 /**
  * Dado un Buffer con size y stream enviado desde socket_cliente, devuelve stream y asigna a size.
@@ -19,7 +20,8 @@ int enviarMensaje(void* mensaje, OpCode codigoOperacion, TipoCola cola, long* ID
  */
 void* recibirMensajeServidor(int socketCliente, int* size);
 char* tipoColaToString(TipoCola tipoCola);
-TipoModulo argvToTipoModulo(char* modulo);
+char* tipoModuloToString(TipoModulo modulo);
+ModuloGameboy argvToModuloGameboy(char* modulo);
 TipoCola argvToTipoCola(char* cola);
 NewPokemon* getNewPokemon(char* nombre, int posX, int posY, int cantidad);
 AppearedPokemon* getAppearedPokemon(char* nombre, int posX, int posY);

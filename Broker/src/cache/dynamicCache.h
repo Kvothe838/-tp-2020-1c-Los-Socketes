@@ -22,7 +22,7 @@ typedef struct {
 	char* fechaCreacion;
 	char* fechaUltimoUso;
 	long ID;
-	long* IDCorrelativo;
+	long IDCorrelativo;
 	TipoCola cola;
 	t_list* suscriptoresRecibidos;
 	t_list* suscriptoresEnviados;
@@ -32,7 +32,7 @@ ItemTablaDinamica *tablaElementos, *tablaVacios;
 
 void inicializarTabla(ItemTablaDinamica **tabla, int estaVacio);
 void inicializarDataBasica(t_config* config, t_log* logger);
-void agregarItem(void* item, int tamanioItem, long ID, long* IDCorrelativo, TipoCola cola);
+void agregarItem(void* item, int tamanioItem, long ID, long IDCorrelativo, TipoCola cola);
 void eliminarItem(long id);
 void compactarCache();
 void eliminarVictima();
@@ -45,5 +45,6 @@ void agregarSuscriptorRecibido(long IDMensaje, Suscriptor* suscriptor);
 t_list* obtenerSuscriptoresRecibidos(long IDMensaje);
 int esSuscriptorRecibido(t_list* suscriptoresRecibidos, Suscriptor suscriptor);
 int* obtenerTamanioItem(long ID);
+/*void modificarSuscriptor(Suscriptor suscriptor);*/
 
 #endif /* CACHE_DYNAMICCACHE_H_ */

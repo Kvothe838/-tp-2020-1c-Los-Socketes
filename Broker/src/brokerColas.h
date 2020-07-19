@@ -16,8 +16,12 @@ typedef struct {
 void crearDiccionario();
 ColaConSuscriptores* crearColaConSuscriptores();
 ColaConSuscriptores* obtenerCola(TipoCola colaClave);
-void agregarSuscriptor(TipoCola colaClave, Suscriptor nuevoSuscriptor);
-void agregarMensaje(TipoCola colaClave, int IDMensaje);
+
+/*
+ * Devuelve 1 si fue agregado exitosamente, o 0 si ya existía y su socket fue actualizado
+*/
+int agregarSuscriptor(TipoCola colaClave, Suscriptor nuevoSuscriptor);
+void agregarMensaje(TipoCola colaClave, long IDMensaje);
 t_list* obtenerSuscriptoresPorCola(TipoCola colaClave);
 
 #endif /* BROKERCOLAS_H_ */

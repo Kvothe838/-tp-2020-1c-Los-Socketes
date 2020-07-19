@@ -26,7 +26,7 @@ typedef struct {
 	char* puerto;
 } IniciarServidorArgs;
 
-void iniciarServidor(IniciarServidorArgs argumentos);
+void iniciarServidor(IniciarServidorArgs* argumentos);
 void enviarMensajesSuscriptores();
 
 #endif

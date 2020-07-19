@@ -67,9 +67,9 @@ int main(int argc, char **argv){
 printf("\n\n");
 
 
-	switch(argvToTipoModulo(argv[1]))
+	switch(argvToModuloGameboy(argv[1]))
 	{
-		case BROKER:
+		case BROKER_GAMEBOY:
 		{
 			ipBroker = config_get_string_value(config, "IP_BROKER");
 			puertoBroker = config_get_string_value(config, "PUERTO_BROKER");
@@ -88,13 +88,33 @@ printf("\n\n");
 				{
 					NewPokemon* pokemon = getNewPokemon(argv[3], atoi(argv[4]), atoi(argv[5]), atoi(argv[6])); //usa malloc, entonces hay que hacer un free
 
-					if(enviarMensaje(pokemon, PUBLISHER, NEW, NULL, conexionBroker, GAMEBOY) == -1)
+					if(!enviarPublisherSinIDCorrelativo(conexionBroker, GAMEBOY, pokemon, NEW))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
 						abort();
 					}
 
 					log_info(logger, "OK - Se envió correctamente el mensaje: %s %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
+
+					OpCode code;
+
+					recv(conexionBroker, &code, sizeof(OpCode), 0);
+
+					if(code == ID_MENSAJE){
+						log_info(logger, "RECIBÍ ID_MENSAJE");
+						IDMensajePublisher* mensaje = NULL;
+						int recibidoExitoso = recibirIDMensajePublisher(conexionBroker, mensaje);
+						log_info(logger, "EL ID ES %d", mensaje->IDMensaje);
+						log_info(logger, "LA COLA ES %s", tipoColaToString(mensaje->cola));
+
+						if(recibidoExitoso)
+						{
+							free(mensaje);
+						}
+
+					}else {
+						log_info(logger, "TODO MAL. RECIBÍ OTRO CODE.");
+					}
 
 					liberar_conexion_cliente(conexionBroker);
 
@@ -107,27 +127,7 @@ printf("\n\n");
 				{
 					AppearedPokemon* pokemon = getAppearedPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 
-				OpCode code;
-				long idMensaje;
-				TipoCola cola;
-				int size;
-
-				recv(conexionBroker, &code, sizeof(OpCode), 0);
-
-				if(code == ID_MENSAJE){
-					log_info(logger, "RECIBÍ ALGO");
-					recv(conexionBroker, &size, sizeof(int), 0);
-					log_info(logger, "EL SIZE ES %d", size);
-					recv(conexionBroker, &idMensaje, sizeof(long), 0);
-					log_info(logger, "EL ID ES %d", idMensaje);
-					recv(conexionBroker, &cola, sizeof(TipoCola), 0);
-					log_info(logger, "LA COLA ES %s", tipoColaToString(cola));
-				}else {
-					log_info(logger, "TODO MAL. RECIBÍ OTRO CODE.");
-				}
-				
-				liberar_conexion_cliente(conexionBroker);
-					if(enviarMensaje(pokemon, PUBLISHER, APPEARED, NULL, conexionBroker, BROKER) == -1)
+					if(!enviarPublisherSinIDCorrelativo(conexionBroker, GAMEBOY, pokemon, APPEARED))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
 						abort();
@@ -146,7 +146,7 @@ printf("\n\n");
 				{
 					CatchPokemon* pokemon = getCatchPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 
-					if(enviarMensaje(pokemon, PUBLISHER, CATCH, NULL, conexionBroker, GAMEBOY) == -1)
+					if(!enviarPublisherSinIDCorrelativo(conexionBroker, GAMEBOY, pokemon, CATCH))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %d %d", argv[1], argv[2], argv[3], argv[4], argv[5]);
 						abort();
@@ -165,7 +165,7 @@ printf("\n\n");
 				{
 					CaughtPokemon* pokemon = getCaughtPokemon(atoi(argv[3]));//usa malloc, entonces hay que hacer un free
 
-					if(enviarMensaje(pokemon, PUBLISHER, CAUGHT, NULL, conexionBroker, GAMEBOY) == -1)
+					if(!enviarPublisherSinIDCorrelativo(conexionBroker, GAMEBOY, pokemon, CAUGHT))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %d", argv[1], argv[2], argv[3]);
 						abort();
@@ -184,7 +184,7 @@ printf("\n\n");
 				{
 					GetPokemon* pokemon = getGetPokemon(argv[3]);//usa malloc, entonces hay que hacer un free
 
-					if(enviarMensaje(pokemon, PUBLISHER, GET, NULL, conexionBroker, GAMEBOY) == -1)
+					if(!enviarPublisherSinIDCorrelativo(conexionBroker, GAMEBOY, pokemon, GET))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s", argv[1], argv[2], argv[3]);
 						abort();
@@ -208,7 +208,7 @@ printf("\n\n");
 		break;
 		}
 
-		case TEAM:
+		case TEAM_GAMEBOY:
 		{
 			ipTeam = config_get_string_value(config, "IP_TEAM");
 			puertoTeam = config_get_string_value(config, "PUERTO_TEAM");
@@ -229,7 +229,7 @@ printf("\n\n");
 				{
 					AppearedPokemon* pokemon = getAppearedPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 
-					if(enviarMensaje(pokemon, PUBLISHER, APPEARED, NULL, conexionTeam, GAMEBOY) == -1)
+					if(!enviarPublisherSinIDCorrelativo(conexionTeam, GAMEBOY, pokemon, APPEARED))
 					{
 						log_info(logger, "ERROR. No se pudo enviar el mensaje %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
 						abort();
@@ -253,7 +253,7 @@ printf("\n\n");
 		break;
 		}
 
-		case GAMECARD:
+		case GAMECARD_GAMEBOY:
 		{
 			ipGamecard = config_get_string_value(config, "IP_GAMECARD");
 			puertoGamecard = config_get_string_value(config, "PUERTO_GAMECARD");
@@ -343,7 +343,7 @@ printf("\n\n");
 		break;
 		}
 
-	case SUSCRIPTOR:
+	case SUSCRIPTOR_GAMEBOY:
 	{
 		// ./gameboy SUSCRIPTOR [COLA_DE_MENSAJES] [TIEMPO]
 		//   argv[0]   argv[1]      argv[2]         argv[3]
@@ -375,7 +375,7 @@ printf("\n\n");
 		while ((time(0) - start) <= tiempo )
 		{
 
-			mandarSuscripcion(conexionBroker, 1, colaDeMensaje);
+			enviarSuscripcion(conexionBroker, GAMEBOY, 1, colaDeMensaje);
 
 			//recibir mensaje
 			char *mensaje = recibirMensaje(conexionBroker);

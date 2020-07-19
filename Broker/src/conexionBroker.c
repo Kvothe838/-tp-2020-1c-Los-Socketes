@@ -1,30 +1,31 @@
 #include "conexionBroker.h"
 #include "cache/dynamicCache.h"
 
-void manejarSuscriptor(void* contenido, int socketCliente){
-	int offset = 0;
-	int tamanio;
-	TipoCola colaASuscribirse;
-	TipoModulo modulo;
-	Suscriptor suscriptor;
+t_list* recibirSuscripcion(int socket, int* cantidadColas)
+{
+	t_list* colas = list_create();
 
-	memcpy(&tamanio, contenido + offset, sizeof(int));
-	offset += sizeof(int);
+	recv(socket, cantidadColas, sizeof(int), MSG_WAITALL);
 
-	memcpy(&modulo, contenido + offset, sizeof(TipoModulo));
-	offset += sizeof(TipoModulo);
+	for(int i = 0; i < *cantidadColas; i++){
+		TipoCola* nuevaCola = (TipoCola*)malloc(sizeof(TipoCola));
 
-	suscriptor.socket = socketCliente;
-	suscriptor.modulo = modulo;
+		recv(socket, nuevaCola, sizeof(TipoCola), MSG_WAITALL);
+		list_add(colas, nuevaCola);
+	}
 
-	for(int i = 0; i < tamanio; i++){
-		memcpy(&colaASuscribirse, contenido + offset, sizeof(TipoCola));
-		agregarSuscriptor(colaASuscribirse, suscriptor);
+	return colas;
+}
+
+void manejarSuscripcion(t_list* colas, int cantidadColas, Suscriptor suscriptor)
+{
+	for(int i = 0; i < cantidadColas; i++)
+	{
+		TipoCola* cola = list_get(colas, i);
+		agregarSuscriptor(*cola, suscriptor);
 
 		//Log obligatorio.
-		log_info(logger, "Suscripción de proceso a cola %s.", tipoColaToString(colaASuscribirse));
-
-		offset += sizeof(TipoCola);
+		log_info(logger, "Suscripción de proceso a cola %s.", tipoColaToString(*cola));
 	}
 }
 
@@ -39,71 +40,95 @@ long generarIDMensaje(){
 	return hash;
 }
 
-void manejarPublisher(void* contenido, int tamanioContenido, int socketCliente){
+Publicacion* recibirPublisher(int socket)
+{
+	Publicacion* publicacion;
+	int tamanio;
+	long IDCorrelativo;
 	TipoCola cola;
+	void* dato;
+
+	recv(socket, &IDCorrelativo, sizeof(long), MSG_WAITALL);
+	recv(socket, &cola, sizeof(TipoCola), MSG_WAITALL);
+	recv(socket, &tamanio, sizeof(int), MSG_WAITALL);
+
+	dato = malloc(tamanio);
+	recv(socket, dato, tamanio, MSG_WAITALL);
+
+	publicacion = (Publicacion*)malloc(sizeof(long) + sizeof(TipoCola) + sizeof(int) + tamanio);
+
+	publicacion->IDCorrelativo = IDCorrelativo;
+	publicacion->cola = cola;
+	publicacion->tamanioDato = tamanio;
+	publicacion->dato = dato;
+
+	return publicacion;
+}
+
+void manejarPublisher(int socketCliente){
 	void *buffer, *stream;
-	int bytes, tamanio, offset = 0;
-	long ID, *IDCorrelativo;
+	int bytes, tamanio;
+	long ID;
 
 	ID = generarIDMensaje();
 
-	//Creo el nuevo MensajeEnCola y lo agrego a la cola correspondiente.
-	memcpy(&IDCorrelativo, contenido + offset, sizeof(long));
-	offset += sizeof(long);
-	memcpy(&cola, contenido + offset, sizeof(TipoCola));
-	offset += sizeof(TipoCola);
+	Publicacion* publicacion = recibirPublisher(socketCliente);
 
-	agregarMensaje(cola, ID);
+	//Creo el nuevo MensajeEnCola y lo agrego a la cola correspondiente.
+
+	agregarMensaje(publicacion->cola, ID);
 
 	//Log obligatorio.
-	log_info(logger, "Llegada de nuevo mensaje con ID %d a cola %s", ID, tipoColaToString(cola));
+	log_info(logger, "Llegada de nuevo mensaje con ID %d a cola %s", ID, tipoColaToString(publicacion->cola));
 
-	agregarItem(contenido, tamanioContenido, ID, IDCorrelativo, cola);
+	agregarItem(publicacion->dato, publicacion->tamanioDato, ID, publicacion->IDCorrelativo, publicacion->cola);
 
 	//Log obligatorio.
 	log_info(logger, "Almacenado mensaje con ID %d y posición de inicio de partición %d.", ID, obtenerPosicionPorID(ID));
 
 	//Le devuelvo el id del mensaje y el tipo de cola al cliente.
-	tamanio = sizeof(long) + sizeof(TipoCola);
-	stream = serializarStreamIdMensajePublisher(ID, cola);
-	buffer = armarPaqueteYSerializar(ID_MENSAJE, BROKER, tamanio, stream, &bytes);
+	stream = serializarStreamIdMensajePublisher(ID, publicacion->cola, &tamanio);
+	buffer = armarPaqueteYSerializar(ID_MENSAJE, tamanio, stream, &bytes);
 
 	send(socketCliente, buffer, bytes, 0);
 }
 
-void manejarACK(void* contenido, Suscriptor suscriptor){
-	long IDMensaje;
+Ack recibirACK(int socket)
+{
+	Ack contenido;
 
-	memcpy(&IDMensaje, contenido, sizeof(long));
+	recv(socket, &(contenido.IDMensaje), sizeof(long), MSG_WAITALL);
 
+	return contenido;
+}
+
+void manejarACK(Ack contenido, Suscriptor suscriptor){
 	//Log obligatorio.
-	log_info(logger, "Recepción del mensaje con ID %d.", IDMensaje);
+	log_info(logger, "Recepción del mensaje con ID %d.", contenido.IDMensaje);
 
-	agregarSuscriptorRecibido(IDMensaje, &suscriptor);
+	agregarSuscriptorRecibido(contenido.IDMensaje, &suscriptor);
 }
 
 void processRequest(int opCode, Suscriptor suscriptor){
-	int size;
-	void* msg;
-
 	if(opCode <= 0){
 		pthread_exit(NULL);
 		return;
 	}
 
-	msg = recibirMensajeServidor(suscriptor.socket, &size);
-
 	switch ((OpCode)opCode) {
-		case SUSCRIBER:
-			manejarSuscriptor(msg, suscriptor.socket);
+		case SUSCRIBER:;
+			int cantidadColas;
+			t_list* colas = recibirSuscripcion(suscriptor.socket, &cantidadColas);
+			manejarSuscripcion(colas, cantidadColas, suscriptor);
 
 			break;
-		case PUBLISHER:
-			manejarPublisher(msg, size, suscriptor.socket);
+		case PUBLISHER:;
+			manejarPublisher(suscriptor.socket);
 
 			break;
-		case ACK:
-			manejarACK(msg, suscriptor);
+		case ACK:;
+			Ack ack = recibirACK(suscriptor.socket);
+			manejarACK(ack, suscriptor);
 
 			break;
 		default:
@@ -113,18 +138,22 @@ void processRequest(int opCode, Suscriptor suscriptor){
 
 void serveClient(int* socketCliente){
 	Suscriptor suscriptor;
-	int modulo, opCode;
+	TipoModulo modulo;
+	OpCode opCode;
 
-	if(recv(*socketCliente, &modulo, sizeof(int), MSG_WAITALL) == -1){
-		modulo = -1;
-	}
-
-	if(recv(*socketCliente, &opCode, sizeof(int), MSG_WAITALL) == -1){
+	if(recv(*socketCliente, &opCode, sizeof(OpCode), MSG_WAITALL) == -1){
 		opCode = -1;
 	}
 
+	if(recv(*socketCliente, &modulo, sizeof(TipoModulo), MSG_WAITALL) == -1){
+		modulo = -1;
+	}
+
+	//Log obligatorio.
+	log_info(logger, "Conexión de proceso %s a Broker.", tipoModuloToString(modulo));
+
 	suscriptor.socket = *socketCliente;
-	suscriptor.modulo = (TipoModulo)modulo;
+	suscriptor.modulo = modulo;
 
 	processRequest(opCode, suscriptor);
 }
@@ -133,16 +162,16 @@ void esperarCliente(int socket_servidor)
 {
 	struct sockaddr_in dir_cliente;
 	socklen_t tam_direccion;
-	int socket_cliente;
+	int socketCliente;
 
 	tam_direccion = sizeof(struct sockaddr_in);
-	socket_cliente = accept(socket_servidor, (void*)&dir_cliente, &tam_direccion);
+	socketCliente = accept(socket_servidor, (void*)&dir_cliente, &tam_direccion);
 
-	//Log obligatorio.
-	log_info(logger, "Conexión de proceso %d a Broker.", socket_cliente);
+	if(socketCliente == -1) return;
 
-	pthread_create(&thread,NULL,(void*)serveClient,&socket_cliente);
+	pthread_create(&thread,NULL,(void*)serveClient,&socketCliente);
 	pthread_join(thread, NULL);
+
 }
 
 void enviarMensajesPorCola(TipoCola tipoCola){
@@ -153,17 +182,20 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 		void* mensaje = obtenerItem(*IDMensaje);
 		int* tamanioItem = obtenerTamanioItem(*IDMensaje);
 
+		if(mensaje == NULL || tamanioItem == NULL){
+			log_info(logger, "Error intentando obtener item para ID %d", *IDMensaje);
+			abort();
+		}
+
 		for(int j = 0; j < list_size(cola->suscriptores); j++){
 			Suscriptor* suscriptor = (Suscriptor*)list_get(cola->suscriptores, j);
 			t_list* suscriptoresRecibidos = obtenerSuscriptoresRecibidos(*IDMensaje);
 
-			if(suscriptoresRecibidos == NULL) continue;
-
-			if(esSuscriptorRecibido(suscriptoresRecibidos, *suscriptor)) continue;
+			if(suscriptoresRecibidos != NULL && esSuscriptorRecibido(suscriptoresRecibidos, *suscriptor)) continue;
 
 			int bytes;
 			void* stream = serializarMensajeSuscriptor(*IDMensaje, NULL, mensaje, *tamanioItem, tipoCola);
-			void* paqueteSerializado = armarPaqueteYSerializar(NUEVO_MENSAJE_SUSCRIBER, BROKER, sizeof(MensajeParaSuscriptor), stream, &bytes);
+			void* paqueteSerializado = armarPaqueteYSerializar(NUEVO_MENSAJE_SUSCRIBER, sizeof(MensajeParaSuscriptor), stream, &bytes);
 			free(stream);
 
 			if((send(suscriptor->socket, paqueteSerializado, bytes, 0)) > 0){
@@ -177,14 +209,16 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 }
 
 void enviarMensajesSuscriptores(){
-	int colas[] = {NEW, GET, CATCH, APPEARED, LOCALIZED, CAUGHT};
+	while(1){
+		int colas[] = {NEW, GET, CATCH, APPEARED, LOCALIZED, CAUGHT};
 
-	for (int i = 0; i < 6; i++){
-		enviarMensajesPorCola(colas[i]);
+		for (int i = 0; i < 6; i++){
+			enviarMensajesPorCola(colas[i]);
+		}
 	}
 }
 
-void iniciarServidor(IniciarServidorArgs argumentos){
+void iniciarServidor(IniciarServidorArgs* argumentos){
 	int socket_servidor;
 
     struct addrinfo hints, *servinfo, *p;
@@ -194,7 +228,7 @@ void iniciarServidor(IniciarServidorArgs argumentos){
     hints.ai_socktype = SOCK_STREAM;
     hints.ai_flags = AI_PASSIVE;
 
-    getaddrinfo(argumentos.ip, argumentos.puerto, &hints, &servinfo);
+    getaddrinfo(argumentos->ip, argumentos->puerto, &hints, &servinfo);
 
     for (p=servinfo; p != NULL; p = p->ai_next)
     {

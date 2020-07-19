@@ -22,15 +22,16 @@
    Nota: no hace falta enviar el tamaño del mensaje antes que éste, ya que con saber el tipo de cola, el receptor
    ya sabe cómo deserializarlo.
 */
-int enviarMensaje(void* mensaje, OpCode codigoOperacion, TipoCola cola, long* IDCorrelativo, int socket_cliente,
+
+/*int enviarMensaje(void* mensaje, OpCode codigoOperacion, TipoCola cola, long* IDCorrelativo, int socket_cliente,
 		TipoModulo modulo)
 {
-	int bytes, offset = 0, resultado = 0, tamanioTotal = sizeof(TipoCola), tamanioMensaje;
+	int bytes, offset = 0, resultado = 0, tamanioTotal = 0, tamanioMensaje;
 	void *mensajeSerializado, *streamMensajeEspecifico, *stream;
 
 	switch(codigoOperacion){
 		case SUSCRIBER:
-			streamMensajeEspecifico = serializarSuscripcion(mensaje, &tamanioMensaje);
+			streamMensajeEspecifico = serializarSuscripcion(modulo, &bytes);
 			break;
 		case PUBLISHER:
 			streamMensajeEspecifico = serializarDato(mensaje, &tamanioMensaje, cola);
@@ -47,21 +48,24 @@ int enviarMensaje(void* mensaje, OpCode codigoOperacion, TipoCola cola, long* ID
 	}
 
 	if(IDCorrelativo != NULL){
-		stream = malloc(tamanioMensaje + sizeof(long));
+		tamanioTotal += sizeof(long);
+		stream = malloc(tamanioTotal);
 		memcpy(stream + offset, IDCorrelativo, sizeof(long));
 		offset += sizeof(long);
-		tamanioTotal += sizeof(long);
 	} else {
-		stream = malloc(tamanioMensaje);
+		stream = malloc(tamanioTotal);
 	}
 
-	memcpy(stream + offset, &cola, sizeof(TipoCola));
-	offset += sizeof(TipoCola);
+	if(codigoOperacion != SUSCRIBER){
+		memcpy(stream + offset, &cola, sizeof(TipoCola));
+		offset += sizeof(TipoCola);
+		tamanioTotal += sizeof(TipoCola);
+	}
 
 	memcpy(stream + offset, streamMensajeEspecifico, tamanioMensaje);
 	offset += tamanioMensaje;
 
-	mensajeSerializado = armarPaqueteYSerializar(codigoOperacion, tamanioTotal, modulo, stream, &bytes);
+	mensajeSerializado = armarPaqueteYSerializar(codigoOperacion, modulo, tamanioTotal, stream, &bytes);
 
 	if(send(socket_cliente, mensajeSerializado, bytes, 0) == -1){
 		printf("Error enviando mensaje.\n");
@@ -70,26 +74,59 @@ int enviarMensaje(void* mensaje, OpCode codigoOperacion, TipoCola cola, long* ID
 
 	free(mensajeSerializado);
 	return resultado;
+}*/
+
+int enviarPublisherSinIDCorrelativo(int socket, TipoModulo modulo, void* dato, TipoCola cola)
+{
+	int IDCorrelativoVacio = 0;
+
+	return enviarPublisherConIDCorrelativo(socket, modulo, dato, cola, IDCorrelativoVacio);
 }
 
-void mandarSuscripcion(int socket_server, TipoModulo modulo, int cantidadColasASuscribir, ...){
-	va_list colas;
-	va_start(colas, cantidadColasASuscribir);
-	Suscripcion* suscripcion = malloc(sizeof(Suscripcion));
-	suscripcion->cantidadColas = cantidadColasASuscribir;
-	suscripcion->colas = malloc(sizeof(TipoCola) * cantidadColasASuscribir);
+int enviarPublisherConIDCorrelativo(int socket, TipoModulo modulo, void* dato, TipoCola cola, long IDCorrelativo)
+{
+	int resultado = 1;
+	int bytes;
+	void* paquete = serializarPublisher(modulo, cola, dato, IDCorrelativo, &bytes);
 
-	for(int i = 0; i < cantidadColasASuscribir; i++){
-		TipoCola cola = va_arg(colas, TipoCola);
-		(suscripcion->colas)[i] = cola;
+	if(send(socket, paquete, bytes, 0) == -1)
+	{
+		resultado = 0;
 	}
 
-	va_end(colas);
+	free(paquete);
 
-	int resultado = enviarMensaje(suscripcion, SUSCRIBER, 0, NULL, socket_server, modulo);
+	return resultado;
+}
 
-	if(resultado == -1)
-		printf("ERROR");
+int enviarSuscripcion(int socket, TipoModulo modulo, int cantidadColas, ...){
+	int resultado = 1;
+	int bytes, bytesContenido, bytesSuscripcion;
+	void *suscripcionSerializada, *contenidoSerializado, *serializacionFinal;
+	va_list colasRecibidas;
+
+	va_start(colasRecibidas, cantidadColas);
+	TipoCola* colas = malloc(sizeof(TipoCola)*cantidadColas);
+
+	for(int i = 0; i < cantidadColas; i++){
+		TipoCola cola = va_arg(colasRecibidas, TipoCola);
+		colas[i] = cola;
+	}
+
+	va_end(colasRecibidas);
+
+	suscripcionSerializada = serializarSuscripcion(cantidadColas, colas, &bytesSuscripcion);
+	contenidoSerializado = armarYSerializarContenidoHaciaBroker(modulo, bytesSuscripcion, suscripcionSerializada, &bytesContenido);
+	serializacionFinal = armarPaqueteYSerializar(SUSCRIBER, bytesContenido, contenidoSerializado, &bytes);
+
+	if(send(socket, serializacionFinal, bytes, 0) == -1)
+	{
+		resultado = -1;
+	}
+
+	free(serializacionFinal);
+
+	return resultado;
 }
 
 void* recibirMensaje(int socket_cliente)
@@ -147,16 +184,48 @@ char* tipoColaToString(TipoCola tipoCola){
 	return "";
 }
 
-TipoModulo argvToTipoModulo(char* modulo)
+char* tipoModuloToString(TipoModulo modulo){
+	if(modulo > TEAM){
+		char str[6];
+		char* stringCompleto;
+
+		sprintf(str, "TEAM%d", modulo);
+
+		stringCompleto = malloc(6 * sizeof(char));
+
+		for(int i = 0; i < 5; i++){
+			stringCompleto[i] = str[i];
+		}
+
+		stringCompleto[5] = '\0';
+
+		return stringCompleto;
+	}
+
+	switch(modulo){
+		case BROKER:
+			return "BROKER";
+		case GAMECARD:
+			return "GAMECARD";
+		case GAMEBOY:
+			return "GAMEBOY";
+		case TEAM:
+			return "TEAM";
+	}
+
+	return "";
+}
+
+ModuloGameboy argvToModuloGameboy(char* modulo)
 {
 	if(strcmp(modulo,"BROKER") == 0)
-		return BROKER;
+		return BROKER_GAMEBOY;
 	else if(strcmp(modulo,"TEAM") == 0)
-		return TEAM;
+		return TEAM_GAMEBOY;
 	else if(strcmp(modulo,"GAMECARD") == 0)
-		return GAMECARD;
+		return GAMECARD_GAMEBOY;
 	else if(strcmp(modulo,"SUSCRIPTOR") == 0)
-		return SUSCRIPTOR;
+			return SUSCRIPTOR_GAMEBOY;
 	else
 		return -1;
 }
@@ -256,5 +325,37 @@ int enviarMensajeASuscriptor(int socketSuscriptor, long ID, long* IDCorrelativo,
 	free(mensajeAEnviar);
 
 	return resultado;
+}
+
+int recibirMensajeSuscriber(int socket, t_log* logger, TipoModulo modulo, MensajeParaSuscriptor* mensaje){
+	mensaje = (MensajeParaSuscriptor*)malloc(sizeof(MensajeParaSuscriptor));
+	void *respuesta;
+	int bytes;
+
+	recv(socket, &mensaje->ID, sizeof(long), 0);
+	recv(socket, &mensaje->IDMensajeCorrelativo, sizeof(long), 0);
+	recv(socket, &mensaje->cola, sizeof(TipoCola), 0);
+	recv(socket, &mensaje->tamanioContenido, sizeof(int), 0);
+	recv(socket, &mensaje->contenido, mensaje->tamanioContenido, 0);
+
+	log_info(logger, "Nuevo mensaje recibido con ID %d de cola %s", mensaje->ID, tipoColaToString(mensaje->cola));
+
+	respuesta = armarYSerializarAck(mensaje->ID, modulo, &bytes);
+
+	send(socket, &respuesta, bytes, 0);
+
+	log_info(logger, "ACK enviado para mensaje con ID %d", mensaje->ID);
+
+	return 1; //Retornar 0 en caso de error en algún recv.
+}
+
+int recibirIDMensajePublisher(int socket, IDMensajePublisher* mensaje)
+{
+	mensaje = (IDMensajePublisher*)malloc(sizeof(IDMensajePublisher));
+
+	recv(socket, &(mensaje->IDMensaje), sizeof(long), 0);
+	recv(socket, &(mensaje->cola), sizeof(TipoCola), 0);
+
+	return 1;
 }
 

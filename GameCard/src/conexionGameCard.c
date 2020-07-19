@@ -15,7 +15,7 @@ void process_request(long IDMensajeCorrelativo, int cliente_fd){
 	t_log* logger = log_create("respuesta.log", "RESPUESTA", true, LOG_LEVEL_TRACE);
 	log_trace(logger, "Llegó algo");
 	void* msg;
-	uint32_t size;
+	int size;
 	TipoCola colaRecibida;
 
 
@@ -23,6 +23,10 @@ void process_request(long IDMensajeCorrelativo, int cliente_fd){
 	recv(cliente_fd, &size, sizeof(size), MSG_WAITALL);
 
 	recv(cliente_fd, &colaRecibida, sizeof(TipoCola), MSG_WAITALL);
+
+	if(colaRecibida <= 0){
+		pthread_exit(NULL);
+	}
 
 	switch (colaRecibida) {
 		/*case GET:
@@ -65,7 +69,7 @@ void process_request(long IDMensajeCorrelativo, int cliente_fd){
 			msg = malloc(size);
 			recv(cliente_fd, msg, size, MSG_WAITALL);
 
-			CatchPokemon* pokemonCatch = (CatchPokemon*)deserializarCatch(msg, (int)size);
+			CatchPokemon* pokemonCatch = (CatchPokemon*)deserializarCatch(msg);
 			log_trace(logger, "Nombre: %s", pokemonCatch->nombre);
 			log_trace(logger, "X: %d", pokemonCatch->posX);
 			log_trace(logger, "Y: %d", pokemonCatch->posY);
@@ -80,7 +84,7 @@ void process_request(long IDMensajeCorrelativo, int cliente_fd){
 			msg = malloc(size);
 			recv(cliente_fd, msg, size, MSG_WAITALL);
 
-			NewPokemon* pokemonNew = (NewPokemon*)deserializarNew(msg, (int)size);
+			NewPokemon* pokemonNew = (NewPokemon*)deserializarNew(msg);
 			log_trace(logger, "Nombre: %s", pokemonNew->nombre);
 			log_trace(logger, "X: %d", pokemonNew->posX);
 			log_trace(logger, "Y: %d", pokemonNew->posY);
@@ -90,11 +94,8 @@ void process_request(long IDMensajeCorrelativo, int cliente_fd){
 			administrarNewPokemon(pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY, pokemonNew->cantidad);
 
 			break;
-		case 0:
+		default:
 			pthread_exit(NULL);
-		case -1:
-			pthread_exit(NULL);
-
 	}
 }
 

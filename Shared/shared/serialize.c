@@ -1,24 +1,29 @@
 #include "../shared/serialize.h"
+#include "../shared/messages.h"
 
-void* serializarPaquete(Paquete* paquete, int *bytes)
+/*void* serializarPaquete(Paquete* paquete, int *bytes)
 {
-	*bytes = sizeof(paquete->codigoOperacion) + sizeof(paquete->buffer->size) + paquete->buffer->size;
+	*bytes = sizeof(OpCode) + sizeof(TipoModulo) + sizeof(int) + paquete->buffer->size;
 	void* paqueteSerializado = malloc(*bytes);
 	int offset = 0;
 
 	memcpy(paqueteSerializado + offset, &(paquete->codigoOperacion), sizeof(OpCode));
 	offset += sizeof(OpCode);
-	memcpy(paqueteSerializado + offset, &(paquete->modulo), sizeof(TipoModulo));
-	offset += sizeof(TipoModulo);
+
+	if(paquete->modulo != -1){
+		memcpy(paqueteSerializado + offset, &(paquete->modulo), sizeof(TipoModulo));
+		offset += sizeof(TipoModulo);
+	}
+
 	memcpy(paqueteSerializado + offset, &(paquete->buffer->size), sizeof(int));
 	offset += sizeof(int);
 	memcpy(paqueteSerializado + offset, paquete->buffer->stream, paquete->buffer->size);
 	offset += paquete->buffer->size;
 
 	return paqueteSerializado;
-}
+}*/
 
-Paquete* armarPaquete(OpCode codigoOperacion, TipoModulo modulo, int tamanio, void* stream){
+/*Paquete* armarPaquete(OpCode codigoOperacion, TipoModulo modulo, int tamanio, void* stream){
 	Paquete* paquete = malloc(sizeof(Paquete));
 
 	paquete->codigoOperacion = codigoOperacion;
@@ -28,9 +33,9 @@ Paquete* armarPaquete(OpCode codigoOperacion, TipoModulo modulo, int tamanio, vo
 	paquete->buffer->stream = stream;
 
 	return paquete;
-}
+}*/
 
-void* armarPaqueteYSerializar(OpCode codigoOperacion, TipoModulo modulo, int tamanio, void* stream, int* bytes){
+/*void* armarPaqueteYSerializar(OpCode codigoOperacion, TipoModulo modulo, int tamanio, void* stream, int* bytes){
 	Paquete* paquete = armarPaquete(codigoOperacion, modulo, tamanio, stream);
 	void* paqueteSerializado = serializarPaquete(paquete, bytes);
 
@@ -38,25 +43,198 @@ void* armarPaqueteYSerializar(OpCode codigoOperacion, TipoModulo modulo, int tam
 	free(paquete);
 
 	return paqueteSerializado;
+}*/
+
+void* serializarPaquete(Paquete* paquete, int tamanioContenido, int* bytes)
+{
+	*bytes = sizeof(OpCode) + sizeof(TipoModulo) + tamanioContenido;
+	void* paqueteSerializado = malloc(*bytes);
+	int offset = 0;
+
+	memcpy(paqueteSerializado + offset, &(paquete->codigoOperacion), sizeof(OpCode));
+	offset += sizeof(OpCode);
+
+	memcpy(paqueteSerializado + offset, paquete->contenido, tamanioContenido);
+	offset += tamanioContenido;
+
+	return paqueteSerializado;
 }
 
-void* serializarSuscripcion(Suscripcion* suscripcion, int* tamanio){
-	*tamanio = sizeof(int) + suscripcion->cantidadColas * sizeof(TipoCola);
+Paquete* armarPaquete(OpCode codigoOperacion, void* contenido)
+{
+	Paquete* paquete = (Paquete*)malloc(sizeof(Paquete));
+
+	paquete->codigoOperacion = codigoOperacion;
+	paquete->contenido = contenido;
+
+	return paquete;
+}
+
+void* armarPaqueteYSerializar(OpCode codigoOperacion, int tamanioContenido, void* contenido, int* bytes){
+	Paquete* paquete = armarPaquete(codigoOperacion, contenido);
+	void* paqueteSerializado = serializarPaquete(paquete, tamanioContenido, bytes);
+
+	free(paquete);
+
+	return paqueteSerializado;
+}
+
+void* serializarContenidoHaciaBroker(ContenidoHaciaBroker contenido, int tamanioContenido, int* bytes)
+{
+	*bytes = sizeof(TipoModulo) + tamanioContenido;
+	void* contenidoSerializado = malloc(*bytes);
+	int offset = 0;
+
+	memcpy(contenidoSerializado + offset, &(contenido.modulo), sizeof(TipoModulo));
+	offset += sizeof(TipoModulo);
+
+	memcpy(contenidoSerializado + offset, contenido.contenido, tamanioContenido);
+	offset += tamanioContenido;
+
+	return contenidoSerializado;
+}
+
+ContenidoHaciaBroker armarContenidoHaciaBroker(TipoModulo modulo, void* contenido)
+{
+	ContenidoHaciaBroker contenidoFinal;
+
+	contenidoFinal.modulo = modulo;
+	contenidoFinal.contenido = contenido;
+
+	return contenidoFinal;
+}
+
+void* armarYSerializarContenidoHaciaBroker(TipoModulo modulo, int tamanioContenido, void* contenido, int* bytes)
+{
+	void* serializacion;
+	ContenidoHaciaBroker contenidoFinal = armarContenidoHaciaBroker(modulo, contenido);
+	serializacion = serializarContenidoHaciaBroker(contenidoFinal, tamanioContenido, bytes);
+
+	return serializacion;
+}
+
+void* serializarAck(Ack contenido, int* bytes)
+{
+	*bytes = sizeof(ACK);
+	void* contenidoSerializado = malloc(*bytes);
+	int offset = 0;
+
+	memcpy(contenidoSerializado + offset, &(contenido.IDMensaje), sizeof(long));
+	offset += sizeof(long);
+
+	return contenidoSerializado;
+}
+
+Ack armarAck(long IDMensaje)
+{
+	Ack contenido;
+
+	contenido.IDMensaje = IDMensaje;
+
+	return contenido;
+}
+
+void* armarYSerializarAck(long IDMensaje, TipoModulo modulo, int* bytes)
+{
+	int bytesContenido, bytesContenidoHB;
+	Ack contenido = armarAck(IDMensaje);
+	void* contenidoSerializado = serializarAck(contenido, &bytesContenido);
+	void* contenidoHB = armarYSerializarContenidoHaciaBroker(modulo, bytesContenido, contenidoSerializado, &bytesContenidoHB);
+	void* serializacionFinal = armarPaqueteYSerializar(ACK, bytesContenidoHB, contenidoHB, bytes);
+
+	return serializacionFinal;
+}
+
+void* serializarSuscripcion(int cantidadColas, TipoCola* colas, int* tamanio)
+{
+	*tamanio = sizeof(int) + cantidadColas * sizeof(TipoCola);
 	void* stream = malloc(*tamanio);
 	int offset = 0;
 
-	memcpy(stream, &suscripcion->cantidadColas, sizeof(int));
+	memcpy(stream, &cantidadColas, sizeof(int));
 	offset += sizeof(int);
 
-	for(int i = 0; i < suscripcion->cantidadColas; i++){
-		memcpy(stream + offset, &((suscripcion->colas)[i]), sizeof(TipoCola));
+	for(int i = 0; i < cantidadColas; i++){
+		memcpy(stream + offset, &(colas[i]), sizeof(TipoCola));
 		offset += sizeof(TipoCola);
 	}
+
+	//fflush(stdout);
 
 	return stream;
 }
 
-void* serializarDato(void* mensaje, int* tamanio, TipoCola cola){
+Suscripcion* armarSuscripcion(int cantidadColasASuscribir, t_list* colas)
+{
+	Suscripcion* suscripcion = (Suscripcion*)malloc(sizeof(Suscripcion));
+
+	suscripcion->cantidadColas = cantidadColasASuscribir;
+	suscripcion->colas = malloc(sizeof(TipoCola) * cantidadColasASuscribir);
+
+	for(int i = 0; i < cantidadColasASuscribir; i++){
+		TipoCola* cola = list_get(colas, i);
+		(suscripcion->colas)[i] = *cola;
+	}
+
+	return suscripcion;
+}
+
+Publicacion armarPublicacion(TipoCola cola, int bytesDato, long IDCorrelativo, void* dato)
+{
+	Publicacion publicacion;
+
+	publicacion.IDCorrelativo = IDCorrelativo;
+	publicacion.cola = cola;
+	publicacion.tamanioDato = bytesDato;
+	publicacion.dato = dato;
+
+	return publicacion;
+}
+
+void* serializarPublicacion(Publicacion publicacion, int* bytes)
+{
+	int offset = 0;
+	*bytes = sizeof(long) + sizeof(TipoCola) + sizeof(int) + publicacion.tamanioDato;
+	void* serializacion = malloc(*bytes);
+
+	memcpy(serializacion + offset, &(publicacion.IDCorrelativo), sizeof(long));
+	offset += sizeof(long);
+
+	memcpy(serializacion + offset, &(publicacion.cola), sizeof(TipoCola));
+	offset += sizeof(TipoCola);
+
+	memcpy(serializacion + offset, &(publicacion.tamanioDato), sizeof(int));
+	offset += sizeof(int);
+
+	memcpy(serializacion + offset, publicacion.dato, publicacion.tamanioDato);
+	offset += publicacion.tamanioDato;
+
+	return serializacion;
+}
+
+void* armarYSerializarPublicacion(TipoCola cola, long IDCorrelativo, void* dato, int bytesDato, int* bytes)
+{
+	Publicacion publicacion = armarPublicacion(cola, bytesDato, IDCorrelativo, dato);
+	void* serializacion = serializarPublicacion(publicacion, bytes);
+
+	return serializacion;
+}
+
+void* serializarPublisher(TipoModulo modulo, TipoCola cola, void* dato, long IDCorrelativo, int* bytes)
+{
+	int bytesDato, bytesPublicacion, bytesContenido;
+	void *datoSerializado, *publicacionSerializada, *contenidoSerializado, *serializacionFinal;
+
+	datoSerializado = serializarDato(dato, &bytesDato, cola);
+	publicacionSerializada = armarYSerializarPublicacion(cola, IDCorrelativo, datoSerializado, bytesDato, &bytesPublicacion);
+	contenidoSerializado = armarYSerializarContenidoHaciaBroker(modulo, bytesPublicacion, publicacionSerializada, &bytesContenido);
+	serializacionFinal = armarPaqueteYSerializar(PUBLISHER, bytesContenido, contenidoSerializado, bytes);
+
+	return serializacionFinal;
+}
+
+void* serializarDato(void* mensaje, int* tamanio, TipoCola cola)
+{
 	switch(cola){
 		case NEW:
 			return serializarNew(mensaje, tamanio);
@@ -167,20 +345,22 @@ void* serializarGet(GetPokemon* pokemon, int* bytes){
 	return stream;
 }
 
-NewPokemon* deserializarNew(void* msj, int* bytes){
+NewPokemon* deserializarNew(void* mensaje){
 	NewPokemon* pokemon = malloc(sizeof(NewPokemon));
-	uint32_t pos = 0;
-	memcpy(&pokemon->posX, msj, sizeof(uint32_t));
-	pos += sizeof(uint32_t);
-	memcpy(&pokemon->posY, msj+pos, sizeof(uint32_t));
-	pos += sizeof(uint32_t);
-	memcpy(&pokemon->cantidad, msj+pos, sizeof(uint32_t));
-	pos += sizeof(uint32_t);
-	memcpy(&pokemon->largoNombre, msj+pos, sizeof(uint32_t));
-	pos += sizeof(uint32_t);
+	int offset = 0;
+
+	memcpy(&pokemon->posX, mensaje + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+
+	memcpy(&pokemon->posY, mensaje + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+	memcpy(&pokemon->cantidad, mensaje + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+	memcpy(&pokemon->largoNombre, mensaje + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
 
 	char* stringRecibido = malloc(pokemon->largoNombre+1);
-	memcpy(stringRecibido, msj+pos, pokemon->largoNombre+1);
+	memcpy(stringRecibido, mensaje + offset, pokemon->largoNombre+1);
 
 	pokemon->nombre = malloc(pokemon->largoNombre);
 	strncpy(pokemon->nombre, stringRecibido, pokemon->largoNombre);
@@ -189,43 +369,46 @@ NewPokemon* deserializarNew(void* msj, int* bytes){
 	return pokemon;
 }
 
-AppearedPokemon* deserializarAppeared(void* msj, int* bytes){
+AppearedPokemon* deserializarAppeared(void* mensaje){
 	AppearedPokemon* pokemon = malloc(sizeof(AppearedPokemon));
-	uint32_t pos = 0;
-	memcpy(&pokemon->posX, msj, sizeof(uint32_t));
-	pos += sizeof(uint32_t);
-	memcpy(&pokemon->posY, msj+pos, sizeof(uint32_t));
-	pos += sizeof(uint32_t);
-	memcpy(&pokemon->largoNombre, msj+pos, sizeof(uint32_t));
-	pos += sizeof(uint32_t);
-	memcpy(pokemon->nombre, msj+pos, pokemon->largoNombre + 1);
+	int offset = 0;
+
+	memcpy(&pokemon->posX, mensaje + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+	memcpy(&pokemon->posY, mensaje + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+	memcpy(&pokemon->largoNombre, mensaje + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+	memcpy(pokemon->nombre, mensaje + offset, pokemon->largoNombre + 1);
+	offset += pokemon->largoNombre + 1;
 
 	return pokemon;
 }
 
-CaughtPokemon* deserializarCaught(void* msj, int* bytes){
+CaughtPokemon* deserializarCaught(void* mensaje){
 	CaughtPokemon* pokemon = malloc(sizeof(CaughtPokemon));
+	int offset = 0;
 
-	memcpy(&pokemon->loAtrapo, msj, sizeof(uint32_t));
+	memcpy(&(pokemon->loAtrapo), mensaje + offset, sizeof(uint32_t));
 
 	return pokemon;
 }
 
-CatchPokemon* deserializarCatch(void* msj, int* bytes){
+CatchPokemon* deserializarCatch(void* mensaje){
 	CatchPokemon* pokemon = malloc(sizeof(CatchPokemon));
-	uint32_t pos = 0;
-	memcpy(&pokemon->posX, msj, sizeof(uint32_t));
+	int offset = 0;
 
-	pos += sizeof(uint32_t);
-	memcpy(&pokemon->posY, msj+pos, sizeof(uint32_t));
+	memcpy(&pokemon->posX, mensaje + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
 
-	pos += sizeof(uint32_t);
-	memcpy(&pokemon->largoNombre, msj+pos, sizeof(uint32_t));
+	memcpy(&pokemon->posY, mensaje + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
 
-	pos += sizeof(uint32_t);
+	memcpy(&pokemon->largoNombre, mensaje + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
 
 	char* stringRecibido = malloc(pokemon->largoNombre+1);
-	memcpy(stringRecibido, msj+pos, pokemon->largoNombre+1);
+	memcpy(stringRecibido, mensaje + offset, pokemon->largoNombre+1);
 
 	pokemon->nombre = malloc(pokemon->largoNombre);
 	strncpy(pokemon->nombre, stringRecibido, pokemon->largoNombre);
@@ -236,16 +419,16 @@ CatchPokemon* deserializarCatch(void* msj, int* bytes){
 	return pokemon;
 }
 
-GetPokemon* deserializarGet(void* msj, int* bytes){
+GetPokemon* deserializarGet(void* mensaje){
 	GetPokemon* pokemon = malloc(sizeof(GetPokemon));
+	int offset = 0;
 
-	uint32_t pos = 0;
-	memcpy(&pokemon->largoNombre, msj, sizeof(uint32_t));
-	pos += sizeof(uint32_t);
+	memcpy(&pokemon->largoNombre, mensaje + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
 
 	char* stringRecibido = malloc(pokemon->largoNombre+1);
 
-	memcpy(stringRecibido, msj+pos, pokemon->largoNombre+1);
+	memcpy(stringRecibido, mensaje + offset, pokemon->largoNombre+1);
 
 	pokemon->nombre = malloc(pokemon->largoNombre);
 	strncpy(pokemon->nombre, stringRecibido, pokemon->largoNombre);
@@ -255,26 +438,23 @@ GetPokemon* deserializarGet(void* msj, int* bytes){
 
 	return pokemon;
 }
-void* deserializarDato(void* msj,int* bytes){
-	TipoCola tipo;
 
-	memcpy(&tipo, msj , sizeof(TipoCola));
-
-	switch(tipo){
+void* deserializarDato(void* mensaje, TipoCola cola){
+	switch(cola){
 		case NEW:
-			return deserializarNew(msj, bytes);
+			return deserializarNew(mensaje);
 			break;
 		case APPEARED:
-			return deserializarAppeared(msj, bytes);
+			return deserializarAppeared(mensaje);
 			break;
 		case CATCH:
-			return deserializarCatch(msj, bytes);
+			return deserializarCatch(mensaje);
 			break;
 		case CAUGHT:
-			return deserializarCaught(msj, bytes);
+			return deserializarCaught(mensaje);
 			break;
 		case GET:
-			return deserializarGet(msj, bytes);
+			return deserializarGet(mensaje);
 			break;
 		default:
 			return NULL;
@@ -282,9 +462,10 @@ void* deserializarDato(void* msj,int* bytes){
 	}
 }
 
-void* serializarStreamIdMensajePublisher(long ID, TipoCola cola){
+void* serializarStreamIdMensajePublisher(long ID, TipoCola cola, int* bytes){
 	int offset = 0;
-	void* stream = malloc(sizeof(long) + sizeof(TipoCola));
+	*bytes = sizeof(long) + sizeof(TipoCola);
+	void* stream = malloc(*bytes);
 
 	memcpy(stream + offset, &ID, sizeof(long));
 	offset += sizeof(long);
@@ -319,6 +500,9 @@ void* serializarMensajeSuscriptor(long ID, long* IDCorrelativo, void* contenido,
 
 	memcpy(stream + offset,&(mensajeParaSuscriptor.cola), sizeof(TipoCola));
 	offset += sizeof(TipoCola);
+
+	memcpy(stream + offset, &mensajeParaSuscriptor.tamanioContenido, sizeof(int));
+	offset += sizeof(int);
 
 	memcpy(stream + offset,&(mensajeParaSuscriptor.contenido), mensajeParaSuscriptor.tamanioContenido);
 	offset += mensajeParaSuscriptor.tamanioContenido;

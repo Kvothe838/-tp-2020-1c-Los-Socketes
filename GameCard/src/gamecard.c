@@ -58,35 +58,20 @@ int main(void) {
 	ip = config_get_string_value(config, "IP_BROKER");
 	puerto = config_get_string_value(config, "PUERTO_BROKER");
 	int socketCliente = crear_conexion_cliente(ip, puerto);
-	mandarSuscripcion(socketCliente, GAMECARD, 3, NEW, GET, CAUGHT);
+	enviarSuscripcion(socketCliente, GAMECARD, 3, NEW, GET, CAUGHT);
 	log_info(logger, "MANDADAS COLAS NEW, GET, CAUGHT");
 
-	MensajeParaSuscriptor* mensaje = (MensajeParaSuscriptor*)malloc(sizeof(MensajeParaSuscriptor));
-	OpCode codigo;
-	int size;
-
 	while(1){
+		OpCode codigo;
 		recv(socketCliente, &codigo, sizeof(OpCode), 0);
 		if(codigo == NUEVO_MENSAJE_SUSCRIBER){
-			void *stream, *respuesta;
-			int bytes;
+			MensajeParaSuscriptor* mensaje = NULL;
+			int recepcionExitosa = recibirMensajeSuscriber(socketCliente, logger, GAMECARD, mensaje);
 
-			recv(socketCliente, &size, sizeof(int), 0);
-			recv(socketCliente, &mensaje->ID, sizeof(long), 0);
-			recv(socketCliente, &mensaje->IDMensajeCorrelativo, sizeof(long), 0);
-			recv(socketCliente, &mensaje->cola, sizeof(TipoCola), 0);
-			recv(socketCliente, &mensaje->tamanioContenido, sizeof(int), 0);
-			recv(socketCliente, &mensaje->contenido, mensaje->tamanioContenido, 0);
-
-			log_info(logger, "Nuevo mensaje recibido con ID %d de cola %s", mensaje->ID, tipoColaToString(mensaje->cola));
-
-			stream = malloc(sizeof(long));
-			memcpy(stream, &(mensaje->ID), sizeof(long));
-			respuesta = armarPaqueteYSerializar(ACK, GAMECARD, sizeof(long), stream, &bytes);
-
-			send(socketCliente, &respuesta, bytes, 0);
-
-			log_info(logger, "ACK enviado para mensaje con ID %d", mensaje->ID);
+			if(recepcionExitosa)
+			{
+				free(mensaje);
+			}
 		}
 	}
 

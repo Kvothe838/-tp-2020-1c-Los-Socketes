@@ -17,11 +17,18 @@
 typedef enum
 {
 	BROKER = 1,
-	TEAM,
 	GAMECARD,
 	GAMEBOY,
-	SUSCRIPTOR
+	TEAM //No va a haber nadie que use Team, pero desde 4 en adelante van a ser los hilos del Team.
 } TipoModulo;
+
+typedef enum
+{
+	BROKER_GAMEBOY = 1,
+	GAMECARD_GAMEBOY,
+	TEAM_GAMEBOY,
+	SUSCRIPTOR_GAMEBOY
+} ModuloGameboy;
 
 typedef enum
 {
@@ -44,12 +51,6 @@ typedef enum
 
 typedef struct
 {
-	int cantidadColas;
-	TipoCola* colas;
-} Suscripcion;
-
-typedef struct
-{
 	int size;
 	void* stream;
 } Buffer;
@@ -57,9 +58,39 @@ typedef struct
 typedef struct
 {
 	OpCode codigoOperacion;
-	TipoModulo modulo;
-	Buffer* buffer;
+	void* contenido;
 } Paquete;
+
+typedef struct
+{
+	TipoModulo modulo;
+	void* contenido;
+} ContenidoHaciaBroker;
+
+typedef struct
+{
+	int IDMensaje;
+} Ack;
+
+typedef struct
+{
+	int cantidadColas;
+	TipoCola* colas;
+} Suscripcion;
+
+typedef struct
+{
+	long IDCorrelativo;
+	TipoCola cola;
+	int tamanioDato;
+	void* dato;
+} Publicacion;
+
+typedef struct
+{
+	long IDMensaje;
+	TipoCola cola;
+} IDMensajePublisher;
 
 typedef struct
 {

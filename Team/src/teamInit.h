@@ -66,6 +66,7 @@ typedef struct{
 	char** objetivos;
 	char* ip;
 	char* puerto;
+	int ID;
 }Config;
 typedef Entrenador** Team;
 
@@ -82,7 +83,7 @@ int verificar_deadlock(Entrenador* persona);
 
 
 // INICIALIZAR Y CONFIGURAR
-void cargarConfig(Config* conexionConfig);
+void cargarConfig(Config* conexionConfig, t_log* logger);
 void iniciar_entrenador(Entrenador** entrenador);
 Entrenador* inicializarEntrenador(int id,char*posicion ,char* pokePertenecientes, char* pokeObjetivos);
 Entrenador** inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeObjetivos);

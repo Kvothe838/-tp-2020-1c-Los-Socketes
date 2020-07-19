@@ -23,12 +23,32 @@ ColaConSuscriptores* obtenerCola(TipoCola colaClave){
 	return dictionary_get(diccionario, tipoColaToString(colaClave));
 }
 
-void agregarSuscriptor(TipoCola colaClave, Suscriptor nuevoSuscriptor){
+int agregarSuscriptor(TipoCola colaClave, Suscriptor nuevoSuscriptor){
 	ColaConSuscriptores* colaEspecifica = obtenerCola(colaClave);
-	list_add(colaEspecifica->suscriptores, &nuevoSuscriptor);
+
+	_Bool buscarSuscriptor(void* suscriptorGeneric){
+		Suscriptor* suscriptor = (Suscriptor*)suscriptorGeneric;
+
+		return suscriptor->modulo == nuevoSuscriptor.modulo;
+	}
+
+	void* suscriptorEncontrado = list_find(colaEspecifica->suscriptores, &buscarSuscriptor);
+
+	if(suscriptorEncontrado == NULL)
+	{
+		list_add(colaEspecifica->suscriptores, &nuevoSuscriptor);
+
+		return 1;
+	} else {
+		Suscriptor* suscriptorAModificar = (Suscriptor*)suscriptorEncontrado;
+
+		suscriptorAModificar->socket = nuevoSuscriptor.socket;
+
+		return 0;
+	}
 }
 
-void agregarMensaje(TipoCola colaClave, int IDMensaje){
+void agregarMensaje(TipoCola colaClave, long IDMensaje){
 	ColaConSuscriptores* colaEspecifica = obtenerCola(colaClave);
 	list_add(colaEspecifica->IDMensajes, &IDMensaje);
 }

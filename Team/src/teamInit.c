@@ -132,16 +132,15 @@ int get_posicion(Entrenador* persona,int eje){
 	}
 }
 
-void cargarConfig(Config* conexionConfig){
-	t_log* logger;
+void cargarConfig(Config* conexionConfig, t_log* logger){
 	t_config* config;
-	logger = iniciar_logger("Team.log", "Team");
-	config = leer_config("configTeam.config", logger);
+	config = leer_config("../configTeam.config", logger);
 	conexionConfig->posiciones = config_get_array_value(config,"POSICIONES_ENTRENADORES"); // lista de strings, ultimo elemento nulo
 	conexionConfig->pertenecientes = config_get_array_value(config,"POKEMON_ENTRENADORES");
 	conexionConfig->objetivos = config_get_array_value(config,"OBJETIVOS_ENTRENADORES");
-	conexionConfig->ip = config_get_string_value(config, "IP_TEAM");
-	conexionConfig->puerto = config_get_string_value(config, "PUERTO_TEAM");
+	conexionConfig->ip = config_get_string_value(config, "IP_BROKER");
+	conexionConfig->puerto = config_get_string_value(config, "PUERTO_BROKER");
+	conexionConfig->ID = 4 + config_get_int_value(config, "ID"); //Cosas turbias del Broker.
 }
 Pokemon* crearPokemon(char *nombre,int x, int y) {
 	Pokemon *new = malloc(sizeof(Pokemon));
