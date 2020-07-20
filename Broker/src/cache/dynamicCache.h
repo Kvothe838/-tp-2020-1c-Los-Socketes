@@ -45,6 +45,7 @@ void agregarSuscriptorRecibido(long IDMensaje, Suscriptor* suscriptor);
 t_list* obtenerSuscriptoresRecibidos(long IDMensaje);
 int esSuscriptorRecibido(t_list* suscriptoresRecibidos, Suscriptor suscriptor);
 int* obtenerTamanioItem(long ID);
+void obtenerDump();
 /*void modificarSuscriptor(Suscriptor suscriptor);*/
 
 #endif /* CACHE_DYNAMICCACHE_H_ */

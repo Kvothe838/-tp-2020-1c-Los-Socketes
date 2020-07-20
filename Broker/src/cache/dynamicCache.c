@@ -318,15 +318,72 @@ void eliminarItem(long ID){
 	}
 }
 
-void imprimirTabla(ItemTablaDinamica tabla[], t_log* logger){
-	log_info(logger, "MOSTRANDO ELEMENTOS");
+//DUMP DE CACHE (COMIENZO)
+void imprimirDatos(t_list* listaDeParticiones){
+	uint32_t posicion = 0;
+	char stringFinal[1000];
+	FILE* archivoDump = fopen("dump.txt", "w+");
+
+	time_t t = time(NULL);
+	struct tm tm = *localtime(&t);
+
+	sprintf(stringFinal, "Dump: %d/%d/%d - %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, temporal_get_string_time());
+	fwrite(stringFinal, string_length(stringFinal), 1, archivoDump);
+
+
+
+	while(posicion < list_size(listaDeParticiones)){
+		ItemTablaDinamica *dato = list_get(listaDeParticiones, posicion);
+
+
+		if(dato->fechaUltimoUso != NULL){
+			sprintf(stringFinal,
+				"Partición %-5d 0x%-3X - 0x%-10X\t[X]\tsize %-5d\tLRU: %-15s\tCOLA: %-5s\tID: %d\n",
+				(posicion+1),
+				dato->posicion,
+				(dato->posicion + dato->tamanio) - 1,
+				(dato->tamanio),
+				dato->fechaUltimoUso,
+				(char*)tipoColaToString(dato->cola),
+				dato->ID);
+		}
+		else{
+			sprintf(stringFinal,
+				"Partición %-5d 0x%-3X - 0x%-10X\t[L]\tsize %d\n",
+				(posicion+1),
+				dato->posicion,
+				(dato->posicion + dato->tamanio) - 1,
+				(dato->tamanio)
+				);
+		}
+
+		fwrite(stringFinal, string_length(stringFinal), 1, archivoDump);
+		posicion++;
+	}
+	fclose(archivoDump);
+
+}
+
+bool ordenamientoDump(ItemTablaDinamica *primerDato, ItemTablaDinamica *segundoDato){
+	return primerDato->posicion < segundoDato->posicion;
+}
+
+void obtenerDump(){
+	t_list* lista = list_create();
 	for(int i = 0; i < tamanioTabla; i++){
-		if(!tabla[i].estaVacio){
-			log_info(logger, "Elemento ID %d, posicion %d,  espacio %d, fecha %s",
-					tabla[i].ID, tabla[i].posicion, tabla[i].tamanio, tabla[i].fechaUltimoUso);
+		if(!tablaElementos[i].estaVacio){
+			list_add(lista, &(tablaElementos[i]));
+		}
+
+		if(!tablaVacios[i].estaVacio){
+			list_add(lista, &(tablaVacios[i]));
 		}
 	}
+	list_sort(lista, ordenamientoDump);
+	imprimirDatos(lista);
+	list_destroy(lista);
 }
+//DUMP DE CACHE (FIN)
 
 //SUSCRIPTORES
 
