@@ -48,9 +48,9 @@ int agregarSuscriptor(TipoCola colaClave, Suscriptor nuevoSuscriptor){
 	}
 }
 
-void agregarMensaje(TipoCola colaClave, long IDMensaje){
+void agregarMensaje(TipoCola colaClave, long* IDMensaje){
 	ColaConSuscriptores* colaEspecifica = obtenerCola(colaClave);
-	list_add(colaEspecifica->IDMensajes, &IDMensaje);
+	list_add(colaEspecifica->IDMensajes, IDMensaje);
 	printf("PUNTERO1: %p %ld %d\n", (void*)(colaEspecifica->IDMensajes), *((long*)list_get(colaEspecifica->IDMensajes, 0)), list_size(colaEspecifica->IDMensajes));
 }
 

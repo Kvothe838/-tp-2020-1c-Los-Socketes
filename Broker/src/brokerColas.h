@@ -21,7 +21,7 @@ ColaConSuscriptores* obtenerCola(TipoCola colaClave);
  * Devuelve 1 si fue agregado exitosamente, o 0 si ya existía y su socket fue actualizado
 */
 int agregarSuscriptor(TipoCola colaClave, Suscriptor nuevoSuscriptor);
-void agregarMensaje(TipoCola colaClave, long IDMensaje);
+void agregarMensaje(TipoCola colaClave, long *IDMensaje);
 t_list* obtenerSuscriptoresPorCola(TipoCola colaClave);
 
 #endif /* BROKERCOLAS_H_ */

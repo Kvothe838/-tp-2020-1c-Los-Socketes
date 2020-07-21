@@ -111,7 +111,7 @@ void manejarPublisher(int socketCliente){
 
 	//Creo el nuevo MensajeEnCola y lo agrego a la cola correspondiente.
 	sem_wait(&mutexNuevoMensaje);
-	agregarMensaje(publicacion->cola, ID);
+	agregarMensaje(publicacion->cola, &ID);
 	ColaConSuscriptores* COLAWEA = obtenerCola(publicacion->cola);
 
 	printf("PUNTERO2: %p %ld %d\n", (void*)(COLAWEA->IDMensajes), *((long*)list_get(COLAWEA->IDMensajes, 0)), list_size(COLAWEA->IDMensajes));
