@@ -3,12 +3,21 @@
 #include "conexionBroker.h"
 #include "cache/dynamicCache.h"
 
+static void	sig_usr(int);
+
+void  err_sys(char * msg) {
+  printf("%s \n", msg);
+  exit(-1);
+}
+
+
 int main(void) {
 	t_config* config;
 	//pthread_t threadIniciarServidor, threadEnviarMensajesSuscriptores;
 	IniciarServidorArgs argumentos;
 
 	logger = iniciar_logger("loggerBroker.log", "Broker");
+	//config = leer_config("../configBroker.config", logger);
 	config = leer_config("configBroker.config", logger);
 
 	argumentos.ip = config_get_string_value(config, "IP_BROKER");
@@ -18,6 +27,13 @@ int main(void) {
 
 	inicializarDataBasica(config, logger);
 	crearDiccionario();
+
+
+	log_info(logger, "ID del proceso Broker: %d", process_getpid());
+
+	if (signal(SIGUSR1, sig_usr) == SIG_ERR)
+		err_sys("can't catch SIGUSR1");
+
 
 
 	//Pruebas para la caché.
@@ -32,6 +48,13 @@ int main(void) {
 	agregarItem(&b, sizeof(double), 3, NULL, NEW);
 
 	log_info(logger, "ANTES");
+
+	eliminarItem(2);
+
+	while(1){
+		printf("%d\n", process_getpid());
+		sleep(2);
+	}
 
 	for (int i = 0; i <= hasta; i++){
 		log_info(logger, "[ELEMENTO] ID %d, tamaño %d, posicion %d",
@@ -114,6 +137,8 @@ int main(void) {
 	return 0;
 }
 
-
-
-
+static void sig_usr(int signo)
+{
+	if (signo == SIGUSR1)
+		obtenerDump();
+}
