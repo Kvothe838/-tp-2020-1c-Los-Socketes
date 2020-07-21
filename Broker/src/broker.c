@@ -2,6 +2,7 @@
 #include "brokerColas.h"
 #include "conexionBroker.h"
 #include "cache/dynamicCache.h"
+#include <commons/process.h>
 
 static void	sig_usr(int);
 
@@ -13,12 +14,11 @@ void  err_sys(char * msg) {
 
 int main(void) {
 	t_config* config;
-	//pthread_t threadIniciarServidor, threadEnviarMensajesSuscriptores;
+	pthread_t threadIniciarServidor, threadEnviarMensajesSuscriptores;
 	IniciarServidorArgs argumentos;
 
 	logger = iniciar_logger("loggerBroker.log", "Broker");
-	//config = leer_config("../configBroker.config", logger);
-	config = leer_config("configBroker.config", logger);
+	config = leer_config("../configBroker.config", logger);
 
 	argumentos.ip = config_get_string_value(config, "IP_BROKER");
 	argumentos.puerto = config_get_string_value(config, "PUERTO_BROKER");
@@ -124,13 +124,10 @@ int main(void) {
 		tablaVacios[i].ID, tablaVacios[i].tamanio, tablaVacios[i].posicion);
 	}*/
 
-	inicializarMutex();
-	manejarPublisher(-1);
-
-	//pthread_create(&threadIniciarServidor, NULL,(void*)iniciarServidor, (void*)&argumentos);
-	//pthread_create(&threadEnviarMensajesSuscriptores, NULL,(void*)enviarMensajesSuscriptores, NULL);
-	//pthread_join(threadIniciarServidor, NULL);
-	//pthread_join(threadEnviarMensajesSuscriptores, NULL);
+	pthread_create(&threadIniciarServidor, NULL,(void*)iniciarServidor, (void*)&argumentos);
+	pthread_create(&threadEnviarMensajesSuscriptores, NULL,(void*)enviarMensajesSuscriptores, NULL);
+	pthread_join(threadIniciarServidor, NULL);
+	pthread_join(threadEnviarMensajesSuscriptores, NULL);
 
 	terminar_programa(logger, config);
 

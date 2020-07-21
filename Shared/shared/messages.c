@@ -349,10 +349,8 @@ int recibirMensajeSuscriber(int socket, t_log* logger, TipoModulo modulo, Mensaj
 
 int recibirIDMensajePublisher(int socket, IDMensajePublisher* mensaje)
 {
-	mensaje = (IDMensajePublisher*)malloc(sizeof(IDMensajePublisher));
-
-	recv(socket, &(mensaje->IDMensaje), sizeof(long), 0);
-	recv(socket, &(mensaje->cola), sizeof(TipoCola), 0);
+	recv(socket, &(mensaje->IDMensaje), sizeof(long), MSG_WAITALL);
+	recv(socket, &(mensaje->cola), sizeof(TipoCola), MSG_WAITALL);
 
 	return 1;
 }

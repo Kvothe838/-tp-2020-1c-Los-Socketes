@@ -23,26 +23,26 @@ ColaConSuscriptores* obtenerCola(TipoCola colaClave){
 	return dictionary_get(diccionario, tipoColaToString(colaClave));
 }
 
-int agregarSuscriptor(TipoCola colaClave, Suscriptor nuevoSuscriptor){
+int agregarSuscriptor(TipoCola colaClave, Suscriptor* nuevoSuscriptor){
 	ColaConSuscriptores* colaEspecifica = obtenerCola(colaClave);
 
 	_Bool buscarSuscriptor(void* suscriptorGeneric){
 		Suscriptor* suscriptor = (Suscriptor*)suscriptorGeneric;
 
-		return suscriptor->modulo == nuevoSuscriptor.modulo;
+		return suscriptor->modulo == nuevoSuscriptor->modulo;
 	}
 
 	void* suscriptorEncontrado = list_find(colaEspecifica->suscriptores, &buscarSuscriptor);
 
 	if(suscriptorEncontrado == NULL)
 	{
-		list_add(colaEspecifica->suscriptores, &nuevoSuscriptor);
+		list_add(colaEspecifica->suscriptores, nuevoSuscriptor);
 
 		return 1;
 	} else {
 		Suscriptor* suscriptorAModificar = (Suscriptor*)suscriptorEncontrado;
 
-		suscriptorAModificar->socket = nuevoSuscriptor.socket;
+		suscriptorAModificar->socket = nuevoSuscriptor->socket;
 
 		return 0;
 	}

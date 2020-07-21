@@ -101,16 +101,10 @@ printf("\n\n");
 					recv(conexionBroker, &code, sizeof(OpCode), 0);
 
 					if(code == ID_MENSAJE){
-						log_info(logger, "RECIBÍ ID_MENSAJE");
-						IDMensajePublisher* mensaje;
-						int recibidoExitoso = recibirIDMensajePublisher(conexionBroker, mensaje);
-						log_info(logger, "EL ID ES %d", mensaje->IDMensaje);
+						IDMensajePublisher* mensaje = malloc(sizeof(IDMensajePublisher));
+						recibirIDMensajePublisher(conexionBroker, mensaje);
+						log_info(logger, "EL ID ES %ld", mensaje->IDMensaje);
 						log_info(logger, "LA COLA ES %s", tipoColaToString(mensaje->cola));
-
-						if(recibidoExitoso)
-						{
-							free(mensaje);
-						}
 
 					}else {
 						log_info(logger, "TODO MAL. RECIBÍ OTRO CODE.");

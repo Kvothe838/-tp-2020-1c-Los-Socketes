@@ -25,7 +25,7 @@ t_list* recibirSuscripcion(int socket, int* cantidadColas)
 	return colas;
 }
 
-void manejarSuscripcion(t_list* colas, int cantidadColas, Suscriptor suscriptor)
+void manejarSuscripcion(t_list* colas, int cantidadColas, Suscriptor* suscriptor)
 {
 	for(int i = 0; i < cantidadColas; i++)
 	{
@@ -73,22 +73,6 @@ Publicacion* recibirPublisher(int socket)
 	return publicacion;
 }
 
-Publicacion* recibirPublisherFake()
-{
-	int tamanio = sizeof(int);
-	int ALGO = 123;
-
-	Publicacion* publicacion = malloc(sizeof(long) + sizeof(TipoCola) + sizeof(int) + tamanio);
-
-	publicacion->IDCorrelativo = 0;
-	publicacion->cola = NEW;
-	publicacion->tamanioDato = tamanio;
-	publicacion->dato = malloc(sizeof(int));
-	memcpy(publicacion->dato, &ALGO, 0);
-
-	return publicacion;
-}
-
 void manejarPublisher(int socketCliente){
 	void *buffer, *stream;
 	int bytes, tamanio;
@@ -96,26 +80,14 @@ void manejarPublisher(int socketCliente){
 
 	ID = generarIDMensaje();
 
-	Publicacion* publicacion;
-
-	if(socketCliente == -1)
-	{
-		publicacion = recibirPublisherFake();
-	} else {
-		publicacion = recibirPublisher(socketCliente);
-	}
+	Publicacion* publicacion = recibirPublisher(socketCliente);
 
 	//Log obligatorio.
 	log_info(logger, "Llegada de nuevo mensaje con ID %ld a cola %s", ID, tipoColaToString(publicacion->cola));
 
-
 	//Creo el nuevo MensajeEnCola y lo agrego a la cola correspondiente.
 	sem_wait(&mutexNuevoMensaje);
 	agregarMensaje(publicacion->cola, &ID);
-	ColaConSuscriptores* COLAWEA = obtenerCola(publicacion->cola);
-
-	printf("PUNTERO2: %p %ld %d\n", (void*)(COLAWEA->IDMensajes), *((long*)list_get(COLAWEA->IDMensajes, 0)), list_size(COLAWEA->IDMensajes));
-	fflush(stdout);
 	agregarItem(publicacion->dato, publicacion->tamanioDato, ID, publicacion->IDCorrelativo, publicacion->cola);
 	sem_post(&mutexNuevoMensaje);
 
@@ -123,12 +95,12 @@ void manejarPublisher(int socketCliente){
 	log_info(logger, "Almacenado mensaje con ID %ld y posición de inicio de partición %d.", ID, obtenerPosicionPorID(ID));
 
 	//Le devuelvo el id del mensaje y el tipo de cola al cliente.
-	/*stream = serializarStreamIdMensajePublisher(ID, publicacion->cola, &tamanio);
+	stream = serializarStreamIdMensajePublisher(&ID, &(publicacion->cola), &tamanio);
 	buffer = armarPaqueteYSerializar(ID_MENSAJE, tamanio, stream, &bytes);
 
 	if(send(socketCliente, buffer, bytes, 0) == -1){
 		log_info(logger, "Error intentando enviar ID del mensaje al publisher.");
-	}*/
+	}
 }
 
 Ack recibirACK(int socket)
@@ -140,14 +112,14 @@ Ack recibirACK(int socket)
 	return contenido;
 }
 
-void manejarACK(Ack contenido, Suscriptor suscriptor){
+void manejarACK(Ack contenido, Suscriptor* suscriptor){
 	//Log obligatorio.
 	log_info(logger, "Recepción del mensaje con ID %d.", contenido.IDMensaje);
 
-	agregarSuscriptorRecibido(contenido.IDMensaje, &suscriptor);
+	agregarSuscriptorRecibido(contenido.IDMensaje, suscriptor);
 }
 
-void processRequest(int opCode, Suscriptor suscriptor){
+void processRequest(int opCode, Suscriptor* suscriptor){
 	if(opCode <= 0){
 		pthread_exit(NULL);
 		return;
@@ -156,16 +128,16 @@ void processRequest(int opCode, Suscriptor suscriptor){
 	switch ((OpCode)opCode) {
 		case SUSCRIBER:;
 			int cantidadColas;
-			t_list* colas = recibirSuscripcion(suscriptor.socket, &cantidadColas);
+			t_list* colas = recibirSuscripcion(suscriptor->socket, &cantidadColas);
 			manejarSuscripcion(colas, cantidadColas, suscriptor);
 
 			break;
 		case PUBLISHER:;
-			manejarPublisher(suscriptor.socket);
+			manejarPublisher(suscriptor->socket);
 
 			break;
 		case ACK:;
-			Ack ack = recibirACK(suscriptor.socket);
+			Ack ack = recibirACK(suscriptor->socket);
 			manejarACK(ack, suscriptor);
 
 			break;
@@ -175,7 +147,7 @@ void processRequest(int opCode, Suscriptor suscriptor){
 }
 
 void serveClient(int* socketCliente){
-	Suscriptor suscriptor;
+	Suscriptor* suscriptor = (Suscriptor*)malloc(sizeof(Suscriptor));
 	TipoModulo modulo;
 	OpCode opCode;
 
@@ -190,8 +162,8 @@ void serveClient(int* socketCliente){
 	//Log obligatorio.
 	log_info(logger, "Conexión de proceso %s a Broker.", tipoModuloToString(modulo));
 
-	suscriptor.socket = *socketCliente;
-	suscriptor.modulo = modulo;
+	suscriptor->socket = *socketCliente;
+	suscriptor->modulo = modulo;
 
 	processRequest(opCode, suscriptor);
 }
@@ -217,7 +189,6 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 
 	for(int i = 0; i < list_size(cola->IDMensajes); i++){
 		long* IDMensaje = list_get(cola->IDMensajes, i);
-		log_info(logger, "ID DEL MENSAJE: %ld", *IDMensaje);
 
 		sem_wait(&mutexNuevoMensaje);
 		void* mensaje = obtenerItem(*IDMensaje);
@@ -243,7 +214,7 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 
 			if((send(suscriptor->socket, paqueteSerializado, bytes, 0)) > 0){
 				//Log obligatorio.
-				log_info(logger, "Envío de mensaje con ID %d a suscriptor %d.", IDMensaje, suscriptor);
+				log_info(logger, "Envío de mensaje con ID %ld a suscriptor %s", *IDMensaje, tipoModuloToString(suscriptor->modulo));
 
 				agregarSuscriptorEnviado(*IDMensaje, suscriptor);
 			}

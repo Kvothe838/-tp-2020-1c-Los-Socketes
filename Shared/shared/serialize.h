@@ -25,7 +25,7 @@ CatchPokemon* deserializarCatch(void* mensaje);
 GetPokemon* deserializarGet(void* mensaje);
 void* deserializarDato(void* mensaje, TipoCola cola);
 
-void* serializarStreamIdMensajePublisher(long ID, TipoCola cola, int* bytes);
+void* serializarStreamIdMensajePublisher(long* ID, TipoCola* cola, int* bytes);
 void* serializarMensajeSuscriptor(long ID, long IDCorrelativo, void* contenido, int tamanioContenido, TipoCola tipoCola, int* bytes);
 
 

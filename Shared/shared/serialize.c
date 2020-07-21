@@ -418,14 +418,14 @@ void* deserializarDato(void* mensaje, TipoCola cola){
 	}
 }
 
-void* serializarStreamIdMensajePublisher(long ID, TipoCola cola, int* bytes){
+void* serializarStreamIdMensajePublisher(long* ID, TipoCola* cola, int* bytes){
 	int offset = 0;
 	*bytes = sizeof(long) + sizeof(TipoCola);
 	void* stream = malloc(*bytes);
 
-	memcpy(stream + offset, &ID, sizeof(long));
+	memcpy(stream + offset, ID, sizeof(long));
 	offset += sizeof(long);
-	memcpy(stream + offset, &cola, sizeof(TipoCola));
+	memcpy(stream + offset, cola, sizeof(TipoCola));
 	offset += sizeof(TipoCola);
 
 	return stream;
