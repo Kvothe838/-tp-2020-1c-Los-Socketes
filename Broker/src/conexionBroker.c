@@ -1,6 +1,14 @@
 #include "conexionBroker.h"
 #include "cache/dynamicCache.h"
 
+sem_t mutexNuevoMensaje;
+
+void inicializarMutex()
+{
+	sem_init(&mutexNuevoMensaje, 0, 1);
+	log_info(logger, "Semáforo inicializado");
+}
+
 t_list* recibirSuscripcion(int socket, int* cantidadColas)
 {
 	t_list* colas = list_create();
@@ -65,6 +73,22 @@ Publicacion* recibirPublisher(int socket)
 	return publicacion;
 }
 
+Publicacion* recibirPublisherFake()
+{
+	int tamanio = sizeof(int);
+	int ALGO = 123;
+
+	Publicacion* publicacion = malloc(sizeof(long) + sizeof(TipoCola) + sizeof(int) + tamanio);
+
+	publicacion->IDCorrelativo = 0;
+	publicacion->cola = NEW;
+	publicacion->tamanioDato = tamanio;
+	publicacion->dato = malloc(sizeof(int));
+	memcpy(publicacion->dato, &ALGO, 0);
+
+	return publicacion;
+}
+
 void manejarPublisher(int socketCliente){
 	void *buffer, *stream;
 	int bytes, tamanio;
@@ -72,25 +96,39 @@ void manejarPublisher(int socketCliente){
 
 	ID = generarIDMensaje();
 
-	Publicacion* publicacion = recibirPublisher(socketCliente);
+	Publicacion* publicacion;
+
+	if(socketCliente == -1)
+	{
+		publicacion = recibirPublisherFake();
+	} else {
+		publicacion = recibirPublisher(socketCliente);
+	}
+
+	//Log obligatorio.
+	log_info(logger, "Llegada de nuevo mensaje con ID %ld a cola %s", ID, tipoColaToString(publicacion->cola));
+
 
 	//Creo el nuevo MensajeEnCola y lo agrego a la cola correspondiente.
-
+	sem_wait(&mutexNuevoMensaje);
 	agregarMensaje(publicacion->cola, ID);
+	ColaConSuscriptores* COLAWEA = obtenerCola(publicacion->cola);
 
-	//Log obligatorio.
-	log_info(logger, "Llegada de nuevo mensaje con ID %d a cola %s", ID, tipoColaToString(publicacion->cola));
-
+	printf("PUNTERO2: %p %ld %d\n", (void*)(COLAWEA->IDMensajes), *((long*)list_get(COLAWEA->IDMensajes, 0)), list_size(COLAWEA->IDMensajes));
+	fflush(stdout);
 	agregarItem(publicacion->dato, publicacion->tamanioDato, ID, publicacion->IDCorrelativo, publicacion->cola);
+	sem_post(&mutexNuevoMensaje);
 
 	//Log obligatorio.
-	log_info(logger, "Almacenado mensaje con ID %d y posición de inicio de partición %d.", ID, obtenerPosicionPorID(ID));
+	log_info(logger, "Almacenado mensaje con ID %ld y posición de inicio de partición %d.", ID, obtenerPosicionPorID(ID));
 
 	//Le devuelvo el id del mensaje y el tipo de cola al cliente.
-	stream = serializarStreamIdMensajePublisher(ID, publicacion->cola, &tamanio);
+	/*stream = serializarStreamIdMensajePublisher(ID, publicacion->cola, &tamanio);
 	buffer = armarPaqueteYSerializar(ID_MENSAJE, tamanio, stream, &bytes);
 
-	send(socketCliente, buffer, bytes, 0);
+	if(send(socketCliente, buffer, bytes, 0) == -1){
+		log_info(logger, "Error intentando enviar ID del mensaje al publisher.");
+	}*/
 }
 
 Ack recibirACK(int socket)
@@ -178,12 +216,17 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 	ColaConSuscriptores* cola = obtenerCola(tipoCola);
 
 	for(int i = 0; i < list_size(cola->IDMensajes); i++){
-		long* IDMensaje = (long*)list_get(cola->IDMensajes, i);
+		long* IDMensaje = list_get(cola->IDMensajes, i);
+		log_info(logger, "ID DEL MENSAJE: %ld", *IDMensaje);
+
+		sem_wait(&mutexNuevoMensaje);
 		void* mensaje = obtenerItem(*IDMensaje);
 		int* tamanioItem = obtenerTamanioItem(*IDMensaje);
+		long* IDCorrelativo = obtenerIDCorrelativoItem(*IDMensaje);
+		sem_post(&mutexNuevoMensaje);
 
-		if(mensaje == NULL || tamanioItem == NULL){
-			log_info(logger, "Error intentando obtener item para ID %d", *IDMensaje);
+		if(mensaje == NULL || tamanioItem == NULL || IDCorrelativo == NULL){
+			log_info(logger, "Error intentando obtener item para ID %ld", *IDMensaje);
 			abort();
 		}
 
@@ -193,9 +236,9 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 
 			if(suscriptoresRecibidos != NULL && esSuscriptorRecibido(suscriptoresRecibidos, *suscriptor)) continue;
 
-			int bytes;
-			void* stream = serializarMensajeSuscriptor(*IDMensaje, NULL, mensaje, *tamanioItem, tipoCola);
-			void* paqueteSerializado = armarPaqueteYSerializar(NUEVO_MENSAJE_SUSCRIBER, sizeof(MensajeParaSuscriptor), stream, &bytes);
+			int bytes, bytesMensajeSuscriptor;
+			void* stream = serializarMensajeSuscriptor(*IDMensaje, *IDCorrelativo, mensaje, *tamanioItem, tipoCola, &bytesMensajeSuscriptor);
+			void* paqueteSerializado = armarPaqueteYSerializar(NUEVO_MENSAJE_SUSCRIBER, bytesMensajeSuscriptor, stream, &bytes);
 			free(stream);
 
 			if((send(suscriptor->socket, paqueteSerializado, bytes, 0)) > 0){
@@ -245,6 +288,8 @@ void iniciarServidor(IniciarServidorArgs* argumentos){
 	listen(socket_servidor, SOMAXCONN);
 
     freeaddrinfo(servinfo);
+
+    inicializarMutex();
 
     while(1){
     	esperarCliente(socket_servidor);

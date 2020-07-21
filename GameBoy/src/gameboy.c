@@ -102,7 +102,7 @@ printf("\n\n");
 
 					if(code == ID_MENSAJE){
 						log_info(logger, "RECIBÍ ID_MENSAJE");
-						IDMensajePublisher* mensaje = NULL;
+						IDMensajePublisher* mensaje;
 						int recibidoExitoso = recibirIDMensajePublisher(conexionBroker, mensaje);
 						log_info(logger, "EL ID ES %d", mensaje->IDMensaje);
 						log_info(logger, "LA COLA ES %s", tipoColaToString(mensaje->cola));
@@ -274,7 +274,7 @@ printf("\n\n");
 				{
 					CatchPokemon* pokemon = getCatchPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 					long IDMensaje = 12345;
-					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, NULL, CATCH, pokemon))
+					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, 0, CATCH, pokemon))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
 						abort();
@@ -297,7 +297,7 @@ printf("\n\n");
 
 					long IDMensaje = 12345;
 
-					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, NULL, GET, pokemon))
+					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, 0, GET, pokemon))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s", argv[1], argv[2], argv[3]);
 						abort();
@@ -318,7 +318,7 @@ printf("\n\n");
 
 					long IDMensaje = 12345;
 
-					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, NULL, NEW, pokemon))
+					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, 0, NEW, pokemon))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s", argv[1], argv[2], argv[3]);
 						abort();

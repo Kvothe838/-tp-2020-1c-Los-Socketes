@@ -309,16 +309,14 @@ GetPokemon* getGetPokemon(char* nombre){
    	 ya sabe cómo deserializarlo.
 */
 
-int enviarMensajeASuscriptor(int socketSuscriptor, long ID, long* IDCorrelativo, TipoCola cola, void* data){
-	int tamanioFinal = sizeof(long) + sizeof(TipoCola);
-	int resultado = 1, *tamanioDato = NULL;
+int enviarMensajeASuscriptor(int socketSuscriptor, long ID, long IDCorrelativo, TipoCola cola, void* data){
+	int resultado = 1, tamanioDato, bytes;
 	void *mensajeAEnviar, *datoSerializado;
 
-	datoSerializado = serializarDato(data, tamanioDato, cola);
-	tamanioFinal += *tamanioDato;
-	mensajeAEnviar = serializarMensajeSuscriptor(ID, IDCorrelativo, datoSerializado, *tamanioDato, cola);
+	datoSerializado = serializarDato(data, &tamanioDato, cola);
+	mensajeAEnviar = serializarMensajeSuscriptor(ID, IDCorrelativo, datoSerializado, tamanioDato, cola, &bytes);
 
-	if(send(socketSuscriptor, mensajeAEnviar, tamanioFinal, 0) == -1){
+	if(send(socketSuscriptor, mensajeAEnviar, bytes, 0) == -1){
 		resultado = 0;
 	}
 

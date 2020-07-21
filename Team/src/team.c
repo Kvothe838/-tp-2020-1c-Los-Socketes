@@ -52,7 +52,7 @@ int main(void) {
 					{
 						long* IDCorrelativoAEsperar = list_get(IDsCorrelativos, i);
 
-						if(*(mensaje->IDMensajeCorrelativo) == *IDCorrelativoAEsperar)
+						if(mensaje->IDMensajeCorrelativo == *IDCorrelativoAEsperar)
 						{
 							log_info(logger, "Me llegó el puto mensaje que esperaba, respuesta al ID %d", *IDCorrelativoAEsperar);
 						}

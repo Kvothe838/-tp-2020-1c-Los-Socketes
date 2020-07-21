@@ -1,53 +1,9 @@
 #include "../shared/serialize.h"
 #include "../shared/messages.h"
 
-/*void* serializarPaquete(Paquete* paquete, int *bytes)
-{
-	*bytes = sizeof(OpCode) + sizeof(TipoModulo) + sizeof(int) + paquete->buffer->size;
-	void* paqueteSerializado = malloc(*bytes);
-	int offset = 0;
-
-	memcpy(paqueteSerializado + offset, &(paquete->codigoOperacion), sizeof(OpCode));
-	offset += sizeof(OpCode);
-
-	if(paquete->modulo != -1){
-		memcpy(paqueteSerializado + offset, &(paquete->modulo), sizeof(TipoModulo));
-		offset += sizeof(TipoModulo);
-	}
-
-	memcpy(paqueteSerializado + offset, &(paquete->buffer->size), sizeof(int));
-	offset += sizeof(int);
-	memcpy(paqueteSerializado + offset, paquete->buffer->stream, paquete->buffer->size);
-	offset += paquete->buffer->size;
-
-	return paqueteSerializado;
-}*/
-
-/*Paquete* armarPaquete(OpCode codigoOperacion, TipoModulo modulo, int tamanio, void* stream){
-	Paquete* paquete = malloc(sizeof(Paquete));
-
-	paquete->codigoOperacion = codigoOperacion;
-	paquete->modulo = modulo;
-	paquete->buffer = malloc(sizeof(Buffer));
-	paquete->buffer->size = tamanio;
-	paquete->buffer->stream = stream;
-
-	return paquete;
-}*/
-
-/*void* armarPaqueteYSerializar(OpCode codigoOperacion, TipoModulo modulo, int tamanio, void* stream, int* bytes){
-	Paquete* paquete = armarPaquete(codigoOperacion, modulo, tamanio, stream);
-	void* paqueteSerializado = serializarPaquete(paquete, bytes);
-
-	free(paquete->buffer);
-	free(paquete);
-
-	return paqueteSerializado;
-}*/
-
 void* serializarPaquete(Paquete* paquete, int tamanioContenido, int* bytes)
 {
-	*bytes = sizeof(OpCode) + sizeof(TipoModulo) + tamanioContenido;
+	*bytes = sizeof(OpCode) + tamanioContenido;
 	void* paqueteSerializado = malloc(*bytes);
 	int offset = 0;
 
@@ -74,7 +30,7 @@ void* armarPaqueteYSerializar(OpCode codigoOperacion, int tamanioContenido, void
 	Paquete* paquete = armarPaquete(codigoOperacion, contenido);
 	void* paqueteSerializado = serializarPaquete(paquete, tamanioContenido, bytes);
 
-	free(paquete);
+	//free(paquete);
 
 	return paqueteSerializado;
 }
@@ -475,21 +431,17 @@ void* serializarStreamIdMensajePublisher(long ID, TipoCola cola, int* bytes){
 	return stream;
 }
 
-void* serializarMensajeSuscriptor(long ID, long* IDCorrelativo, void* contenido, int tamanioContenido, TipoCola tipoCola){
+void* serializarMensajeSuscriptor(long ID, long IDCorrelativo, void* contenido, int tamanioContenido, TipoCola tipoCola, int* bytes){
 	MensajeParaSuscriptor mensajeParaSuscriptor;
 
 	mensajeParaSuscriptor.ID = ID;
-
-	if(IDCorrelativo == NULL){
-		long IDCorrelativoInexistente = -1;
-		IDCorrelativo = &IDCorrelativoInexistente;
-	}
-
 	mensajeParaSuscriptor.IDMensajeCorrelativo = IDCorrelativo;
 	mensajeParaSuscriptor.cola = tipoCola;
+	mensajeParaSuscriptor.tamanioContenido = tamanioContenido;
 	mensajeParaSuscriptor.contenido = contenido;
 
-	void* stream =  malloc(sizeof(MensajeParaSuscriptor));
+	*bytes = sizeof(long)*2 + sizeof(TipoCola) + sizeof(int) + tamanioContenido;
+	void* stream =  malloc(*bytes);
 	int offset = 0;
 
 	memcpy(stream + offset,&(mensajeParaSuscriptor.ID), sizeof(long));
@@ -504,7 +456,7 @@ void* serializarMensajeSuscriptor(long ID, long* IDCorrelativo, void* contenido,
 	memcpy(stream + offset, &mensajeParaSuscriptor.tamanioContenido, sizeof(int));
 	offset += sizeof(int);
 
-	memcpy(stream + offset,&(mensajeParaSuscriptor.contenido), mensajeParaSuscriptor.tamanioContenido);
+	memcpy(stream + offset, mensajeParaSuscriptor.contenido, mensajeParaSuscriptor.tamanioContenido);
 	offset += mensajeParaSuscriptor.tamanioContenido;
 
 	return stream;

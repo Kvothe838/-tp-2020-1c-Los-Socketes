@@ -130,7 +130,7 @@ typedef struct
 
 typedef struct {
 	long ID;
-	long* IDMensajeCorrelativo;
+	long IDMensajeCorrelativo;
 	TipoCola cola;
 	int tamanioContenido;
 	void* contenido;

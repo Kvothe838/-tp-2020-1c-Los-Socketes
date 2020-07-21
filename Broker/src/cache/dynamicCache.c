@@ -1,5 +1,6 @@
 #include "dynamicCache.h"
 
+sem_t mutexCache;
 int particionesLiberadas = 0;
 
 int esTiempoMasAntiguo(char* masAntiguo, char* masNuevo){
@@ -116,7 +117,7 @@ void modificarTablaVacio(ItemTablaDinamica *tabla, int espacioRequerido, int pos
 	}
 }
 
-int obtenerPosicionPorID(int ID){
+int obtenerPosicionPorID(long ID){
 	for(int i = 0; i < tamanioTabla; i++){
 		if(tablaElementos[i].ID == ID)
 			return i;
@@ -144,6 +145,8 @@ void inicializarTabla(ItemTablaDinamica **tabla, int estaVacio){
 }
 
 void inicializarDataBasica(t_config* config, t_log* loggerParaAsignar) {
+	sem_init(&mutexCache, 0, 1);
+
 	tamanioCache = (int)config_get_int_value(config, "TAMANO_MEMORIA");
 	tamanioParticionMinima = (int)config_get_int_value(config, "TAMANO_MINIMO_PARTICION");
 	algoritmoEleccionDeParticionLibre = config_get_string_value(config,"ALGORITMO_PARTICION_LIBRE");
@@ -175,6 +178,8 @@ void agregarElementoValido(int posicionVacioAModificar, int tamanioItem, void* i
 }
 
 void agregarItem(void* item, int tamanioItem, long ID, long IDCorrelativo, TipoCola cola){
+	sem_wait(&mutexCache);
+
 	int posicionVacioAModificar;
 	int hayEspacioParaItem = hayEspacio(tamanioItem, &posicionVacioAModificar);
 
@@ -184,6 +189,8 @@ void agregarItem(void* item, int tamanioItem, long ID, long IDCorrelativo, TipoC
 	}
 
 	agregarElementoValido(posicionVacioAModificar, tamanioItem, item, ID, IDCorrelativo, cola);
+
+	sem_post(&mutexCache);
 }
 
 ItemTablaDinamica* obtenerItemTablaDinamica(long ID){
@@ -202,6 +209,15 @@ int* obtenerTamanioItem(long ID){
 	if(item == NULL) return NULL;
 
 	return &item->tamanio;
+}
+
+long* obtenerIDCorrelativoItem(long ID)
+{
+	ItemTablaDinamica* item = obtenerItemTablaDinamica(ID);
+
+	if(item == NULL) return NULL;
+
+	return &(item->IDCorrelativo);
 }
 
 void* obtenerItem(long ID){
@@ -293,6 +309,8 @@ void compactarCache(){
 }
 
 void eliminarItem(long ID){
+	sem_wait(&mutexCache);
+
 	particionesLiberadas++;
 	int posDatoAEliminar = obtenerPosicionPorID(ID);
 	int posNuevoVacio = obtenerPrimeraParticion(tablaVacios, 1);
@@ -316,6 +334,8 @@ void eliminarItem(long ID){
 	if(frecuenciaCompactacion <= 1 || particionesLiberadas == frecuenciaCompactacion){
 		compactarCache();
 	}
+
+	sem_post(&mutexCache);
 }
 
 void imprimirTabla(ItemTablaDinamica tabla[], t_log* logger){

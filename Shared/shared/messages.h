@@ -4,7 +4,7 @@
 #include "../shared/structs.h"
 
 int enviarSuscripcion(int socket, TipoModulo modulo, int cantidadColasASuscribir, ...);
-int enviarMensajeASuscriptor(int socketSuscriptor, long ID, long* IDCorrelativo, TipoCola cola, void* data);
+int enviarMensajeASuscriptor(int socketSuscriptor, long ID, long IDCorrelativo, TipoCola cola, void* data);
 void* recibirMensaje(int socket_cliente);
 int enviarPublisherSinIDCorrelativo(int socket, TipoModulo modulo, void* dato, TipoCola cola);
 int enviarPublisherConIDCorrelativo(int socket, TipoModulo modulo, void* dato, TipoCola cola, long IDCorrelativo);

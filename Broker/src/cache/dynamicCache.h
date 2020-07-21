@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "basicCache.h"
+#include <semaphore.h>
 
 char *algoritmoEleccionDeParticionLibre;
 char *algoritmoEleccionDeVictima;
@@ -39,12 +40,12 @@ void eliminarVictima();
 void inicializarCache();
 void* obtenerItem(long id);
 void imprimirTabla(ItemTablaDinamica tabla[], t_log* logger);
-int obtenerPosicionPorID(int ID);
+int obtenerPosicionPorID(long ID);
 void agregarSuscriptorEnviado(long IDMensaje, Suscriptor* suscriptor);
 void agregarSuscriptorRecibido(long IDMensaje, Suscriptor* suscriptor);
 t_list* obtenerSuscriptoresRecibidos(long IDMensaje);
 int esSuscriptorRecibido(t_list* suscriptoresRecibidos, Suscriptor suscriptor);
 int* obtenerTamanioItem(long ID);
-/*void modificarSuscriptor(Suscriptor suscriptor);*/
+long* obtenerIDCorrelativoItem(long ID);
 
 #endif /* CACHE_DYNAMICCACHE_H_ */

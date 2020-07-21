@@ -17,6 +17,7 @@
 #include <pthread.h>
 #include <shared/connection.h>
 #include <shared/commonsExtensions.h>
+#include <semaphore.h>
 
 pthread_t thread;
 t_log* logger;
@@ -28,5 +29,7 @@ typedef struct {
 
 void iniciarServidor(IniciarServidorArgs* argumentos);
 void enviarMensajesSuscriptores();
+void manejarPublisher(int socketCliente);
+void inicializarMutex();
 
 #endif
