@@ -29,6 +29,8 @@ int main(void) {
 
 	log_info(logger, "ID del proceso Broker: %d", process_getpid());
 
+	//kill -SIGUSR1 [ID]
+
 	if (signal(SIGUSR1, sig_usr) == SIG_ERR)
 		err_sys("can't catch SIGUSR1");
 

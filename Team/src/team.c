@@ -27,7 +27,7 @@ int main(void) {
 			recv(conexionBroker, &codigo, sizeof(OpCode), 0);
 			if(codigo == NUEVO_MENSAJE_SUSCRIBER){
 				MensajeParaSuscriptor* mensaje= NULL;
-				int recepcionExitosa = recibirMensajeSuscriber(conexionBroker, logger, TEAM, mensaje);
+				int recepcionExitosa = recibirMensajeSuscriber(conexionBroker, logger, TEAM, &mensaje, configTeam->ip, configTeam->puerto);
 
 				if(recepcionExitosa)
 				{

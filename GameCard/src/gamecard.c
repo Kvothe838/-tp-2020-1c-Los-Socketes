@@ -66,7 +66,7 @@ int main(void) {
 		recv(socketCliente, &codigo, sizeof(OpCode), 0);
 		if(codigo == NUEVO_MENSAJE_SUSCRIBER){
 			MensajeParaSuscriptor* mensaje;
-			int recepcionExitosa = recibirMensajeSuscriber(socketCliente, logger, GAMECARD, &mensaje);
+			int recepcionExitosa = recibirMensajeSuscriber(socketCliente, logger, GAMECARD, &mensaje, ip, puerto);
 
 			if(recepcionExitosa)
 			{

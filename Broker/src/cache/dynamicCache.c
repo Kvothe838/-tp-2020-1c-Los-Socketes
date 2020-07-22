@@ -208,7 +208,7 @@ int* obtenerTamanioItem(long ID){
 
 	if(item == NULL) return NULL;
 
-	return &item->tamanio;
+	return &(item->tamanio);
 }
 
 long* obtenerIDCorrelativoItem(long ID)

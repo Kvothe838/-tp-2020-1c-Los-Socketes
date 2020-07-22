@@ -325,7 +325,7 @@ int enviarMensajeASuscriptor(int socketSuscriptor, long ID, long IDCorrelativo, 
 	return resultado;
 }
 
-int recibirMensajeSuscriber(int socket, t_log* logger, TipoModulo modulo, MensajeParaSuscriptor** mensaje){
+int recibirMensajeSuscriber(int socket, t_log* logger, TipoModulo modulo, MensajeParaSuscriptor** mensaje, char* ip, char* puerto){
 	*mensaje = (MensajeParaSuscriptor*)malloc(sizeof(MensajeParaSuscriptor));
 	void *respuesta;
 	int bytes;
@@ -341,9 +341,13 @@ int recibirMensajeSuscriber(int socket, t_log* logger, TipoModulo modulo, Mensaj
 
 	respuesta = armarYSerializarAck((*mensaje)->ID, modulo, &bytes);
 
-	send(socket, &respuesta, bytes, 0);
+	int nuevoSocket = crear_conexion_cliente(ip, puerto);
+
+	send(nuevoSocket, respuesta, bytes, 0);
 
 	log_info(logger, "ACK enviado para mensaje con ID %d", (*mensaje)->ID);
+
+	liberar_conexion_cliente(nuevoSocket);
 
 	return 1; //Retornar 0 en caso de error en algún recv.
 }
