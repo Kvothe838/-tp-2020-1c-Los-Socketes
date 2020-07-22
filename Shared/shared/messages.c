@@ -325,24 +325,25 @@ int enviarMensajeASuscriptor(int socketSuscriptor, long ID, long IDCorrelativo, 
 	return resultado;
 }
 
-int recibirMensajeSuscriber(int socket, t_log* logger, TipoModulo modulo, MensajeParaSuscriptor* mensaje){
-	mensaje = (MensajeParaSuscriptor*)malloc(sizeof(MensajeParaSuscriptor));
+int recibirMensajeSuscriber(int socket, t_log* logger, TipoModulo modulo, MensajeParaSuscriptor** mensaje){
+	*mensaje = (MensajeParaSuscriptor*)malloc(sizeof(MensajeParaSuscriptor));
 	void *respuesta;
 	int bytes;
 
-	recv(socket, &mensaje->ID, sizeof(long), 0);
-	recv(socket, &mensaje->IDMensajeCorrelativo, sizeof(long), 0);
-	recv(socket, &mensaje->cola, sizeof(TipoCola), 0);
-	recv(socket, &mensaje->tamanioContenido, sizeof(int), 0);
-	recv(socket, &mensaje->contenido, mensaje->tamanioContenido, 0);
+	recv(socket, &((*mensaje)->ID), sizeof(long), 0);
+	recv(socket, &((*mensaje)->IDMensajeCorrelativo), sizeof(long), 0);
+	recv(socket, &((*mensaje)->cola), sizeof(TipoCola), 0);
+	recv(socket, &((*mensaje)->tamanioContenido), sizeof(int), 0);
+	(*mensaje)->contenido = malloc((*mensaje)->tamanioContenido);
+	recv(socket, (*mensaje)->contenido, (*mensaje)->tamanioContenido, 0);
 
-	log_info(logger, "Nuevo mensaje recibido con ID %d de cola %s", mensaje->ID, tipoColaToString(mensaje->cola));
+	log_info(logger, "Nuevo mensaje recibido con ID %d de cola %s", (*mensaje)->ID, tipoColaToString((*mensaje)->cola));
 
-	respuesta = armarYSerializarAck(mensaje->ID, modulo, &bytes);
+	respuesta = armarYSerializarAck((*mensaje)->ID, modulo, &bytes);
 
 	send(socket, &respuesta, bytes, 0);
 
-	log_info(logger, "ACK enviado para mensaje con ID %d", mensaje->ID);
+	log_info(logger, "ACK enviado para mensaje con ID %d", (*mensaje)->ID);
 
 	return 1; //Retornar 0 en caso de error en algún recv.
 }

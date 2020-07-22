@@ -6,7 +6,6 @@ sem_t mutexNuevoMensaje;
 void inicializarMutex()
 {
 	sem_init(&mutexNuevoMensaje, 0, 1);
-	log_info(logger, "Semáforo inicializado");
 }
 
 t_list* recibirSuscripcion(int socket, int* cantidadColas)
@@ -197,6 +196,7 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 		sem_post(&mutexNuevoMensaje);
 
 		if(mensaje == NULL || tamanioItem == NULL || IDCorrelativo == NULL){
+			log_info(logger, "VALORES %d %d %d", mensaje == NULL, tamanioItem == NULL, IDCorrelativo == NULL);
 			log_info(logger, "Error intentando obtener item para ID %ld", *IDMensaje);
 			abort();
 		}

@@ -23,8 +23,6 @@ int main(void) {
 	argumentos.ip = config_get_string_value(config, "IP_BROKER");
 	argumentos.puerto = config_get_string_value(config, "PUERTO_BROKER");
 
-	log_info(logger, "Escuchando en ip %s y puerto %s...", argumentos.ip, argumentos.puerto);
-
 	inicializarDataBasica(config, logger);
 	crearDiccionario();
 

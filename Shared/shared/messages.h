@@ -8,7 +8,7 @@ int enviarMensajeASuscriptor(int socketSuscriptor, long ID, long IDCorrelativo, 
 void* recibirMensaje(int socket_cliente);
 int enviarPublisherSinIDCorrelativo(int socket, TipoModulo modulo, void* dato, TipoCola cola);
 int enviarPublisherConIDCorrelativo(int socket, TipoModulo modulo, void* dato, TipoCola cola, long IDCorrelativo);
-int recibirMensajeSuscriber(int socket, t_log* logger, TipoModulo modulo, MensajeParaSuscriptor* mensaje);
+int recibirMensajeSuscriber(int socket, t_log* logger, TipoModulo modulo, MensajeParaSuscriptor** mensaje);
 int recibirIDMensajePublisher(int socket, IDMensajePublisher* mensaje);
 
 /**
