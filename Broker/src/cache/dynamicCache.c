@@ -209,6 +209,8 @@ int* obtenerTamanioItem(long ID){
 	if(item == NULL) return NULL;
 
 	return &(item->tamanio);
+
+	//return item->tamanio;
 }
 
 long* obtenerIDCorrelativoItem(long ID)
@@ -218,6 +220,8 @@ long* obtenerIDCorrelativoItem(long ID)
 	if(item == NULL) return NULL;
 
 	return &(item->IDCorrelativo);
+
+	//return item->IDCorrelativo;
 }
 
 void* obtenerItem(long ID){
@@ -355,10 +359,9 @@ void imprimirDatos(t_list* listaDeParticiones){
 	while(posicion < list_size(listaDeParticiones)){
 		ItemTablaDinamica *dato = list_get(listaDeParticiones, posicion);
 
-
 		if(dato->fechaUltimoUso != NULL){
 			sprintf(stringFinal,
-				"Partición %-5d 0x%-3X - 0x%-10X\t[X]\tsize %-5d\tLRU: %-15s\tCOLA: %-5s\tID: %d\n",
+				"Partición %-5d 0x%-3X - 0x%-10X\t[X]\tsize %-5d\tLRU: %-15s\tCOLA: %-5s\tID: %ld\n",
 				(posicion+1),
 				dato->posicion,
 				(dato->posicion + dato->tamanio) - 1,
@@ -384,7 +387,10 @@ void imprimirDatos(t_list* listaDeParticiones){
 
 }
 
-bool ordenamientoDump(ItemTablaDinamica *primerDato, ItemTablaDinamica *segundoDato){
+bool ordenamientoDump(void* primerDatoVoid, void* segundoDatoVoid){
+	ItemTablaDinamica* primerDato = (ItemTablaDinamica*)primerDatoVoid;
+	ItemTablaDinamica* segundoDato = (ItemTablaDinamica*)segundoDatoVoid;
+
 	return primerDato->posicion < segundoDato->posicion;
 }
 
@@ -413,14 +419,13 @@ void* mapearSuscriptorAModulo(void* suscriptor){
 	return &(suscriptorCasteado->modulo);
 }
 
-void agregarSuscriptorEnviado(long IDMensaje, Suscriptor* suscriptor){
+void agregarSuscriptorEnviado(long IDMensaje, Suscriptor** suscriptor){
 	for(int i = 0; i < tamanioTabla; i++){
 		if(tablaElementos[i].ID == IDMensaje){
-			t_list* moduloSuscriptores = list_map(tablaElementos[i].suscriptoresEnviados, &mapearSuscriptorAModulo);
-			int yaEnviado = list_contains_int(moduloSuscriptores, suscriptor->modulo);
+			int yaEnviado = list_contains_int(tablaElementos[i].suscriptoresEnviados, (*suscriptor)->modulo);
 
 			if(!yaEnviado){
-				list_add(tablaElementos[i].suscriptoresRecibidos, &suscriptor);
+				list_add(tablaElementos[i].suscriptoresEnviados, &((*suscriptor)->modulo));
 			}
 		}
 	}
@@ -434,23 +439,22 @@ void agregarSuscriptorRecibido(long IDMensaje, Suscriptor* suscriptor){
 	}
 }
 
-t_list* obtenerSuscriptoresRecibidos(long IDMensaje){
-	t_list* suscriptoresRecibidos = NULL;
+t_list* obtenerSuscriptoresEnviados(long IDMensaje){
+	t_list* suscriptoresEnviados = NULL;
 
 	for(int i = 0; i < tamanioTabla; i++){
 		if(tablaElementos[i].ID == IDMensaje){
-			suscriptoresRecibidos = tablaElementos[i].suscriptoresRecibidos;
+			suscriptoresEnviados = tablaElementos[i].suscriptoresEnviados;
 		}
 	}
 
-	return suscriptoresRecibidos;
+	return suscriptoresEnviados;
 }
 
-int esSuscriptorRecibido(t_list* suscriptoresRecibidos, Suscriptor suscriptor){
-	//t_list* moduloSuscriptores = list_map(suscriptoresRecibidos, &mapearSuscriptorAModulo);
+int esSuscriptorEnviado(t_list* suscriptoresEnviados, Suscriptor suscriptor){
 
-	for(int i = 0; i < list_size(suscriptoresRecibidos); i++){
-		TipoModulo* suscriptorRecibido = list_get(suscriptoresRecibidos, i);
+	for(int i = 0; i < list_size(suscriptoresEnviados); i++){
+		TipoModulo* suscriptorRecibido = list_get(suscriptoresEnviados, i);
 
 		if(*suscriptorRecibido == suscriptor.modulo){
 			return 1;
@@ -458,25 +462,6 @@ int esSuscriptorRecibido(t_list* suscriptoresRecibidos, Suscriptor suscriptor){
 	}
 
 	return 0;
-
-	//return list_contains_int(moduloSuscriptores, suscriptor.modulo);
 }
-
-/*void modificarSuscriptor(Suscriptor nuevoSuscriptor){
-	_Bool buscarSuscriptor(void* suscriptorGeneric){
-			Suscriptor* suscriptor = (Suscriptor*)suscriptorGeneric;
-
-			return suscriptor->modulo == nuevoSuscriptor.modulo;
-	}
-
-	for(int i = 0; i < tamanioTabla; i++){
-		Suscriptor* suscriptorEncontrado = list_find(tablaElementos[i].suscriptoresRecibidos, &buscarSuscriptor);
-
-		if(suscriptorEncontrado != NULL){
-			suscriptorEncontrado->socket = nuevoSuscriptor.socket;
-		}
-	}
-}*/
-
 
 

@@ -214,7 +214,7 @@ void* serializarDato(void* mensaje, int* tamanio, TipoCola cola)
 }
 
 void* serializarNew(NewPokemon* pokemon, int* bytes){
-	*bytes = sizeof(uint32_t) * 4 + pokemon->largoNombre + 1;
+	*bytes = sizeof(uint32_t) * 4 + pokemon->largoNombre;
 	void* stream =  malloc(*bytes);
 	int offset = 0;
 
@@ -230,14 +230,14 @@ void* serializarNew(NewPokemon* pokemon, int* bytes){
 	memcpy(stream + offset, &pokemon->largoNombre, sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
-	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre + 1);
-	offset += pokemon->largoNombre + 1;
+	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre);
+	offset += pokemon->largoNombre;
 
 	return stream;
 }
 
 void* serializarAppeared(AppearedPokemon* pokemon, int* bytes){
-	*bytes = sizeof(uint32_t) * 3 + pokemon->largoNombre + 1;
+	*bytes = sizeof(uint32_t) * 3 + pokemon->largoNombre;
 	void* stream =  malloc(*bytes);
 	int offset = 0;
 
@@ -250,14 +250,14 @@ void* serializarAppeared(AppearedPokemon* pokemon, int* bytes){
 	memcpy(stream + offset, &pokemon->largoNombre, sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
-	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre + 1);
-	offset += pokemon->largoNombre + 1;
+	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre);
+	offset += pokemon->largoNombre;
 
 	return stream;
 }
 
 void* serializarCatch(CatchPokemon* pokemon, int* bytes){
-	*bytes = sizeof(uint32_t) * 3 + pokemon->largoNombre + 1;
+	*bytes = sizeof(uint32_t) * 3 + pokemon->largoNombre;
 	void* stream =  malloc(*bytes);
 	int offset = 0;
 
@@ -270,8 +270,8 @@ void* serializarCatch(CatchPokemon* pokemon, int* bytes){
 	memcpy(stream + offset, &pokemon->largoNombre, sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
-	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre + 1);
-	offset += pokemon->largoNombre + 1;
+	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre);
+	offset += pokemon->largoNombre;
 
 	return stream;
 }
@@ -288,15 +288,15 @@ void* serializarCaught(CaughtPokemon* pokemon, int* bytes){
 }
 
 void* serializarGet(GetPokemon* pokemon, int* bytes){
-	*bytes = sizeof(uint32_t) + pokemon->largoNombre + 1;
+	*bytes = sizeof(uint32_t) + pokemon->largoNombre;
 	void* stream =  malloc(*bytes);
 	int offset = 0;
 
 	memcpy(stream + offset, &pokemon->largoNombre, sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
-	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre + 1);
-	offset += pokemon->largoNombre + 1;
+	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre);
+	offset += pokemon->largoNombre;
 
 	return stream;
 }

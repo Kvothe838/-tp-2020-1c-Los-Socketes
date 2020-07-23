@@ -124,8 +124,6 @@ void processRequest(int opCode, Suscriptor* suscriptor){
 		return;
 	}
 
-	log_info(logger, "Nuevo request. Opcode: %d", opCode);
-
 	switch ((OpCode)opCode) {
 		case SUSCRIBER:;
 			int cantidadColas;
@@ -138,7 +136,6 @@ void processRequest(int opCode, Suscriptor* suscriptor){
 
 			break;
 		case ACK:;
-			log_info(logger, "RECIBÍ ACK");
 			Ack ack = recibirACK(suscriptor->socket);
 			manejarACK(ack, suscriptor);
 
@@ -192,23 +189,19 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 	for(int i = 0; i < list_size(cola->IDMensajes); i++){
 		long* IDMensaje = list_get(cola->IDMensajes, i);
 
-		sem_wait(&mutexNuevoMensaje);
 		void* mensaje = obtenerItem(*IDMensaje);
 		int* tamanioItem = obtenerTamanioItem(*IDMensaje);
 		long* IDCorrelativo = obtenerIDCorrelativoItem(*IDMensaje);
-		sem_post(&mutexNuevoMensaje);
 
 		if(mensaje == NULL || tamanioItem == NULL || IDCorrelativo == NULL){
-			//log_info(logger, "VALORES %d %d %d", mensaje == NULL, tamanioItem == NULL, IDCorrelativo == NULL);
-			log_info(logger, "Error intentando obtener item para ID %ld", *IDMensaje);
 			abort();
 		}
 
 		for(int j = 0; j < list_size(cola->suscriptores); j++){
 			Suscriptor* suscriptor = (Suscriptor*)list_get(cola->suscriptores, j);
-			t_list* suscriptoresRecibidos = obtenerSuscriptoresRecibidos(*IDMensaje);
+			t_list* suscriptoresEnviados = obtenerSuscriptoresEnviados(*IDMensaje);
 
-			if(suscriptoresRecibidos != NULL && esSuscriptorRecibido(suscriptoresRecibidos, *suscriptor)) continue;
+			if(suscriptoresEnviados != NULL && esSuscriptorEnviado(suscriptoresEnviados, *suscriptor)) continue;
 
 			int bytes, bytesMensajeSuscriptor;
 			void* stream = serializarMensajeSuscriptor(*IDMensaje, *IDCorrelativo, mensaje, *tamanioItem, tipoCola, &bytesMensajeSuscriptor);
@@ -219,7 +212,7 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 				//Log obligatorio.
 				log_info(logger, "Envío de mensaje con ID %ld a suscriptor %s", *IDMensaje, tipoModuloToString(suscriptor->modulo));
 
-				agregarSuscriptorEnviado(*IDMensaje, suscriptor);
+				agregarSuscriptorEnviado(*IDMensaje, &suscriptor);
 			}
 		}
 	}
@@ -230,7 +223,9 @@ void enviarMensajesSuscriptores(){
 		int colas[] = {NEW, GET, CATCH, APPEARED, LOCALIZED, CAUGHT};
 
 		for (int i = 0; i < 6; i++){
+			sem_wait(&mutexNuevoMensaje);
 			enviarMensajesPorCola(colas[i]);
+			sem_post(&mutexNuevoMensaje);
 		}
 	}
 }
@@ -262,8 +257,6 @@ void iniciarServidor(IniciarServidorArgs* argumentos){
 	listen(socket_servidor, SOMAXCONN);
 
     freeaddrinfo(servinfo);
-
-    inicializarMutex();
 
     while(1){
     	esperarCliente(socket_servidor);

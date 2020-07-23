@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "basicCache.h"
 #include <semaphore.h>
+#include "shared/messages.h"
 
 char *algoritmoEleccionDeParticionLibre;
 char *algoritmoEleccionDeVictima;
@@ -41,10 +42,10 @@ void inicializarCache();
 void* obtenerItem(long id);
 void imprimirTabla(ItemTablaDinamica tabla[], t_log* logger);
 int obtenerPosicionPorID(long ID);
-void agregarSuscriptorEnviado(long IDMensaje, Suscriptor* suscriptor);
+void agregarSuscriptorEnviado(long IDMensaje, Suscriptor** suscriptor);
 void agregarSuscriptorRecibido(long IDMensaje, Suscriptor* suscriptor);
-t_list* obtenerSuscriptoresRecibidos(long IDMensaje);
-int esSuscriptorRecibido(t_list* suscriptoresRecibidos, Suscriptor suscriptor);
+t_list* obtenerSuscriptoresEnviados(long IDMensaje);
+int esSuscriptorEnviado(t_list* suscriptoresRecibidos, Suscriptor suscriptor);
 int* obtenerTamanioItem(long ID);
 long* obtenerIDCorrelativoItem(long ID);
 void obtenerDump();

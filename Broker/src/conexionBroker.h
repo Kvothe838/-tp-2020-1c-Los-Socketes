@@ -29,5 +29,6 @@ typedef struct {
 
 void iniciarServidor(IniciarServidorArgs* argumentos);
 void enviarMensajesSuscriptores();
+void inicializarMutex();
 
 #endif

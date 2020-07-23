@@ -124,6 +124,8 @@ int main(void) {
 		tablaVacios[i].ID, tablaVacios[i].tamanio, tablaVacios[i].posicion);
 	}*/
 
+    inicializarMutex();
+
 	pthread_create(&threadIniciarServidor, NULL,(void*)iniciarServidor, (void*)&argumentos);
 	pthread_create(&threadEnviarMensajesSuscriptores, NULL,(void*)enviarMensajesSuscriptores, NULL);
 	pthread_join(threadIniciarServidor, NULL);
