@@ -40,6 +40,7 @@ void compactarCache();
 void eliminarVictima();
 void inicializarCache();
 void* obtenerItem(long id);
+void cambiarLRU(long ID);
 void imprimirTabla(ItemTablaDinamica tabla[], t_log* logger);
 int obtenerPosicionPorID(long ID);
 void agregarSuscriptorEnviado(long IDMensaje, Suscriptor** suscriptor);
@@ -49,6 +50,5 @@ int esSuscriptorEnviado(t_list* suscriptoresRecibidos, Suscriptor suscriptor);
 int* obtenerTamanioItem(long ID);
 long* obtenerIDCorrelativoItem(long ID);
 void obtenerDump();
-/*void modificarSuscriptor(Suscriptor suscriptor);*/
 
 #endif /* CACHE_DYNAMICCACHE_H_ */

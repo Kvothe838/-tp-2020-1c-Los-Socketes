@@ -229,10 +229,17 @@ void* obtenerItem(long ID){
 
 	if(item == NULL) return NULL;
 
-	free(item->fechaUltimoUso);
-	item->fechaUltimoUso = temporal_get_string_time();
-
 	return obtenerValor(item->tamanio, item->posicion);
+}
+
+void cambiarLRU(long ID)
+{
+	ItemTablaDinamica* item = obtenerItemTablaDinamica(ID);
+
+	if(item != NULL){
+		free(item->fechaUltimoUso);
+		item->fechaUltimoUso = temporal_get_string_time();
+	}
 }
 
 void consolidarCache(ItemTablaDinamica* elementoVacio, int posicionElementoVacio, int posicionElemento){

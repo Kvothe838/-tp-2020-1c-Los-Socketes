@@ -36,13 +36,14 @@ void manejarSuscripcion(t_list* colas, int cantidadColas, Suscriptor* suscriptor
 	}
 }
 
-long generarIDMensaje(){
+long* generarIDMensaje(){
 	char* str = temporal_get_string_time();
-	unsigned long hash = 0;
+	long* hash = malloc(sizeof(long));
+	*hash = 0;
 	int c;
 
 	while ((c = *str++))
-		hash = c + (hash << 6) + (hash << 16) - hash;
+		*hash = c + (*hash << 6) + (*hash << 16) - *hash;
 
 	return hash;
 }
@@ -75,26 +76,25 @@ Publicacion* recibirPublisher(int socket)
 void manejarPublisher(int socketCliente){
 	void *buffer, *stream;
 	int bytes, tamanio;
-	long ID;
+	long* ID;
 
 	ID = generarIDMensaje();
 
 	Publicacion* publicacion = recibirPublisher(socketCliente);
 
 	//Log obligatorio.
-	log_info(logger, "Llegada de nuevo mensaje con ID %ld a cola %s", ID, tipoColaToString(publicacion->cola));
+	log_info(logger, "Llegada de nuevo mensaje con ID %ld a cola %s", *ID, tipoColaToString(publicacion->cola));
 
 	//Creo el nuevo MensajeEnCola y lo agrego a la cola correspondiente.
-	sem_wait(&mutexNuevoMensaje);
-	agregarMensaje(publicacion->cola, &ID);
-	agregarItem(publicacion->dato, publicacion->tamanioDato, ID, publicacion->IDCorrelativo, publicacion->cola);
-	sem_post(&mutexNuevoMensaje);
+
+	agregarMensaje(publicacion->cola, ID);
+	agregarItem(publicacion->dato, publicacion->tamanioDato, *ID, publicacion->IDCorrelativo, publicacion->cola);
 
 	//Log obligatorio.
-	log_info(logger, "Almacenado mensaje con ID %ld y posición de inicio de partición %d.", ID, obtenerPosicionPorID(ID));
+	log_info(logger, "Almacenado mensaje con ID %ld y posición de inicio de partición %d.", *ID, obtenerPosicionPorID(*ID));
 
 	//Le devuelvo el id del mensaje y el tipo de cola al cliente.
-	stream = serializarStreamIdMensajePublisher(&ID, &(publicacion->cola), &tamanio);
+	stream = serializarStreamIdMensajePublisher(ID, &(publicacion->cola), &tamanio);
 	buffer = armarPaqueteYSerializar(ID_MENSAJE, tamanio, stream, &bytes);
 
 	if(send(socketCliente, buffer, bytes, 0) == -1){
@@ -132,7 +132,9 @@ void processRequest(int opCode, Suscriptor* suscriptor){
 
 			break;
 		case PUBLISHER:;
+			sem_wait(&mutexNuevoMensaje);
 			manejarPublisher(suscriptor->socket);
+			sem_post(&mutexNuevoMensaje);
 
 			break;
 		case ACK:;
@@ -197,7 +199,15 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 			abort();
 		}
 
-		for(int j = 0; j < list_size(cola->suscriptores); j++){
+		int tamanioCola = list_size(cola->suscriptores);
+
+		if(tamanioCola > 0)
+		{
+			cambiarLRU(*IDMensaje);
+		}
+
+		for(int j = 0; j < tamanioCola; j++)
+		{
 			Suscriptor* suscriptor = (Suscriptor*)list_get(cola->suscriptores, j);
 			t_list* suscriptoresEnviados = obtenerSuscriptoresEnviados(*IDMensaje);
 

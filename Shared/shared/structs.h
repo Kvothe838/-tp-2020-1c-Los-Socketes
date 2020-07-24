@@ -69,7 +69,7 @@ typedef struct
 
 typedef struct
 {
-	int IDMensaje;
+	long IDMensaje;
 } Ack;
 
 typedef struct
