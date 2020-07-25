@@ -5,6 +5,7 @@
 #include <commons/process.h>
 
 static void	sig_usr(int);
+static void sig_usr2(int);
 
 void  err_sys(char * msg) {
   printf("%s \n", msg);
@@ -26,15 +27,16 @@ int main(void) {
 	inicializarDataBasica(config, logger);
 	crearDiccionario();
 
-
 	log_info(logger, "ID del proceso Broker: %d", process_getpid());
 
-	//kill -SIGUSR1 [ID]
+	//Forma de llamar al signal: kill -SIGUSR1 [ID]
 
-	if (signal(SIGUSR1, sig_usr) == SIG_ERR)
+	if(signal(SIGUSR1, sig_usr) == SIG_ERR)
 		err_sys("can't catch SIGUSR1");
-
-
+	if(signal(SIGUSR2, sig_usr2) == SIG_ERR)
+		err_sys("can't catch SIGUSR2");
+	/*Esta signal SIGUSR2 sirve sólo para terminar el programa de forma correcta, pasando por las liberaciones de
+	 memoria del final del main.*/
 
 	//Pruebas para la caché.
 	/*int a = 87;
@@ -131,6 +133,8 @@ int main(void) {
 	pthread_join(threadIniciarServidor, NULL);
 	pthread_join(threadEnviarMensajesSuscriptores, NULL);
 
+	liberarDiccionario();
+	liberarCache();
 	terminar_programa(logger, config);
 
 	return 0;
@@ -138,6 +142,12 @@ int main(void) {
 
 static void sig_usr(int signo)
 {
-	if (signo == SIGUSR1)
+	if(signo == SIGUSR1)
 		obtenerDump();
+}
+
+static void sig_usr2(int signo){
+	log_info(logger, "SIGUSR2");
+	if(signo == SIGUSR2)
+		cortarPrograma();
 }

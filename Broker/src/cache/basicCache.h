@@ -15,5 +15,6 @@ void inicializarCache(int tamanio);
 void guardarValor(void* valor, int tamanio, int posicion);
 void* obtenerValor(int tamanio, int posicion);
 void moverBloque(int tamanio, int posicionVieja, int posicionNueva);
+void liberarBasicCache();
 
 #endif

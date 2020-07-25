@@ -12,6 +12,20 @@ void crearDiccionario(){
 	dictionary_put(diccionario, tipoColaToString(CAUGHT), crearColaConSuscriptores());
 }
 
+void destructorDataDiccionario(void* colaBuffer)
+{
+	ColaConSuscriptores* cola = (ColaConSuscriptores*)colaBuffer;
+
+	list_destroy_and_destroy_elements(cola->suscriptores, free);
+	list_destroy_and_destroy_elements(cola->IDMensajes, free);
+
+	free(cola);
+}
+
+void liberarDiccionario(){
+	dictionary_destroy_and_destroy_elements(diccionario, destructorDataDiccionario);
+}
+
 ColaConSuscriptores* crearColaConSuscriptores(){
 	ColaConSuscriptores* cola = (ColaConSuscriptores*)malloc(sizeof(ColaConSuscriptores));
 	cola->suscriptores = list_create();
@@ -41,8 +55,8 @@ int agregarSuscriptor(TipoCola colaClave, Suscriptor* nuevoSuscriptor){
 		return 1;
 	} else {
 		Suscriptor* suscriptorAModificar = (Suscriptor*)suscriptorEncontrado;
-
 		suscriptorAModificar->socket = nuevoSuscriptor->socket;
+		suscriptorAModificar->estaCaido = 0;
 
 		return 0;
 	}

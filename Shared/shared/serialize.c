@@ -30,7 +30,7 @@ void* armarPaqueteYSerializar(OpCode codigoOperacion, int tamanioContenido, void
 	Paquete* paquete = armarPaquete(codigoOperacion, contenido);
 	void* paqueteSerializado = serializarPaquete(paquete, tamanioContenido, bytes);
 
-	//free(paquete);
+	free(paquete);
 
 	return paqueteSerializado;
 }
@@ -90,15 +90,12 @@ Ack armarAck(long IDMensaje)
 	return contenido;
 }
 
-void* armarYSerializarAck(long IDMensaje, TipoModulo modulo, int* bytes)
+void* armarYSerializarAck(long IDMensaje, int* bytes)
 {
-	int bytesContenido, bytesContenidoHB;
 	Ack contenido = armarAck(IDMensaje);
-	void* contenidoSerializado = serializarAck(contenido, &bytesContenido);
-	void* contenidoHB = armarYSerializarContenidoHaciaBroker(modulo, bytesContenido, contenidoSerializado, &bytesContenidoHB);
-	void* serializacionFinal = armarPaqueteYSerializar(ACK, bytesContenidoHB, contenidoHB, bytes);
+	void* ackSerializado = serializarAck(contenido, bytes);
 
-	return serializacionFinal;
+	return ackSerializado;
 }
 
 void* serializarSuscripcion(int cantidadColas, TipoCola* colas, int* tamanio)
@@ -114,8 +111,6 @@ void* serializarSuscripcion(int cantidadColas, TipoCola* colas, int* tamanio)
 		memcpy(stream + offset, &(colas[i]), sizeof(TipoCola));
 		offset += sizeof(TipoCola);
 	}
-
-	//fflush(stdout);
 
 	return stream;
 }
@@ -185,6 +180,10 @@ void* serializarPublisher(TipoModulo modulo, TipoCola cola, void* dato, long IDC
 	publicacionSerializada = armarYSerializarPublicacion(cola, IDCorrelativo, datoSerializado, bytesDato, &bytesPublicacion);
 	contenidoSerializado = armarYSerializarContenidoHaciaBroker(modulo, bytesPublicacion, publicacionSerializada, &bytesContenido);
 	serializacionFinal = armarPaqueteYSerializar(PUBLISHER, bytesContenido, contenidoSerializado, bytes);
+
+	free(datoSerializado);
+	free(publicacionSerializada);
+	free(contenidoSerializado);
 
 	return serializacionFinal;
 }

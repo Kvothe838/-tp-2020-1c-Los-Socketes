@@ -339,15 +339,11 @@ int recibirMensajeSuscriber(int socket, t_log* logger, TipoModulo modulo, Mensaj
 
 	log_info(logger, "Nuevo mensaje recibido con ID %d de cola %s", (*mensaje)->ID, tipoColaToString((*mensaje)->cola));
 
-	respuesta = armarYSerializarAck((*mensaje)->ID, modulo, &bytes);
+	respuesta = armarYSerializarAck((*mensaje)->ID, &bytes);
 
-	int nuevoSocket = crear_conexion_cliente(ip, puerto);
-
-	send(nuevoSocket, respuesta, bytes, 0);
+	send(socket, respuesta, bytes, 0);
 
 	log_info(logger, "ACK enviado para mensaje con ID %d", (*mensaje)->ID);
-
-	liberar_conexion_cliente(nuevoSocket);
 
 	return 1; //Retornar 0 en caso de error en algún recv.
 }

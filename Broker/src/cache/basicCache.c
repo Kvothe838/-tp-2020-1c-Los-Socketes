@@ -25,3 +25,9 @@ void reemplazarCache(int tamanioCache){
 	memcpy(cachePrincipal, cacheAlternativa, tamanioCache);
 }
 
+void liberarBasicCache()
+{
+	free(cachePrincipal);
+	free(cacheAlternativa);
+}
+

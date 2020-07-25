@@ -14,6 +14,8 @@ int main(void) {
 
 	inicializarData(logger);
 
+	log_info(logger, "ID del proceso GameCard: %d", process_getpid());
+
 	//iniciar_servidor("127.0.0.1", "5001");
 	
 	/*inicializarData(logger);
@@ -59,13 +61,11 @@ int main(void) {
 	puerto = config_get_string_value(config, "PUERTO_BROKER");
 	int socketCliente = crear_conexion_cliente(ip, puerto);
 	enviarSuscripcion(socketCliente, GAMECARD, 3, NEW, GET, CAUGHT);
-	log_info(logger, "MANDADAS COLAS NEW, GET, CAUGHT");
 
 	while(1){
 		OpCode codigo;
 		recv(socketCliente, &codigo, sizeof(OpCode), 0);
 		if(codigo == NUEVO_MENSAJE_SUSCRIBER){
-			log_info(logger, "RECIBÍ ALGO LINDO");
 			MensajeParaSuscriptor* mensaje;
 			int recepcionExitosa = recibirMensajeSuscriber(socketCliente, logger, GAMECARD, &mensaje, ip, puerto);
 

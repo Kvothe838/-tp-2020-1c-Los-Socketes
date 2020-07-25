@@ -2,6 +2,7 @@
 #include "cache/dynamicCache.h"
 
 sem_t mutexNuevoMensaje;
+int seguirEjecutando = 1;
 
 void inicializarMutex()
 {
@@ -44,6 +45,8 @@ long* generarIDMensaje(){
 
 	while ((c = *str++))
 		*hash = c + (*hash << 6) + (*hash << 16) - *hash;
+
+	//free(str);
 
 	return hash;
 }
@@ -100,22 +103,42 @@ void manejarPublisher(int socketCliente){
 	if(send(socketCliente, buffer, bytes, 0) == -1){
 		log_info(logger, "Error intentando enviar ID del mensaje al publisher.");
 	}
+
+	free(publicacion->dato);
+	free(publicacion);
+	free(stream);
+	free(buffer);
 }
 
-Ack recibirACK(int socket)
+/*Ack recibirACK(int socket)
 {
 	Ack contenido;
 
 	recv(socket, &(contenido.IDMensaje), sizeof(long), MSG_WAITALL);
 
 	return contenido;
+}*/
+
+int recibirAck(int socket, Ack** respuesta)
+{
+	long IDMensaje;
+
+	if(recv(socket, &IDMensaje, sizeof(long), MSG_WAITALL) == -1)
+	{
+		return 0;
+	}
+
+	*respuesta = malloc(sizeof(Ack));
+	(*respuesta)->IDMensaje = IDMensaje;
+
+	return 1;
 }
 
-void manejarACK(Ack contenido, Suscriptor* suscriptor){
+void manejarACK(Ack* contenido, Suscriptor* suscriptor, long* IDMensaje){
 	//Log obligatorio.
-	log_info(logger, "Recepción del mensaje con ID %d.", contenido.IDMensaje);
+	log_info(logger, "Recepción del mensaje con ID %ld.", contenido->IDMensaje);
 
-	agregarSuscriptorRecibido(contenido.IDMensaje, suscriptor);
+	agregarSuscriptorRecibido(contenido->IDMensaje, suscriptor);
 }
 
 void processRequest(int opCode, Suscriptor* suscriptor){
@@ -137,18 +160,18 @@ void processRequest(int opCode, Suscriptor* suscriptor){
 			sem_post(&mutexNuevoMensaje);
 
 			break;
-		case ACK:;
+		/*case ACK:;
 			Ack ack = recibirACK(suscriptor->socket);
 			manejarACK(ack, suscriptor);
 
-			break;
+			break;*/
 		default:
 			break;
 	}
 }
 
 void serveClient(int* socketCliente){
-	Suscriptor* suscriptor = (Suscriptor*)malloc(sizeof(Suscriptor));
+	Suscriptor* suscriptor = (Suscriptor*)malloc(sizeof(Suscriptor)); //No es necesariamente un suscriptor.
 	TipoModulo modulo;
 	OpCode opCode;
 
@@ -165,8 +188,14 @@ void serveClient(int* socketCliente){
 
 	suscriptor->socket = *socketCliente;
 	suscriptor->modulo = modulo;
+	suscriptor->estaCaido = 0;
 
 	processRequest(opCode, suscriptor);
+
+	if(opCode != SUSCRIBER)
+	{
+		free(suscriptor);
+	}
 }
 
 void esperarCliente(int socket_servidor)
@@ -183,6 +212,11 @@ void esperarCliente(int socket_servidor)
 	pthread_create(&thread,NULL,(void*)serveClient,&socketCliente);
 	pthread_join(thread, NULL);
 
+}
+
+void manejarSuscriptorCaido(Suscriptor* suscriptor)
+{
+	suscriptor->estaCaido = 1;
 }
 
 void enviarMensajesPorCola(TipoCola tipoCola){
@@ -209,6 +243,9 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 		for(int j = 0; j < tamanioCola; j++)
 		{
 			Suscriptor* suscriptor = (Suscriptor*)list_get(cola->suscriptores, j);
+
+			if(suscriptor->estaCaido) continue;
+
 			t_list* suscriptoresEnviados = obtenerSuscriptoresEnviados(*IDMensaje);
 
 			if(suscriptoresEnviados != NULL && esSuscriptorEnviado(suscriptoresEnviados, *suscriptor)) continue;
@@ -218,18 +255,37 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 			void* paqueteSerializado = armarPaqueteYSerializar(NUEVO_MENSAJE_SUSCRIBER, bytesMensajeSuscriptor, stream, &bytes);
 			free(stream);
 
-			if((send(suscriptor->socket, paqueteSerializado, bytes, 0)) > 0){
-				//Log obligatorio.
-				log_info(logger, "Envío de mensaje con ID %ld a suscriptor %s", *IDMensaje, tipoModuloToString(suscriptor->modulo));
+			if((send(suscriptor->socket, paqueteSerializado, bytes, MSG_NOSIGNAL)) > 0){
+				Ack* respuesta;
 
-				agregarSuscriptorEnviado(*IDMensaje, &suscriptor);
+				int recibidoExitoso = recibirAck(suscriptor->socket, &respuesta);
+
+				if(recibidoExitoso)
+				{
+					if(respuesta->IDMensaje == *IDMensaje)
+					{
+						agregarSuscriptorEnviado(*IDMensaje, &suscriptor);
+
+						//Log obligatorio.
+						log_info(logger, "Envío de mensaje con ID %ld a suscriptor %s", *IDMensaje, tipoModuloToString(suscriptor->modulo));
+
+						manejarACK(respuesta, suscriptor, IDMensaje);
+						free(respuesta);
+					}
+				}
+				else
+				{
+					manejarSuscriptorCaido(suscriptor);
+				}
 			}
 		}
+
+		free(mensaje);
 	}
 }
 
 void enviarMensajesSuscriptores(){
-	while(1){
+	while(seguirEjecutando){
 		int colas[] = {NEW, GET, CATCH, APPEARED, LOCALIZED, CAUGHT};
 
 		for (int i = 0; i < 6; i++){
@@ -268,7 +324,11 @@ void iniciarServidor(IniciarServidorArgs* argumentos){
 
     freeaddrinfo(servinfo);
 
-    while(1){
+    while(seguirEjecutando){
     	esperarCliente(socket_servidor);
     }
+}
+
+void cortarPrograma(){
+	seguirEjecutando = 0;
 }

@@ -209,8 +209,6 @@ int* obtenerTamanioItem(long ID){
 	if(item == NULL) return NULL;
 
 	return &(item->tamanio);
-
-	//return item->tamanio;
 }
 
 long* obtenerIDCorrelativoItem(long ID)
@@ -220,8 +218,6 @@ long* obtenerIDCorrelativoItem(long ID)
 	if(item == NULL) return NULL;
 
 	return &(item->IDCorrelativo);
-
-	//return item->IDCorrelativo;
 }
 
 void* obtenerItem(long ID){
@@ -368,7 +364,7 @@ void imprimirDatos(t_list* listaDeParticiones){
 
 		if(dato->fechaUltimoUso != NULL){
 			sprintf(stringFinal,
-				"Partición %-5d 0x%-3X - 0x%-10X\t[X]\tsize %-5d\tLRU: %-15s\tCOLA: %-5s\tID: %ld\n",
+				"Partición %-5d 0x%-3X - 0x%-10X\t[X]\tsize %-5db\tLRU: %-15s\tCOLA: %-5s\tID: %ld\n",
 				(posicion+1),
 				dato->posicion,
 				(dato->posicion + dato->tamanio) - 1,
@@ -471,4 +467,20 @@ int esSuscriptorEnviado(t_list* suscriptoresEnviados, Suscriptor suscriptor){
 	return 0;
 }
 
+void liberarCache(){
+	for(int i = 0; i < tamanioTabla; i++){
+		if(!tablaElementos[i].estaVacio)
+		{
+			free(tablaElementos[i].suscriptoresEnviados);
+			free(tablaElementos[i].suscriptoresRecibidos);
+			free(tablaElementos[i].fechaCreacion);
+			free(tablaElementos[i].fechaUltimoUso);
+		}
+	}
+
+	free(tablaElementos);
+	free(tablaVacios);
+
+	liberarBasicCache();
+}
 

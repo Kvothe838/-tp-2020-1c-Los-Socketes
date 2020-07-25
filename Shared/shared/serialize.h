@@ -6,7 +6,7 @@
 #include <commons/collections/list.h>
 
 void* armarPaqueteYSerializar(OpCode codigoOperacion, int tamanioContenido, void* contenido, int* bytes);
-void* armarYSerializarAck(long IDMensaje, TipoModulo modulo, int* bytes);
+void* armarYSerializarAck(long IDMensaje, int* bytes);
 void* serializarSuscripcion(int cantidadColas, TipoCola* colas, int* tamanio);
 void* armarYSerializarContenidoHaciaBroker(TipoModulo modulo, int tamanioContenido, void* contenido, int* bytes);
 void* serializarPublisher(TipoModulo modulo, TipoCola cola, void* dato, long IDCorrelativo, int* bytes);

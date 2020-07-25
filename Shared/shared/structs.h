@@ -144,10 +144,13 @@ typedef struct
 	void* data; //formato: primero X, luego Y y al final cantidad, y así respectivamente dependiendo la cantidad de posiciones
 } LocalizedPokemon;
 
+/*Queda como suscriptor pero en realidad se está usando en serveClient de conexionBroker.c como un módulo que se conecta
+simplemente, no tiene que ser sí o sí un suscriptor, puede ser un publisher.*/
 typedef struct
 {
 	TipoModulo modulo;
 	int socket;
+	int estaCaido;
 } Suscriptor;
 
 #endif

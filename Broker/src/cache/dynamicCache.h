@@ -50,5 +50,6 @@ int esSuscriptorEnviado(t_list* suscriptoresRecibidos, Suscriptor suscriptor);
 int* obtenerTamanioItem(long ID);
 long* obtenerIDCorrelativoItem(long ID);
 void obtenerDump();
+void liberarCache();
 
 #endif /* CACHE_DYNAMICCACHE_H_ */

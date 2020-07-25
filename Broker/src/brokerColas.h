@@ -14,6 +14,7 @@ typedef struct {
 } ColaConSuscriptores;
 
 void crearDiccionario();
+void liberarDiccionario();
 ColaConSuscriptores* crearColaConSuscriptores();
 ColaConSuscriptores* obtenerCola(TipoCola colaClave);
 
