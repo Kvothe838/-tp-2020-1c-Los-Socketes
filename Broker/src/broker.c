@@ -27,7 +27,7 @@ int main(void) {
 	inicializarDataBasica(config, logger);
 	crearDiccionario();
 
-	log_info(logger, "ID del proceso Broker: %d", process_getpid());
+	//log_info(logger, "ID del proceso Broker: %d", process_getpid());
 
 	//Forma de llamar al signal: kill -SIGUSR1 [ID]
 
@@ -37,6 +37,18 @@ int main(void) {
 		err_sys("can't catch SIGUSR2");
 	/*Esta signal SIGUSR2 sirve sólo para terminar el programa de forma correcta, pasando por las liberaciones de
 	 memoria del final del main.*/
+
+	//Pruebas para Buddy System.
+
+	imprimirCache();
+
+	//Posición: 0 | Tamanio: 2048 | Tamanio ocupado: 0 | Está dividido: No
+
+	int a = 87;
+
+	agregarItemBuddySystem(&a, sizeof(int), 0, 0, NEW);
+
+	imprimirCache();
 
 	//Pruebas para la caché.
 	/*int a = 87;

@@ -11,5 +11,6 @@ sem_t mutexCache;
 
 void inicializarDataBasica(t_config* config, t_log* loggerParaAsignar);
 void liberarCache();
+int esTiempoMasAntiguo(char* masAntiguo, char* masNuevo);
 
 #endif /* CACHE_GENERICCACHE_H_ */

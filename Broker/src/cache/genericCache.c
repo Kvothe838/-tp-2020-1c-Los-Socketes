@@ -27,8 +27,7 @@ void inicializarDataBasica(t_config* config, t_log* loggerParaAsignar){
 	}
 	else if(esBS)
 	{
-		inicializarBuddySystem();
-		imprimirCache();
+		inicializarBuddySystem(tamanioCache);
 	}
 }
 
@@ -42,6 +41,10 @@ void liberarCache()
 	{
 		liberarBuddySystem();
 	}
+}
+
+int esTiempoMasAntiguo(char* masAntiguo, char* masNuevo){
+	return strcmp(masAntiguo, masNuevo) < 0;
 }
 
 

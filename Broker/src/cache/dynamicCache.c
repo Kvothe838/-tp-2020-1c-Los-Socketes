@@ -2,10 +2,6 @@
 
 int particionesLiberadas = 0;
 
-int esTiempoMasAntiguo(char* masAntiguo, char* masNuevo){
-	return strcmp(masAntiguo, masNuevo) < 0;
-}
-
 int calcularBestFit(int desiredSize) {
 	int found = -1;
 	int bestposicion, *bestDifference = NULL;
