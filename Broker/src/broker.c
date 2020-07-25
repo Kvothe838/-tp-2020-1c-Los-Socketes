@@ -1,7 +1,7 @@
 #include <shared/utils.h>
 #include "brokerColas.h"
 #include "conexionBroker.h"
-#include "cache/dynamicCache.h"
+#include "cache/genericCache.h"
 #include <commons/process.h>
 
 static void	sig_usr(int);

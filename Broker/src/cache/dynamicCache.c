@@ -1,6 +1,5 @@
 #include "dynamicCache.h"
 
-sem_t mutexCache;
 int particionesLiberadas = 0;
 
 int esTiempoMasAntiguo(char* masAntiguo, char* masNuevo){
@@ -62,20 +61,22 @@ int calcularLRU(){
 }
 
 void eliminarVictima(){
-	if(strcmp(algoritmoEleccionDeVictima, "FIFO") == 0){
+	if(esFIFO){
 		eliminarItem(calcularFIFO());
-	} else{
+	}
+	else if(esLRU)
+	{
 		eliminarItem(calcularLRU());
 	}
 }
 
 int hayEspacio(int espacioRequerido, int *posicion){
-	if(strcmp(algoritmoEleccionDeParticionLibre, "FF") == 0){
+	if(esFF){
 		for(*posicion = 0; *posicion < tamanioTabla; (*posicion)++){
 			if(!tablaVacios[*posicion].estaVacio && tablaVacios[*posicion].tamanio >= espacioRequerido)
 				return 1;
 		}
-	} else {
+	} else if(esBF) {
 		int mejorPosicion = calcularBestFit(espacioRequerido);
 
 		if(mejorPosicion >= 0){
@@ -142,22 +143,6 @@ void inicializarTabla(ItemTablaDinamica **tabla, int estaVacio){
 		(*tabla)[i].tamanio = 0;
 		(*tabla)[i].estaVacio = 1;
 	}
-}
-
-void inicializarDataBasica(t_config* config, t_log* loggerParaAsignar) {
-	sem_init(&mutexCache, 0, 1);
-
-	tamanioCache = (int)config_get_int_value(config, "TAMANO_MEMORIA");
-	tamanioParticionMinima = (int)config_get_int_value(config, "TAMANO_MINIMO_PARTICION");
-	algoritmoEleccionDeParticionLibre = config_get_string_value(config,"ALGORITMO_PARTICION_LIBRE");
-	algoritmoEleccionDeVictima = config_get_string_value(config,"ALGORITMO_REEMPLAZO");
-	frecuenciaCompactacion = (int)config_get_string_value(config, "FRECUENCIA_COMPACTACION");
-	tamanioTabla = tamanioCache / tamanioParticionMinima;
-	logger = loggerParaAsignar;
-
-	inicializarTabla(&tablaElementos, 0);
-	inicializarTabla(&tablaVacios, 1);
-	inicializarCache(tamanioCache);
 }
 
 void agregarElementoValido(int posicionVacioAModificar, int tamanioItem, void* item, long ID, long IDCorrelativo,
@@ -467,7 +452,7 @@ int esSuscriptorEnviado(t_list* suscriptoresEnviados, Suscriptor suscriptor){
 	return 0;
 }
 
-void liberarCache(){
+void liberarParticiones(){
 	for(int i = 0; i < tamanioTabla; i++){
 		if(!tablaElementos[i].estaVacio)
 		{
