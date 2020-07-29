@@ -29,5 +29,7 @@ AppearedPokemon* getAppearedPokemon(char* nombre, int posX, int posY);
 CatchPokemon* getCatchPokemon(char* nombre, int posX, int posY);
 CaughtPokemon* getCaughtPokemon(int loAtrapo);
 GetPokemon* getGetPokemon(char* nombre);
+LocalizedPokemon* getLocalized(char* nombre, int cantidadParesPosiciones, ...);
+LocalizedPokemon* getLocalizedConList(char* nombre, int cantidadParesPosiciones, t_list* posiciones);
 
 #endif

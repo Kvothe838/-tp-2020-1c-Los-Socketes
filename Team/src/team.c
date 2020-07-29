@@ -47,6 +47,15 @@ int main(void) {
 						free(pokemon);
 					}
 
+					if(mensaje->cola == LOCALIZED)
+					{
+						LocalizedPokemon* pokemon = deserializarLocalized(mensaje->contenido);
+
+						log_info(logger, "Llegó Localized con nombre: %s y cantidad de pares: %d", pokemon->nombre, pokemon->cantidadDeParesDePosiciones);
+
+						free(pokemon);
+					}
+
 					//Tiro ejemplo para filtrar por IDCorrelativo.
 
 					/*for(int i = 0; i < list_size(IDsCorrelativos); i++)

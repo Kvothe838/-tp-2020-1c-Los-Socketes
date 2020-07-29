@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include "conexionGameCard.h"
 #include "ManejoDeBloques/manejoDeArchivos.h"
+#include <commons/process.h>
+
+void funcionDePruebaParaGabo(t_log* logger, char* ip, char* puerto);
 
 int main(void) {
 	t_log* logger = iniciar_logger("gamecard.log", "GAMECARD");
@@ -59,8 +62,9 @@ int main(void) {
 
 	ip = config_get_string_value(config, "IP_BROKER");
 	puerto = config_get_string_value(config, "PUERTO_BROKER");
-	int socketCliente = crear_conexion_cliente(ip, puerto);
-	enviarSuscripcion(socketCliente, GAMECARD, 3, NEW, GET, CAUGHT);
+	funcionDePruebaParaGabo(logger, ip, puerto);
+	//int socketCliente = crear_conexion_cliente(ip, puerto);
+	/*enviarSuscripcion(socketCliente, GAMECARD, 3, NEW, GET, CAUGHT);
 
 	while(1){
 		OpCode codigo;
@@ -74,7 +78,7 @@ int main(void) {
 				free(mensaje);
 			}
 		}
-	}
+	}*/
 
 	//liberarVariablesGlobales();
 
@@ -82,6 +86,35 @@ int main(void) {
 	//terminar_programa(logger, config);
 
 	return EXIT_SUCCESS;
+}
+
+void funcionDePruebaParaGabo(t_log* logger, char* ip, char* puerto){
+	int conexionBroker = crear_conexion_cliente(ip, puerto);
+	LocalizedPokemon* pokemon = getLocalized("Pokemon", 2, 1, 1, 1, 1); //usa malloc, entonces hay que hacer un free
+
+	if(!enviarPublisherSinIDCorrelativo(conexionBroker, GAMECARD, pokemon, LOCALIZED))
+	{
+		log_info(logger, "ERROR - No se pudo enviar el mensaje.");
+		abort();
+	}
+
+	log_info(logger, "OK - Se envió correctamente el mensaje.");
+
+	OpCode code;
+
+	recv(conexionBroker, &code, sizeof(OpCode), 0);
+
+	if(code == ID_MENSAJE){
+		IDMensajePublisher* mensaje = malloc(sizeof(IDMensajePublisher));
+		recibirIDMensajePublisher(conexionBroker, mensaje);
+		log_info(logger, "EL ID ES %ld", mensaje->IDMensaje);
+		log_info(logger, "LA COLA ES %s", tipoColaToString(mensaje->cola));
+
+	}else {
+		log_info(logger, "TODO MAL. RECIBÍ OTRO CODE.");
+	}
+
+	liberar_conexion_cliente(conexionBroker);
 }
 
 

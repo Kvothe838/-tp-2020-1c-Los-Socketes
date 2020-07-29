@@ -13,6 +13,7 @@
 #include<commons/string.h>
 #include<commons/config.h>
 #include<pthread.h>
+#include<commons/collections/list.h>
 
 typedef enum
 {
@@ -140,8 +141,8 @@ typedef struct
 {
 	char* nombre;
 	uint32_t largoNombre;
-	uint32_t cantidadDePosiciones;
-	void* data; //formato: primero X, luego Y y al final cantidad, y así respectivamente dependiendo la cantidad de posiciones
+	uint32_t cantidadDeParesDePosiciones;
+	t_list* posiciones; //formato: primero X, luego Y y así respectivamente dependiendo la cantidad de pares posiciones
 } LocalizedPokemon;
 
 /*Queda como suscriptor pero en realidad se está usando en serveClient de conexionBroker.c como un módulo que se conecta

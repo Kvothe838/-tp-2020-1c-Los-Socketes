@@ -206,6 +206,9 @@ void* serializarDato(void* mensaje, int* tamanio, TipoCola cola)
 		case GET:
 			return serializarGet(mensaje, tamanio);
 			break;
+		case LOCALIZED:
+			return serializarLocalized(mensaje, tamanio);
+			break;
 		default:
 			return NULL;
 			break;
@@ -296,6 +299,31 @@ void* serializarGet(GetPokemon* pokemon, int* bytes){
 
 	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre);
 	offset += pokemon->largoNombre;
+
+	return stream;
+}
+
+void* serializarLocalized(LocalizedPokemon* pokemon, int* bytes){
+	int cantidadPosiciones = list_size(pokemon->posiciones);
+	*bytes = sizeof(uint32_t) * 2 + pokemon->largoNombre + cantidadPosiciones * sizeof(uint32_t);
+	void* stream = malloc(*bytes);
+	int offset = 0;
+
+	memcpy(stream + offset, &pokemon->largoNombre, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+
+	memcpy(stream + offset, pokemon->nombre, pokemon->largoNombre);
+	offset += pokemon->largoNombre;
+
+	memcpy(stream + offset, &pokemon->cantidadDeParesDePosiciones, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+
+	for(int i = 0; i < cantidadPosiciones; i++)
+	{
+		uint32_t* posicion = (uint32_t*)list_get(pokemon->posiciones, i);
+		memcpy(stream + offset, posicion, sizeof(uint32_t));
+		offset += sizeof(uint32_t);
+	}
 
 	return stream;
 }
@@ -400,6 +428,38 @@ GetPokemon* deserializarGet(void* mensaje){
 	return pokemon;
 }
 
+LocalizedPokemon* deserializarLocalized(void* mensaje){
+	LocalizedPokemon* pokemon = malloc(sizeof(LocalizedPokemon));
+	int offset = 0;
+
+	memcpy(&pokemon->largoNombre, mensaje + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+
+	char* stringRecibido = malloc(pokemon->largoNombre + 1);
+
+	memcpy(stringRecibido, mensaje + offset, pokemon->largoNombre + 1);
+	pokemon->nombre = malloc(pokemon->largoNombre);
+	strncpy(pokemon->nombre, stringRecibido, pokemon->largoNombre);
+	pokemon->nombre[pokemon->largoNombre] = '\0';
+
+	free(stringRecibido);
+
+	memcpy(&pokemon->cantidadDeParesDePosiciones, mensaje + offset, sizeof(uint32_t));
+	offset += sizeof(uint32_t);
+
+	pokemon->posiciones = list_create();
+
+	for(int i = 0; i < pokemon->cantidadDeParesDePosiciones * 2; i++)
+	{
+		uint32_t* nuevaPosicion = malloc(sizeof(uint32_t));
+		memcpy(nuevaPosicion, mensaje + offset, sizeof(uint32_t));
+		list_add(pokemon->posiciones, nuevaPosicion);
+		offset += sizeof(uint32_t);
+	}
+
+	return pokemon;
+}
+
 void* deserializarDato(void* mensaje, TipoCola cola){
 	switch(cola){
 		case NEW:
@@ -416,6 +476,9 @@ void* deserializarDato(void* mensaje, TipoCola cola){
 			break;
 		case GET:
 			return deserializarGet(mensaje);
+			break;
+		case LOCALIZED:
+			return deserializarLocalized(mensaje);
 			break;
 		default:
 			return NULL;

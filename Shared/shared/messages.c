@@ -2,80 +2,6 @@
 #include "../shared/serialize.h"
 #include "../shared/structs.h"
 
-/* Envía un mensaje según opcode.
- * Si opcode es suscriber, el formato va a ser:
-
-   {
-   	   cantidad de colas (int)
-   	   array de colas (array de TipoCola)
-   }
-
- * Si opcode es publisher, el formato va a ser:
-
-   {
-   	   id corelativo (long) (-1 si es null)
-   	   modulo (TipoModulo)
-   	   tipo de cola (TipoCola)
-   	   mensaje puro
-   }
-
-   Nota: no hace falta enviar el tamaño del mensaje antes que éste, ya que con saber el tipo de cola, el receptor
-   ya sabe cómo deserializarlo.
-*/
-
-/*int enviarMensaje(void* mensaje, OpCode codigoOperacion, TipoCola cola, long* IDCorrelativo, int socket_cliente,
-		TipoModulo modulo)
-{
-	int bytes, offset = 0, resultado = 0, tamanioTotal = 0, tamanioMensaje;
-	void *mensajeSerializado, *streamMensajeEspecifico, *stream;
-
-	switch(codigoOperacion){
-		case SUSCRIBER:
-			streamMensajeEspecifico = serializarSuscripcion(modulo, &bytes);
-			break;
-		case PUBLISHER:
-			streamMensajeEspecifico = serializarDato(mensaje, &tamanioMensaje, cola);
-			break;
-		default:
-			break;
-	}
-
-	tamanioTotal += tamanioMensaje;
-
-	if(IDCorrelativo == NULL && codigoOperacion == PUBLISHER){
-		long IDCorrelativoVacio = -1;
-		IDCorrelativo = &IDCorrelativoVacio;
-	}
-
-	if(IDCorrelativo != NULL){
-		tamanioTotal += sizeof(long);
-		stream = malloc(tamanioTotal);
-		memcpy(stream + offset, IDCorrelativo, sizeof(long));
-		offset += sizeof(long);
-	} else {
-		stream = malloc(tamanioTotal);
-	}
-
-	if(codigoOperacion != SUSCRIBER){
-		memcpy(stream + offset, &cola, sizeof(TipoCola));
-		offset += sizeof(TipoCola);
-		tamanioTotal += sizeof(TipoCola);
-	}
-
-	memcpy(stream + offset, streamMensajeEspecifico, tamanioMensaje);
-	offset += tamanioMensaje;
-
-	mensajeSerializado = armarPaqueteYSerializar(codigoOperacion, modulo, tamanioTotal, stream, &bytes);
-
-	if(send(socket_cliente, mensajeSerializado, bytes, 0) == -1){
-		printf("Error enviando mensaje.\n");
-		resultado = -1;
-	}
-
-	free(mensajeSerializado);
-	return resultado;
-}*/
-
 int enviarPublisherSinIDCorrelativo(int socket, TipoModulo modulo, void* dato, TipoCola cola)
 {
 	int IDCorrelativoVacio = 0;
@@ -297,17 +223,34 @@ GetPokemon* getGetPokemon(char* nombre){
 	return pokemon;
 }
 
-/* Envía un nuevo mensaje de una cola a un suscriptor. Está acá porque puede ser usado tanto por GameBoy como por Broker.
- * Formato:
-     {
-     	 id correlativo (long)
-     	 tipo de cola (TipoCola)
-     	 mensaje (void*)
-     }
+LocalizedPokemon* getLocalized(char* nombre, int cantidadParesPosiciones, ...){
+	va_list posiciones;
+	int cantidadPosiciones = cantidadParesPosiciones * 2;
 
-     Nota: no hace falta enviar el tamaño del mensaje antes que éste, ya que con saber el tipo de cola, el receptor
-   	 ya sabe cómo deserializarlo.
-*/
+	va_start(posiciones, cantidadPosiciones); //Esto tira un warning pelotudísimo, IGNORAR.
+	t_list* listaDePosiciones = list_create();
+
+	for(int i = 0; i < cantidadPosiciones; i++){
+		uint32_t* nuevaPosicion = malloc(sizeof(uint32_t));
+		*nuevaPosicion = va_arg(posiciones, uint32_t);
+		list_add(listaDePosiciones, nuevaPosicion);
+	}
+
+	va_end(posiciones);
+
+	return getLocalizedConList(nombre, cantidadParesPosiciones, listaDePosiciones);
+}
+
+LocalizedPokemon* getLocalizedConList(char* nombre, int cantidadParesPosiciones, t_list* posiciones){
+	LocalizedPokemon* pokemon = malloc(sizeof(LocalizedPokemon));
+
+	pokemon->nombre = nombre;
+	pokemon->largoNombre = strlen(pokemon->nombre);
+	pokemon->cantidadDeParesDePosiciones = cantidadParesPosiciones;
+	pokemon->posiciones = posiciones;
+
+	return pokemon;
+}
 
 int enviarMensajeASuscriptor(int socketSuscriptor, long ID, long IDCorrelativo, TipoCola cola, void* data){
 	int resultado = 1, tamanioDato, bytes;

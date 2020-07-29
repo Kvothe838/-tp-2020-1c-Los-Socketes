@@ -612,12 +612,12 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 	return 0;
 }
 
-LocalizedPokemon * administrarGetPokemon(char* pokemon){
+/*LocalizedPokemon * administrarGetPokemon(char* pokemon){
 	LocalizedPokemon * datosDePosicionPokemon = malloc(sizeof(LocalizedPokemon));
 
 	datosDePosicionPokemon->nombre = pokemon;
 	datosDePosicionPokemon->largoNombre = strlen(pokemon);
-	datosDePosicionPokemon->cantidadDePosiciones = 0; //para el caso que no encuentre
+	datosDePosicionPokemon->cantidadDeParesDePosiciones = 0; //para el caso que no encuentre
 	datosDePosicionPokemon->data = NULL;
 
 	uint32_t cantidadDeBlocks;
@@ -635,11 +635,11 @@ LocalizedPokemon * administrarGetPokemon(char* pokemon){
 		t_list * lista;// = list_create();
 		cantidadDeBlocks = obtenerDataFileSystem(datosPokemon->tamanio, datosPokemon->bloquesAsociados, &lista);
 
-		datosDePosicionPokemon->cantidadDePosiciones = (uint32_t)list_size(lista);
+		datosDePosicionPokemon->cantidadDePosiciones = (uint32_t)list_size(lista);*/
 
-		void* stream = malloc(sizeof(uint32_t) * 3 /* sizeof(uint32_t) * 3 representa una posicion */ * datosDePosicionPokemon->cantidadDePosiciones);
+		//void* stream = malloc(sizeof(uint32_t) * 3 /* sizeof(uint32_t) * 3 representa una posicion */ * datosDePosicionPokemon->cantidadDePosiciones);
 
-		t_list* listaAuxiliar; //= list_create();
+		/*t_list* listaAuxiliar; //= list_create();
 		uint32_t offset = 0;
 
 		while(!list_is_empty(lista)){
@@ -678,4 +678,4 @@ LocalizedPokemon * administrarGetPokemon(char* pokemon){
 	free(path);
 
 	return datosDePosicionPokemon;
-}
+}*/

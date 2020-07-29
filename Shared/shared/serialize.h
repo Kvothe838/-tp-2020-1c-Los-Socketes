@@ -18,11 +18,13 @@ void* serializarAppeared(AppearedPokemon* pokemon, int* bytes);
 void* serializarCatch(CatchPokemon* pokemon, int* bytes);
 void* serializarCaught(CaughtPokemon* pokemon, int* bytes);
 void* serializarGet(GetPokemon* pokemon, int* bytes);
+void* serializarLocalized(LocalizedPokemon* pokemon, int* bytes);
 NewPokemon* deserializarNew(void* mensaje);
 AppearedPokemon* deserializarAppeared(void* mensaje);
 CaughtPokemon* deserializarCaught(void* mensajes);
 CatchPokemon* deserializarCatch(void* mensaje);
 GetPokemon* deserializarGet(void* mensaje);
+LocalizedPokemon* deserializarLocalized(void* mensaje);
 void* deserializarDato(void* mensaje, TipoCola cola);
 
 void* serializarStreamIdMensajePublisher(long* ID, TipoCola* cola, int* bytes);
