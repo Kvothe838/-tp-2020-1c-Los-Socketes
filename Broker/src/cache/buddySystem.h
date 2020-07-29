@@ -26,6 +26,7 @@ void inicializarBuddySystem(int tamanio);
 void liberarBuddySystem();
 void imprimirCache();
 void agregarItemBuddySystem(void* item, int tamanioItem, long ID, long IDCorrelativo, TipoCola cola);
-void eliminarItemBuddySystem(Bloque* bloque);
+void eliminarItemBuddySystem(Bloque** bloque);
+void eliminarVictimaBuddySystem();
 
 #endif

@@ -12,14 +12,13 @@ void  err_sys(char * msg) {
   exit(-1);
 }
 
-
 int main(void) {
 	t_config* config;
 	pthread_t threadIniciarServidor, threadEnviarMensajesSuscriptores;
 	IniciarServidorArgs argumentos;
 
 	logger = iniciar_logger("loggerBroker.log", "Broker");
-	config = leer_config("../configBroker.config", logger);
+	config = leer_config("configBroker.config", logger);
 
 	argumentos.ip = config_get_string_value(config, "IP_BROKER");
 	argumentos.puerto = config_get_string_value(config, "PUERTO_BROKER");
@@ -27,7 +26,7 @@ int main(void) {
 	inicializarDataBasica(config, logger);
 	crearDiccionario();
 
-	//log_info(logger, "ID del proceso Broker: %d", process_getpid());
+	log_info(logger, "ID del proceso Broker: %d", process_getpid());
 
 	//Forma de llamar al signal: kill -SIGUSR1 [ID]
 
@@ -40,13 +39,21 @@ int main(void) {
 
 	//Pruebas para Buddy System.
 
-	imprimirCache();
-
-	//Posición: 0 | Tamanio: 2048 | Tamanio ocupado: 0 | Está dividido: No
-
 	int a = 87;
+	double b = 7;
+	char* mensaje = "HOLA. TENGO MÁS DE 64 CARACTERES PORQUE SOY RE CAPO Y LA TENGO ENORME.";
+	log_info(logger, "Tamaño string: %d", strlen(mensaje));
 
 	agregarItemBuddySystem(&a, sizeof(int), 0, 0, NEW);
+	agregarItemBuddySystem(&b, sizeof(double), 5, 3, GET);
+	agregarItemBuddySystem(mensaje, strlen(mensaje) + 1, 111, 222, CATCH);
+	agregarItemBuddySystem(&a, sizeof(int), 0, 0, GET);
+
+	imprimirCache();
+
+	eliminarVictimaBuddySystem();
+
+	log_info(logger, "--------------------------------");
 
 	imprimirCache();
 

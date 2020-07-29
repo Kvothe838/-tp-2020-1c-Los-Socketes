@@ -19,11 +19,12 @@ void inicializarDataBasica(t_config* config, t_log* loggerParaAsignar){
 	esFIFO = !strcmp(algoritmoEleccionDeVictima, "FIFO");
 	esLRU = !strcmp(algoritmoEleccionDeVictima, "LRU");
 
+	inicializarCache(tamanioCache);
+
 	if(esParticiones)
 	{
 		inicializarTabla(&tablaElementos, 0);
 		inicializarTabla(&tablaVacios, 1);
-		inicializarCache(tamanioCache);
 	}
 	else if(esBS)
 	{
