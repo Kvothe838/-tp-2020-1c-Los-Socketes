@@ -151,7 +151,9 @@ void calcularFIFOLRUBuddySystem(Bloque* bloque, Bloque*** bloqueMasAntiguo)
 {
 	if(bloque->tamanioOcupado > 0)
 	{
-		if((*(*bloqueMasAntiguo))->fechaCreacion == NULL || esTiempoMasAntiguo((*(*bloqueMasAntiguo))->fechaCreacion, esFIFO ? bloque->fechaCreacion : bloque->fechaUltimoUso))
+		if((esFIFO ? (*(*bloqueMasAntiguo))->fechaCreacion == NULL : (*(*bloqueMasAntiguo))->fechaUltimoUso == NULL)
+				|| esTiempoMasAntiguo(esFIFO ? bloque->fechaCreacion : bloque->fechaUltimoUso,
+									  esFIFO ? (*(*bloqueMasAntiguo))->fechaCreacion : (*(*bloqueMasAntiguo))->fechaUltimoUso))
 		{
 			*bloqueMasAntiguo = &bloque;
 		}
@@ -178,7 +180,7 @@ void eliminarVictimaBuddySystem()
 		return;
 	}
 
-	log_info(logger, "A ELMINAR | POSICION: %d | TAMANIO: %d | DIVIDIDO: %d | CONTENIDO: %d", (*item)->posicion, (*item)->tamanio, (*item)->estaDividido, (*item)->tamanioOcupado);
+	log_info(logger, "A ELIMINAR | POSICION: %d | TAMANIO: %d | DIVIDIDO: %d | CONTENIDO: %d", (*item)->posicion, (*item)->tamanio, (*item)->estaDividido, (*item)->tamanioOcupado);
 
 	eliminarItemBuddySystem(item);
 
