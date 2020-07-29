@@ -31,7 +31,6 @@ int main(void) {
 
 				if(recepcionExitosa)
 				{
-					log_info(logger, "EH HOLA");
 					/*Acá trabajás el mensaje como más te guste. Podés filtrar primero por id correlativo,
 					o directamente trabajar con la cola. No se puede generalizar en el Broker esto porque siempre
 					vas a necesitar hacer un if de la cola para saber cómo castear el dato.*/
