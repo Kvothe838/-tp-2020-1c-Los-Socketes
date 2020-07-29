@@ -134,7 +134,7 @@ int get_posicion(Entrenador* persona,int eje){
 
 void cargarConfig(Config* conexionConfig, t_log* logger){
 	t_config* config;
-	config = leer_config("../configTeam.config", logger);
+	config = leer_config("configTeam.config", logger);
 	conexionConfig->posiciones = config_get_array_value(config,"POSICIONES_ENTRENADORES"); // lista de strings, ultimo elemento nulo
 	conexionConfig->pertenecientes = config_get_array_value(config,"POKEMON_ENTRENADORES");
 	conexionConfig->objetivos = config_get_array_value(config,"OBJETIVOS_ENTRENADORES");

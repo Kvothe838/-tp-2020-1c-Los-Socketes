@@ -334,8 +334,14 @@ AppearedPokemon* deserializarAppeared(void* mensaje){
 	offset += sizeof(uint32_t);
 	memcpy(&pokemon->largoNombre, mensaje + offset, sizeof(uint32_t));
 	offset += sizeof(uint32_t);
-	memcpy(pokemon->nombre, mensaje + offset, pokemon->largoNombre + 1);
+
+	char* stringRecibido = malloc(pokemon->largoNombre+1);
+	memcpy(stringRecibido, mensaje + offset, pokemon->largoNombre + 1);
 	offset += pokemon->largoNombre + 1;
+
+	pokemon->nombre = malloc(pokemon->largoNombre);
+	strncpy(pokemon->nombre, stringRecibido, pokemon->largoNombre);
+	pokemon->nombre[pokemon->largoNombre] = '\0';
 
 	return pokemon;
 }

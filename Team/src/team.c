@@ -18,7 +18,7 @@ int main(void) {
 	/*Esta lista va a contener todos los IDs de mensjes que espere respuesta.
 	 La lista se va a llenar cuando se envíe un nuevo mensaje por alguna cola, y se reciba el ID correspondiente.
 	 La lista se va a leer cuando se reciba un nuevo mensaje de una cola y se filtre por IDCorrelativo.*/
-	t_list* IDsCorrelativos = list_create();
+	//t_list* IDsCorrelativos = list_create();
 
 	if(suscripcionEnviada)
 	{
@@ -42,13 +42,14 @@ int main(void) {
 						AppearedPokemon* pokemon = deserializarAppeared(mensaje->contenido);
 
 						//Hacés lo que te plazca con el pokemon.
+						log_info(logger, "LLEGÓ POKEMON CON NOMBRE: %s", pokemon->nombre);
 
 						free(pokemon);
 					}
 
 					//Tiro ejemplo para filtrar por IDCorrelativo.
 
-					for(int i = 0; i < list_size(IDsCorrelativos); i++)
+					/*for(int i = 0; i < list_size(IDsCorrelativos); i++)
 					{
 						long* IDCorrelativoAEsperar = list_get(IDsCorrelativos, i);
 
@@ -56,7 +57,7 @@ int main(void) {
 						{
 							log_info(logger, "Me llegó el puto mensaje que esperaba, respuesta al ID %d", *IDCorrelativoAEsperar);
 						}
-					}
+					}*/
 
 					free(mensaje);
 				}
@@ -66,7 +67,7 @@ int main(void) {
 
 	//Ejemplo de conexión a Broker para enviar un mensaje a la cola GET.
 
-	GetPokemon* pokemon = getGetPokemon("Charmander");
+	/*GetPokemon* pokemon = getGetPokemon("Charmander");
 
 	if(enviarPublisherSinIDCorrelativo(conexionBroker, TEAM, pokemon, GET))
 	{
@@ -86,7 +87,7 @@ int main(void) {
 			list_add(IDsCorrelativos, &(mensaje->IDMensaje));
 			free(mensaje);
 		}
-	}
+	}*/
 
 	//Fin de ejemplos.
 
