@@ -10,25 +10,98 @@
 #include<pthread.h>
 #include "ManejoDeBloques/manejoDeArchivos.h"
 
+char *ip, *puerto;
 
-void process_request(long IDMensajeCorrelativo, int cliente_fd){
-	t_log* logger = log_create("respuesta.log", "RESPUESTA", true, LOG_LEVEL_TRACE);
-	log_trace(logger, "Llegó algo");
-	void* msg;
+void process_request(OpCode codigo, int cliente_fd){
+	/*void* msg;
 	int size;
-	TipoCola colaRecibida;
+	TipoCola colaRecibida;*/
+	//log_trace(logger, "Codigo recibido: %d", codigo);
 
+	if(codigo == NUEVO_MENSAJE_SUSCRIBER)
+	{
+		t_log* logger = log_create("respuesta.log", "RESPUESTA", true, LOG_LEVEL_TRACE);
+		log_trace(logger, "Llegó algo");
+		MensajeParaSuscriptor* mensaje = NULL;
+		int recepcionExitosa = recibirMensajeSuscriber(cliente_fd, logger, TEAM, &mensaje, ip, puerto);
 
-	log_trace(logger, "IDMensajeCorrelativo: %d", IDMensajeCorrelativo);
-	recv(cliente_fd, &size, sizeof(size), MSG_WAITALL);
+		NewPokemon* pokemonNew;
+		//GetPokemon* pokemonGet;
+		CatchPokemon* pokemonCatch;
 
-	recv(cliente_fd, &colaRecibida, sizeof(TipoCola), MSG_WAITALL);
+		if(recepcionExitosa)
+		{
+			switch (mensaje->cola)
+			{
+				case NEW:
 
-	if(colaRecibida <= 0){
+					pokemonNew = deserializarNew(mensaje->contenido);
+
+					log_info(logger, "LLEGÓ NEW POKEMON CON NOMBRE: %s en la pos %d-%d y son %d", pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY, pokemonNew->cantidad);
+
+					administrarNewPokemon(pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY, pokemonNew->cantidad);
+
+					free(pokemonNew);
+
+					break;
+
+				/*case GET:
+
+					pokemonGet = deserializarGet(mensaje->contenido);
+
+					log_info(logger, "LLEGÓ GET POKEMON CON NOMBRE: %s", pokemonGet->nombre);
+
+					LocalizedPokemon * datosRecibidos = administrarGetPokemon(pokemonGet->nombre);
+
+					printf("%s\n", datosRecibidos->nombre);
+					printf("%d\n", datosRecibidos->cantidadDePosiciones);
+
+					uint32_t offset = 0;
+					uint32_t *data;
+					uint32_t ciclos = datosRecibidos->cantidadDePosiciones;
+					while(ciclos != 0){
+						ciclos--;
+
+						memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
+						printf("X:%d - ", (int)data);
+						offset += sizeof(uint32_t);
+						memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
+						printf("Y:%d - ", (int)data);
+						offset += sizeof(uint32_t);
+						memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
+						printf("Cantidad:%d\n", (int)data);
+						offset += sizeof(uint32_t);
+					}
+
+					free(pokemonGet);
+
+					break;*/
+
+				case CATCH:
+
+					pokemonCatch = deserializarCatch(mensaje->contenido);
+
+					log_info(logger, "LLEGÓ CATCH POKEMON CON NOMBRE: %s en la pos %d-%d", pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
+
+					administrarCatchPokemon(pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
+
+					free(pokemonCatch);
+
+					break;
+				default:
+					pthread_exit(NULL);
+					break;
+			}
+
+			free(mensaje);
+		}
+
+	}
+	/*if(colaRecibida <= 0){
 		pthread_exit(NULL);
 	}
 
-	switch (colaRecibida) {
+	switch (colaRecibida) {*/
 		/*case GET:
 
 			log_trace(logger, "Llegó un GET");
@@ -64,7 +137,7 @@ void process_request(long IDMensajeCorrelativo, int cliente_fd){
 			}
 
 			break;*/
-		case CATCH:
+		/*case CATCH:
 			log_trace(logger, "Llegó un CATCH");
 			msg = malloc(size);
 			recv(cliente_fd, msg, size, MSG_WAITALL);
@@ -96,15 +169,16 @@ void process_request(long IDMensajeCorrelativo, int cliente_fd){
 			break;
 		default:
 			pthread_exit(NULL);
-	}
+	}*/
 }
+
 
 void serve_client(int* socket)
 {
-	long IDMensajeCorrelativo;
-	if(recv(*socket, &IDMensajeCorrelativo, sizeof(int), MSG_WAITALL) == -1)
-		IDMensajeCorrelativo = -1;
-	process_request(IDMensajeCorrelativo, *socket);
+	OpCode codigo;
+	if(recv(*socket, &codigo, sizeof(OpCode), MSG_WAITALL) == -1)
+		codigo = -1;
+	process_request(codigo, *socket);
 }
 
 void esperar_cliente(int socket_servidor)
@@ -120,8 +194,11 @@ void esperar_cliente(int socket_servidor)
 	pthread_detach(thread);
 }
 
-void iniciar_servidor(char *ip, char* puerto)
+void iniciar_servidor(t_config* config, int socketBroker)
 {
+	/*ip = config_get_string_value(config, "IP_GAMECARD");
+	puerto = config_get_string_value(config, "PUERTO_GAMECARD");
+
 	int socket_servidor;
 
     struct addrinfo hints, *servinfo, *p;
@@ -149,8 +226,15 @@ void iniciar_servidor(char *ip, char* puerto)
 
     freeaddrinfo(servinfo);
 
-    while(1)
-    	esperar_cliente(socket_servidor);
+    printf("Socket nro: %d", socket_servidor);*/
+
+    while(1){
+    	OpCode codigo;
+		if(recv(socketBroker, &codigo, sizeof(OpCode), MSG_WAITALL) == -1)
+			codigo = -1;
+		process_request(codigo, socketBroker);
+    }
+    	//esperar_cliente(socket_servidor);
 
 }
 

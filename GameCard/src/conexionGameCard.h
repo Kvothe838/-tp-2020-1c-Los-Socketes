@@ -7,6 +7,6 @@
 
 pthread_t thread;
 
-void iniciar_servidor(char *ip, char* puerto);
+void iniciar_servidor(t_config* config, int socketBroker);
 
 #endif

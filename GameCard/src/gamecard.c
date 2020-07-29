@@ -13,13 +13,25 @@ void funcionDePruebaParaGabo(t_log* logger, char* ip, char* puerto);
 int main(void) {
 	t_log* logger = iniciar_logger("gamecard.log", "GAMECARD");
 	t_config* config = leer_config("GameCard.config", logger);
-	char *ip, *puerto;
 
 	inicializarData(logger);
 
 	log_info(logger, "ID del proceso GameCard: %d", process_getpid());
 
-	//iniciar_servidor("127.0.0.1", "5001");
+
+
+	char* ipBroker, *puertoBroker;
+	ipBroker = config_get_string_value(config, "IP_BROKER");
+	puertoBroker = config_get_string_value(config, "PUERTO_BROKER");
+
+	funcionDePruebaParaGabo(logger, ipBroker, puertoBroker);
+
+	// int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
+
+	// int suscripcionEnviada = enviarSuscripcion(conexionBroker, GAMECARD, 3, NEW, GET, CATCH);
+
+	// if(suscripcionEnviada)
+	// 	iniciar_servidor(config, conexionBroker);
 	
 	/*inicializarData(logger);
 
@@ -60,7 +72,7 @@ int main(void) {
 	//Para pruebas de suscripción con Broker. Comentar si no se usa pero no borrar plis.
 
 
-	ip = config_get_string_value(config, "IP_BROKER");
+	/*ip = config_get_string_value(config, "IP_BROKER");
 	puerto = config_get_string_value(config, "PUERTO_BROKER");
 	funcionDePruebaParaGabo(logger, ip, puerto);
 	//int socketCliente = crear_conexion_cliente(ip, puerto);
