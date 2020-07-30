@@ -14,6 +14,31 @@
 
 char *ip, *puerto;
 
+void mandarMensajeABroker(void* datosRecibidos,	TipoModulo cola, long IDCorrelativo, t_log* logger) {
+	int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
+
+	if (!enviarPublisherConIDCorrelativo(conexionBroker, GAMECARD, datosRecibidos, cola, IDCorrelativo))
+		log_info(logger, "ERROR - No se pudo enviar el mensaje a Broker");
+	else {
+
+		OpCode codigoOperacion;
+		recv(conexionBroker, &codigoOperacion, sizeof(OpCode), 0);
+
+		if (codigoOperacion == ID_MENSAJE) {
+			log_info(logger, "Llegó un ID_MENSAJE");
+			IDMensajePublisher* mensajeBasura = malloc(sizeof(IDMensajePublisher));
+
+			int recibidoExitoso = recibirIDMensajePublisher(conexionBroker,	mensajeBasura);
+
+			if (recibidoExitoso)
+				log_info(logger, "Se recibió el id nuevo: %ld",	mensajeBasura->IDMensaje);
+
+			free(mensajeBasura);
+		}
+	}
+	liberar_conexion_cliente(conexionBroker);
+}
+
 void process_request(OpCode codigo, int cliente_fd){
 	if(codigo == NUEVO_MENSAJE_SUSCRIBER)
 	{
@@ -38,6 +63,10 @@ void process_request(OpCode codigo, int cliente_fd){
 
 					administrarNewPokemon(pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY, pokemonNew->cantidad);
 
+					AppearedPokemon* dataAppeared = getAppearedPokemon(pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY);
+
+					mandarMensajeABroker(dataAppeared, APPEARED, mensaje->ID, logger);
+
 					free(pokemonNew);
 
 					break;
@@ -49,23 +78,23 @@ void process_request(OpCode codigo, int cliente_fd){
 
 					log_info(logger, "LLEGÓ GET POKEMON CON NOMBRE: %s", pokemonGet->nombre);
 
-					LocalizedPokemon * datosRecibidos = administrarGetPokemon(pokemonGet->nombre);
+					LocalizedPokemon * dataLocalized = administrarGetPokemon(pokemonGet->nombre);
 
-					printf("Nombre completo: %s\n", datosRecibidos->nombre);
-					printf("Larog del nombre: %d\n", datosRecibidos->largoNombre);
-					printf("Posiciones en el mapa: %d\n", datosRecibidos->cantidadDeParesDePosiciones);
-					printf("Cantidad de elementos en la lista %d\n", list_size(datosRecibidos->posiciones));
+					printf("Nombre completo: %s\n", dataLocalized->nombre);
+					printf("Larog del nombre: %d\n", dataLocalized->largoNombre);
+					printf("Posiciones en el mapa: %d\n", dataLocalized->cantidadDeParesDePosiciones);
+					printf("Cantidad de elementos en la lista %d\n", list_size(dataLocalized->posiciones));
 
 
 					//Esto está solamente para poder confirmar que el contenido de la lista está bien
 					uint32_t *data;
-					uint32_t ciclos = datosRecibidos->cantidadDeParesDePosiciones, X = 0, Y = 1;
+					uint32_t ciclos = dataLocalized->cantidadDeParesDePosiciones, X = 0, Y = 1;
 					while(ciclos != 0){
 						ciclos--;
 
-						data = list_get(datosRecibidos->posiciones, X);
+						data = list_get(dataLocalized->posiciones, X);
 						log_info(logger, "X:%d", *data);
-						data = list_get(datosRecibidos->posiciones, Y);
+						data = list_get(dataLocalized->posiciones, Y);
 						log_info(logger, "Y:%d", *data);
 
 						X += 2;
@@ -76,27 +105,9 @@ void process_request(OpCode codigo, int cliente_fd){
 
 					//Acá terminó de leer el contenido y empiezo a mandar el mensaje
 
-					int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
+					mandarMensajeABroker(dataLocalized, LOCALIZED, mensaje->ID, logger);
 
-					if(!enviarPublisherConIDCorrelativo(conexionBroker, GAMECARD, datosRecibidos, LOCALIZED, mensaje->ID))
-						log_info(logger, "ERROR - No se pudo enviar el mensaje");
-					else{
-						OpCode codigoOperacion;
-
-						recv(conexionBroker, &codigoOperacion, sizeof(OpCode), 0);
-
-						if(codigoOperacion == ID_MENSAJE){ //Entra bien
-							log_info(logger, "Llegó un ID_MENSAJE");
-							IDMensajePublisher* mensajeBasura = NULL;
-							int recibidoExitoso = recibirIDMensajePublisher(conexionBroker, mensajeBasura); //Devuelve 1
-							log_info(logger, "¿Se recibió el id nuevo?: %d", recibidoExitoso);
-							if(recibidoExitoso)
-								log_info(logger, "Se recibió el id nuevo: %ld", mensajeBasura->IDMensaje); //No llega a leer bien el nro :(
-							free(mensajeBasura);
-						}
-					}
 					free(pokemonGet);
-					liberar_conexion_cliente(conexionBroker);
 					break;
 
 				case CATCH:
@@ -105,7 +116,11 @@ void process_request(OpCode codigo, int cliente_fd){
 
 					log_info(logger, "LLEGÓ CATCH POKEMON CON NOMBRE: %s en la pos %d-%d", pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
 
-					administrarCatchPokemon(pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
+					uint32_t resultado = administrarCatchPokemon(pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
+
+					CaughtPokemon* dataCaught = getCaughtPokemon(resultado);
+
+					mandarMensajeABroker(dataCaught, CAUGHT, mensaje->ID, logger);
 
 					free(pokemonCatch);
 
@@ -254,7 +269,9 @@ void iniciar_servidor(t_config* config, int socketBroker)
     	OpCode codigo;
 		if(recv(socketBroker, &codigo, sizeof(OpCode), MSG_WAITALL) == -1)
 			codigo = -1;
-		process_request(codigo, socketBroker);
+		else
+			process_request(codigo, socketBroker);
+
     }
     	//esperar_cliente(socket_servidor);
 
