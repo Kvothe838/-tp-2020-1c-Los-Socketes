@@ -13,11 +13,6 @@
 char *ip, *puerto;
 
 void process_request(OpCode codigo, int cliente_fd){
-	/*void* msg;
-	int size;
-	TipoCola colaRecibida;*/
-	//log_trace(logger, "Codigo recibido: %d", codigo);
-
 	if(codigo == NUEVO_MENSAJE_SUSCRIBER)
 	{
 		t_log* logger = log_create("respuesta.log", "RESPUESTA", true, LOG_LEVEL_TRACE);
@@ -26,7 +21,7 @@ void process_request(OpCode codigo, int cliente_fd){
 		int recepcionExitosa = recibirMensajeSuscriber(cliente_fd, logger, TEAM, &mensaje, ip, puerto);
 
 		NewPokemon* pokemonNew;
-		//GetPokemon* pokemonGet;
+		GetPokemon* pokemonGet;
 		CatchPokemon* pokemonCatch;
 
 		if(recepcionExitosa)
@@ -45,37 +40,53 @@ void process_request(OpCode codigo, int cliente_fd){
 
 					break;
 
-				/*case GET:
+				case GET:
 
 					pokemonGet = deserializarGet(mensaje->contenido);
+
 
 					log_info(logger, "LLEGÓ GET POKEMON CON NOMBRE: %s", pokemonGet->nombre);
 
 					LocalizedPokemon * datosRecibidos = administrarGetPokemon(pokemonGet->nombre);
 
 					printf("%s\n", datosRecibidos->nombre);
-					printf("%d\n", datosRecibidos->cantidadDePosiciones);
+					printf("%d\n", datosRecibidos->cantidadDeParesDePosiciones);
 
 					uint32_t offset = 0;
 					uint32_t *data;
-					uint32_t ciclos = datosRecibidos->cantidadDePosiciones;
+					uint32_t ciclos = datosRecibidos->cantidadDeParesDePosiciones, X = 0, Y = 1;
 					while(ciclos != 0){
 						ciclos--;
 
-						memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-						printf("X:%d - ", (int)data);
-						offset += sizeof(uint32_t);
-						memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-						printf("Y:%d - ", (int)data);
-						offset += sizeof(uint32_t);
-						memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-						printf("Cantidad:%d\n", (int)data);
-						offset += sizeof(uint32_t);
+						data = list_get(datosRecibidos->posiciones, X);
+						log_info(logger, "X:%d", *data);
+						data = list_get(datosRecibidos->posiciones, Y);
+						log_info(logger, "Y:%d", *data);
+
+						X += 2;
+						Y += 2;
+
+
+					}
+
+					if(enviarPublisherConIDCorrelativo(cliente_fd, TEAM, datosRecibidos, GET, mensaje->ID))
+					{
+						log_info(logger, "ERROR - No se pudo enviar el mensaje");
+					}
+
+					OpCode codigoOperacion;
+
+					recv(cliente_fd, &codigoOperacion, sizeof(OpCode), 0);
+
+					if(codigoOperacion == ID_MENSAJE){
+						IDMensajePublisher* mensajeBasura = NULL;
+						int recibidoExitoso = recibirIDMensajePublisher(cliente_fd, mensajeBasura);
+						free(mensajeBasura);
 					}
 
 					free(pokemonGet);
 
-					break;*/
+					break;
 
 				case CATCH:
 

@@ -24,14 +24,14 @@ int main(void) {
 	ipBroker = config_get_string_value(config, "IP_BROKER");
 	puertoBroker = config_get_string_value(config, "PUERTO_BROKER");
 
-	funcionDePruebaParaGabo(logger, ipBroker, puertoBroker);
+	//funcionDePruebaParaGabo(logger, ipBroker, puertoBroker);
 
-	// int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
+	int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
 
-	// int suscripcionEnviada = enviarSuscripcion(conexionBroker, GAMECARD, 3, NEW, GET, CATCH);
+	int suscripcionEnviada = enviarSuscripcion(conexionBroker, GAMECARD, 3, NEW, GET, CATCH);
 
-	// if(suscripcionEnviada)
-	// 	iniciar_servidor(config, conexionBroker);
+	if(suscripcionEnviada)
+		iniciar_servidor(config, conexionBroker);
 	
 	/*inicializarData(logger);
 
