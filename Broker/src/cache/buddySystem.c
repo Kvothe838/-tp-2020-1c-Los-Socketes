@@ -4,8 +4,9 @@ void imprimirBloque(Bloque* bloque)
 {
 	if(bloque == NULL) return;
 
-	printf("Posición: %d | Tamanio: %d | Tamanio ocupado: %d | Está dividido: %s \n",
-			bloque->posicion, bloque->tamanio, bloque->tamanioOcupado, bloque->estaDividido ? "Si" : "No");
+	printf("Posición: %d | Tamanio: %d | Tamanio ocupado: %d | Está dividido: %s | LRU: %s\n",
+			bloque->posicion, bloque->tamanio, bloque->tamanioOcupado, bloque->estaDividido ? "Si" : "No",
+			bloque->fechaUltimoUso == NULL ? "N" : bloque->fechaUltimoUso);
 
 	if(bloque->estaDividido)
 	{
@@ -24,6 +25,10 @@ void crearBloque(Bloque* bloqueActual, int nuevoTamanio)
 {
 	bloqueActual->estaDividido = 1;
 	bloqueActual->tamanioOcupado = 0;
+	bloqueActual->fechaCreacion = NULL;
+	bloqueActual->fechaUltimoUso = NULL;
+	bloqueActual->suscriptoresEnviados = NULL;
+	bloqueActual->suscriptoresRecibidos = NULL;
 	bloqueActual->izq = (Bloque*)malloc(sizeof(Bloque));
 	bloqueActual->der = (Bloque*)malloc(sizeof(Bloque));
 	bloqueActual->izq->estaDividido = 0;
@@ -34,6 +39,14 @@ void crearBloque(Bloque* bloqueActual, int nuevoTamanio)
 	bloqueActual->der->posicion = nuevoTamanio;
 	bloqueActual->izq->tamanioOcupado = 0;
 	bloqueActual->der->tamanioOcupado = 0;
+	bloqueActual->izq->fechaCreacion = NULL;
+	bloqueActual->der->fechaCreacion = NULL;
+	bloqueActual->izq->fechaUltimoUso = NULL;
+	bloqueActual->der->fechaUltimoUso = NULL;
+	bloqueActual->izq->suscriptoresEnviados = NULL;
+	bloqueActual->der->suscriptoresEnviados = NULL;
+	bloqueActual->izq->suscriptoresRecibidos = NULL;
+	bloqueActual->der->suscriptoresRecibidos = NULL;
 }
 
 void inicializarBuddySystem(int tamanio)
@@ -47,10 +60,25 @@ void inicializarBuddySystem(int tamanio)
 
 void liberarInfoBloque(Bloque* bloqueActual)
 {
-	free(bloqueActual->fechaCreacion);
-	free(bloqueActual->fechaUltimoUso);
-	free(bloqueActual->suscriptoresEnviados);
-	free(bloqueActual->suscriptoresRecibidos);
+	if(bloqueActual->fechaCreacion != NULL){
+		free(bloqueActual->fechaCreacion);
+		bloqueActual->fechaCreacion = NULL;
+	}
+
+	if(bloqueActual->fechaUltimoUso != NULL){
+		free(bloqueActual->fechaUltimoUso);
+		bloqueActual->fechaCreacion = NULL;
+	}
+
+	if(bloqueActual->suscriptoresEnviados != NULL){
+		free(bloqueActual->suscriptoresEnviados);
+		bloqueActual->suscriptoresEnviados = NULL;
+	}
+
+	if(bloqueActual->suscriptoresRecibidos != NULL){
+		free(bloqueActual->suscriptoresRecibidos);
+		bloqueActual->suscriptoresRecibidos = NULL;
+	}
 }
 
 void liberarBloque(Bloque* bloqueActual)
@@ -141,29 +169,31 @@ void consolidarBuddySystem(Bloque* bloque, int* reiniciarConsolidacion)
 		bloque->posicion = bloque->izq->posicion;
 		liberarInfoBloque(bloque->izq);
 		free(bloque->izq);
+		bloque->izq = NULL;
 		liberarInfoBloque(bloque->der);
 		free(bloque->der);
+		bloque->der = NULL;
 		*reiniciarConsolidacion = 1;
 	}
 }
 
-void calcularFIFOLRUBuddySystem(Bloque* bloque, Bloque*** bloqueMasAntiguo)
+void calcularFIFOLRUBuddySystem(Bloque** bloque, Bloque*** bloqueMasAntiguo)
 {
-	if(bloque->tamanioOcupado > 0)
+	if((*bloque)->tamanioOcupado > 0)
 	{
 		if((esFIFO ? (*(*bloqueMasAntiguo))->fechaCreacion == NULL : (*(*bloqueMasAntiguo))->fechaUltimoUso == NULL)
-				|| esTiempoMasAntiguo(esFIFO ? bloque->fechaCreacion : bloque->fechaUltimoUso,
+				|| esTiempoMasAntiguo(esFIFO ? (*bloque)->fechaCreacion : (*bloque)->fechaUltimoUso,
 									  esFIFO ? (*(*bloqueMasAntiguo))->fechaCreacion : (*(*bloqueMasAntiguo))->fechaUltimoUso))
 		{
-			*bloqueMasAntiguo = &bloque;
+			*bloqueMasAntiguo = bloque;
 		}
 	}
 	else
 	{
-		if(bloque->estaDividido)
+		if((*bloque)->estaDividido)
 		{
-			calcularFIFOLRUBuddySystem(bloque->izq, bloqueMasAntiguo);
-			calcularFIFOLRUBuddySystem(bloque->der, bloqueMasAntiguo);
+			calcularFIFOLRUBuddySystem(&((*bloque)->izq), bloqueMasAntiguo);
+			calcularFIFOLRUBuddySystem(&((*bloque)->der), bloqueMasAntiguo);
 		}
 	}
 }
@@ -173,27 +203,24 @@ void eliminarVictimaBuddySystem()
 	Bloque** item = &cache;
 
 	if(esFIFO || esLRU){
-		calcularFIFOLRUBuddySystem(cache, &item);
+		calcularFIFOLRUBuddySystem(&cache, &item);
 	}
 	else
 	{
 		return;
 	}
 
-	log_info(logger, "A ELIMINAR | POSICION: %d | TAMANIO: %d | DIVIDIDO: %d | CONTENIDO: %d", (*item)->posicion, (*item)->tamanio, (*item)->estaDividido, (*item)->tamanioOcupado);
-
 	eliminarItemBuddySystem(item);
 
-	log_info(logger, "ELIMINADO | POSICION: %d | TAMANIO: %d | DIVIDIDO: %d | CONTENIDO: %d", (*item)->posicion, (*item)->tamanio, (*item)->estaDividido, (*item)->tamanioOcupado);
-
+	log_info(logger, "CAMBIO");
 	imprimirCache();
 
 	int reiniciarConsolidacion;
 
-	do{
+	do {
 		reiniciarConsolidacion = 0;
 		consolidarBuddySystem(cache, &reiniciarConsolidacion);
-	}while(reiniciarConsolidacion);
+	} while(reiniciarConsolidacion);
 }
 
 void agregarElementoValidoBuddySystem(Bloque** bloqueAModificar, void* item, int tamanioItem, long ID, long IDCorrelativo,

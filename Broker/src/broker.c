@@ -51,11 +51,17 @@ int main(void) {
 
 	imprimirCache();
 
-	eliminarVictimaBuddySystem();
+	/*eliminarVictimaBuddySystem();
 
-	log_info(logger, "--------------------------------");
+	log_info(logger, "------------------------------------------------------");
 
 	imprimirCache();
+
+	eliminarVictimaBuddySystem();
+
+	log_info(logger, "------------------------------------------------------");
+
+	imprimirCache();*/
 
 	//Pruebas para la caché.
 	/*int a = 87;
