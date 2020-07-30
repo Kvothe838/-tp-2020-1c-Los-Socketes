@@ -52,7 +52,7 @@ void process_request(OpCode codigo, int cliente_fd){
 					printf("%s\n", datosRecibidos->nombre);
 					printf("%d\n", datosRecibidos->cantidadDeParesDePosiciones);
 
-					uint32_t offset = 0;
+					//Esto está solamente para poder confirmar que el contenido de la lista está bien
 					uint32_t *data;
 					uint32_t ciclos = datosRecibidos->cantidadDeParesDePosiciones, X = 0, Y = 1;
 					while(ciclos != 0){
@@ -69,23 +69,26 @@ void process_request(OpCode codigo, int cliente_fd){
 
 					}
 
-					if(enviarPublisherConIDCorrelativo(cliente_fd, TEAM, datosRecibidos, GET, mensaje->ID))
+					//Acá terminó de leer el contenido y empiezo a mandar el mensaje
+
+					if(!enviarPublisherConIDCorrelativo(cliente_fd, GAMECARD, datosRecibidos, LOCALIZED, mensaje->ID))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje");
 					}
+					else{
+						OpCode codigoOperacion;
 
-					OpCode codigoOperacion;
+						recv(cliente_fd, &codigoOperacion, sizeof(OpCode), 0);
 
-					recv(cliente_fd, &codigoOperacion, sizeof(OpCode), 0);
-
-					if(codigoOperacion == ID_MENSAJE){
-						IDMensajePublisher* mensajeBasura = NULL;
-						int recibidoExitoso = recibirIDMensajePublisher(cliente_fd, mensajeBasura);
-						free(mensajeBasura);
+						if(codigoOperacion == ID_MENSAJE){
+							IDMensajePublisher* mensajeBasura = NULL;
+							int recibidoExitoso = recibirIDMensajePublisher(cliente_fd, mensajeBasura);
+							if(recibidoExitoso)
+								log_info(logger, "Se recibió el id nuevo %ld: ", mensajeBasura->IDMensaje);
+							free(mensajeBasura);
+						}
 					}
-
 					free(pokemonGet);
-
 					break;
 
 				case CATCH:
