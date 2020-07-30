@@ -612,13 +612,13 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 	return 0;
 }
 
-/*LocalizedPokemon * administrarGetPokemon(char* pokemon){
+LocalizedPokemon * administrarGetPokemon(char* pokemon){
 	LocalizedPokemon * datosDePosicionPokemon = malloc(sizeof(LocalizedPokemon));
 
 	datosDePosicionPokemon->nombre = pokemon;
 	datosDePosicionPokemon->largoNombre = strlen(pokemon);
 	datosDePosicionPokemon->cantidadDeParesDePosiciones = 0; //para el caso que no encuentre
-	datosDePosicionPokemon->data = NULL;
+	datosDePosicionPokemon->posiciones = list_create();
 
 	uint32_t cantidadDeBlocks;
 	char* path = agregarPuntoDeMontajeConMagicNumber("/Files/");
@@ -635,31 +635,29 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 		t_list * lista;// = list_create();
 		cantidadDeBlocks = obtenerDataFileSystem(datosPokemon->tamanio, datosPokemon->bloquesAsociados, &lista);
 
-		datosDePosicionPokemon->cantidadDePosiciones = (uint32_t)list_size(lista);*/
+		datosDePosicionPokemon->cantidadDeParesDePosiciones = (uint32_t)list_size(lista);
 
-		//void* stream = malloc(sizeof(uint32_t) * 3 /* sizeof(uint32_t) * 3 representa una posicion */ * datosDePosicionPokemon->cantidadDePosiciones);
 
-		/*t_list* listaAuxiliar; //= list_create();
+
+		t_list* listaAuxiliar;
 		uint32_t offset = 0;
 
 		while(!list_is_empty(lista)){
 			listaAuxiliar = list_take_and_remove(lista, 1);
-			pokemonDatoPosicion* structADeserializar; // = malloc(sizeof(pokemonDatoPosicion));
+			pokemonDatoPosicion* structADeserializar;
 			structADeserializar = list_get(listaAuxiliar, 0);
 
-			memcpy(stream+offset, &(structADeserializar->posX), sizeof(uint32_t));
-			offset += sizeof(uint32_t);
-			memcpy(stream+offset, &(structADeserializar->posY), sizeof(uint32_t));
-			offset += sizeof(uint32_t);
-			memcpy(stream+offset, &(structADeserializar->cantidad), sizeof(uint32_t));
-			offset += sizeof(uint32_t);
 
-			list_destroy_and_destroy_elements(listaAuxiliar, (void*)free);
+			printf("X de struct %d\n",structADeserializar->posX);
+			printf("Y de struct %d\n",structADeserializar->posY);
+			list_add(datosDePosicionPokemon->posiciones, &(structADeserializar->posX));
+			list_add(datosDePosicionPokemon->posiciones, &(structADeserializar->posY));
+
+
+			list_destroy(listaAuxiliar);
 		}
 
 		list_destroy_and_destroy_elements(lista, (void*)free);
-
-		datosDePosicionPokemon->data = stream;
 
 		cantidadDeBlocks++;
 		for (int i = 0; i < cantidadDeBlocks; ++i) {
@@ -678,4 +676,4 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 	free(path);
 
 	return datosDePosicionPokemon;
-}*/
+}
