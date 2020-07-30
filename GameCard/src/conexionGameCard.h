@@ -7,6 +7,8 @@
 
 pthread_t thread;
 
+char* ipBroker, *puertoBroker;
+
 void iniciar_servidor(t_config* config, int socketBroker);
 
 #endif

@@ -10,6 +10,8 @@
 #include<pthread.h>
 #include "ManejoDeBloques/manejoDeArchivos.h"
 
+#include "conexionGameCard.h"
+
 char *ip, *puerto;
 
 void process_request(OpCode codigo, int cliente_fd){
@@ -49,8 +51,11 @@ void process_request(OpCode codigo, int cliente_fd){
 
 					LocalizedPokemon * datosRecibidos = administrarGetPokemon(pokemonGet->nombre);
 
-					printf("%s\n", datosRecibidos->nombre);
-					printf("%d\n", datosRecibidos->cantidadDeParesDePosiciones);
+					printf("Nombre completo: %s\n", datosRecibidos->nombre);
+					printf("Larog del nombre: %d\n", datosRecibidos->largoNombre);
+					printf("Posiciones en el mapa: %d\n", datosRecibidos->cantidadDeParesDePosiciones);
+					printf("Cantidad de elementos en la lista %d\n", list_size(datosRecibidos->posiciones));
+
 
 					//Esto está solamente para poder confirmar que el contenido de la lista está bien
 					uint32_t *data;
@@ -71,24 +76,27 @@ void process_request(OpCode codigo, int cliente_fd){
 
 					//Acá terminó de leer el contenido y empiezo a mandar el mensaje
 
-					if(!enviarPublisherConIDCorrelativo(cliente_fd, GAMECARD, datosRecibidos, LOCALIZED, mensaje->ID))
-					{
+					int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
+
+					if(!enviarPublisherConIDCorrelativo(conexionBroker, GAMECARD, datosRecibidos, LOCALIZED, mensaje->ID))
 						log_info(logger, "ERROR - No se pudo enviar el mensaje");
-					}
 					else{
 						OpCode codigoOperacion;
 
-						recv(cliente_fd, &codigoOperacion, sizeof(OpCode), 0);
+						recv(conexionBroker, &codigoOperacion, sizeof(OpCode), 0);
 
-						if(codigoOperacion == ID_MENSAJE){
+						if(codigoOperacion == ID_MENSAJE){ //Entra bien
+							log_info(logger, "Llegó un ID_MENSAJE");
 							IDMensajePublisher* mensajeBasura = NULL;
-							int recibidoExitoso = recibirIDMensajePublisher(cliente_fd, mensajeBasura);
+							int recibidoExitoso = recibirIDMensajePublisher(conexionBroker, mensajeBasura); //Devuelve 1
+							log_info(logger, "¿Se recibió el id nuevo?: %d", recibidoExitoso);
 							if(recibidoExitoso)
-								log_info(logger, "Se recibió el id nuevo %ld: ", mensajeBasura->IDMensaje);
+								log_info(logger, "Se recibió el id nuevo: %ld", mensajeBasura->IDMensaje); //No llega a leer bien el nro :(
 							free(mensajeBasura);
 						}
 					}
 					free(pokemonGet);
+					liberar_conexion_cliente(conexionBroker);
 					break;
 
 				case CATCH:

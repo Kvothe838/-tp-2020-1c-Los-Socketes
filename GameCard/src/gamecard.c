@@ -18,7 +18,6 @@ int main(void) {
 
 	//log_info(logger, "ID del proceso GameCard: %d", process_getpid());
 
-	char* ipBroker, *puertoBroker;
 	ipBroker = config_get_string_value(config, "IP_BROKER");
 	puertoBroker = config_get_string_value(config, "PUERTO_BROKER");
 
