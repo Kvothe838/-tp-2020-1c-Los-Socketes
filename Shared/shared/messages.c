@@ -112,10 +112,11 @@ char* tipoColaToString(TipoCola tipoCola){
 
 char* tipoModuloToString(TipoModulo modulo){
 	if(modulo > TEAM){
+		int hiloTeam = modulo - TEAM;
 		char str[6];
 		char* stringCompleto;
 
-		sprintf(str, "TEAM%d", modulo);
+		sprintf(str, "TEAM%d", hiloTeam);
 
 		stringCompleto = malloc(6 * sizeof(char));
 
@@ -223,9 +224,8 @@ GetPokemon* getGetPokemon(char* nombre){
 	return pokemon;
 }
 
-LocalizedPokemon* getLocalized(char* nombre, int cantidadParesPosiciones, ...){
+LocalizedPokemon* getLocalized(char* nombre, int cantidadPosiciones, ...){
 	va_list posiciones;
-	int cantidadPosiciones = cantidadParesPosiciones * 2;
 
 	va_start(posiciones, cantidadPosiciones); //Esto tira un warning pelotudísimo, IGNORAR.
 	t_list* listaDePosiciones = list_create();
@@ -238,7 +238,7 @@ LocalizedPokemon* getLocalized(char* nombre, int cantidadParesPosiciones, ...){
 
 	va_end(posiciones);
 
-	return getLocalizedConList(nombre, cantidadParesPosiciones, listaDePosiciones);
+	return getLocalizedConList(nombre, cantidadPosiciones / 2, listaDePosiciones);
 }
 
 LocalizedPokemon* getLocalizedConList(char* nombre, int cantidadParesPosiciones, t_list* posiciones){

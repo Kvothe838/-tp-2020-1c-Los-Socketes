@@ -42,7 +42,7 @@ int main(void) {
 						AppearedPokemon* pokemon = deserializarAppeared(mensaje->contenido);
 
 						//Hacés lo que te plazca con el pokemon.
-						log_info(logger, "LLEGÓ POKEMON CON NOMBRE: %s", pokemon->nombre);
+						log_info(logger, "Llegó Appeared con nombre: %s", pokemon->nombre);
 
 						free(pokemon);
 					}

@@ -8,7 +8,7 @@
 #include "ManejoDeBloques/manejoDeArchivos.h"
 #include <commons/process.h>
 
-void funcionDePruebaParaGabo(t_log* logger, char* ip, char* puerto);
+void funcionDePruebaParaGabo(t_log* logger, char* ip, char* puerto, LocalizedPokemon* pokemon);
 
 int main(void) {
 	t_log* logger = iniciar_logger("gamecard.log", "GAMECARD");
@@ -16,15 +16,16 @@ int main(void) {
 
 	inicializarData(logger);
 
-	log_info(logger, "ID del proceso GameCard: %d", process_getpid());
-
-
+	//log_info(logger, "ID del proceso GameCard: %d", process_getpid());
 
 	char* ipBroker, *puertoBroker;
 	ipBroker = config_get_string_value(config, "IP_BROKER");
 	puertoBroker = config_get_string_value(config, "PUERTO_BROKER");
 
-	//funcionDePruebaParaGabo(logger, ipBroker, puertoBroker);
+	LocalizedPokemon* pikachu = getLocalized("Pikachu", 4, 1, 1, 1, 1);
+	funcionDePruebaParaGabo(logger, ipBroker, puertoBroker, pikachu);
+	LocalizedPokemon* squirtle = getLocalized("Squirtle", 1, 3, 1);
+	funcionDePruebaParaGabo(logger, ipBroker, puertoBroker, squirtle);
 
 	int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
 
@@ -74,7 +75,7 @@ int main(void) {
 
 	/*ip = config_get_string_value(config, "IP_BROKER");
 	puerto = config_get_string_value(config, "PUERTO_BROKER");
-	funcionDePruebaParaGabo(logger, ip, puerto);
+	funcionDePruebaParaGabo(logger, ip, puerto);*/
 	//int socketCliente = crear_conexion_cliente(ip, puerto);
 	/*enviarSuscripcion(socketCliente, GAMECARD, 3, NEW, GET, CAUGHT);
 
@@ -100,9 +101,8 @@ int main(void) {
 	return EXIT_SUCCESS;
 }
 
-void funcionDePruebaParaGabo(t_log* logger, char* ip, char* puerto){
+void funcionDePruebaParaGabo(t_log* logger, char* ip, char* puerto, LocalizedPokemon* pokemon){
 	int conexionBroker = crear_conexion_cliente(ip, puerto);
-	LocalizedPokemon* pokemon = getLocalized("Pokemon", 2, 1, 1, 1, 1); //usa malloc, entonces hay que hacer un free
 
 	if(!enviarPublisherSinIDCorrelativo(conexionBroker, GAMECARD, pokemon, LOCALIZED))
 	{
@@ -111,6 +111,8 @@ void funcionDePruebaParaGabo(t_log* logger, char* ip, char* puerto){
 	}
 
 	log_info(logger, "OK - Se envió correctamente el mensaje.");
+
+	free(pokemon);
 
 	OpCode code;
 

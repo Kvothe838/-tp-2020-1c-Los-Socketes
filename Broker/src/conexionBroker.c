@@ -271,6 +271,8 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 
 						manejarACK(respuesta, suscriptor, IDMensaje);
 						free(respuesta);
+					} else {
+						manejarSuscriptorCaido(suscriptor);
 					}
 				}
 				else
