@@ -28,7 +28,7 @@ int main(void) {
 			if(codigo == NUEVO_MENSAJE_SUSCRIBER){
 				MensajeParaSuscriptor* mensaje= NULL;
 				int recepcionExitosa = recibirMensajeSuscriber(conexionBroker, logger, TEAM, &mensaje, configTeam->ip, configTeam->puerto);
-
+				log_info(logger, "ID CORRELATIVO: %d", mensaje->IDMensajeCorrelativo);
 				if(recepcionExitosa)
 				{
 					/*Acá trabajás el mensaje como más te guste. Podés filtrar primero por id correlativo,
