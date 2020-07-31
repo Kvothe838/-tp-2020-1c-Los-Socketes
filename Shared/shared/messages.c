@@ -2,14 +2,16 @@
 #include "../shared/serialize.h"
 #include "../shared/structs.h"
 
-int enviarPublisherSinIDCorrelativo(int socket, TipoModulo modulo, void* dato, TipoCola cola)
+int enviarPublisherSinIDCorrelativo(t_log* logger, int socket, TipoModulo modulo, void* dato, TipoCola cola,
+		IDMensajePublisher** mensajeRecibido)
 {
 	int IDCorrelativoVacio = 0;
 
-	return enviarPublisherConIDCorrelativo(socket, modulo, dato, cola, IDCorrelativoVacio);
+	return enviarPublisherConIDCorrelativo(logger, socket, modulo, dato, cola, IDCorrelativoVacio, mensajeRecibido);
 }
 
-int enviarPublisherConIDCorrelativo(int socket, TipoModulo modulo, void* dato, TipoCola cola, long IDCorrelativo)
+int enviarPublisherConIDCorrelativo(t_log* logger, int socket, TipoModulo modulo, void* dato, TipoCola cola, long IDCorrelativo,
+		IDMensajePublisher** mensajeRecibido)
 {
 	int resultado = 1;
 	int bytes;
@@ -17,10 +19,28 @@ int enviarPublisherConIDCorrelativo(int socket, TipoModulo modulo, void* dato, T
 
 	if(send(socket, paquete, bytes, 0) == -1)
 	{
+		log_info(logger, "Mensaje enviado.");
 		resultado = 0;
 	}
 
 	free(paquete);
+
+	if(resultado == 0) return 0;
+
+	OpCode code;
+
+	if(recv(socket, &code, sizeof(OpCode), 0) == -1)
+	{
+		return 0;
+	}
+
+	if(code == ID_MENSAJE){
+		*mensajeRecibido = malloc(sizeof(IDMensajePublisher));
+		recibirIDMensajePublisher(socket, *mensajeRecibido);
+
+	} else {
+		log_info(logger, "Error al recibir IDMensaje para Publisher.");
+	}
 
 	return resultado;
 }
