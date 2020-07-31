@@ -75,7 +75,6 @@ void process_request(OpCode codigo, int cliente_fd){
 
 					pokemonGet = deserializarGet(mensaje->contenido);
 
-
 					log_info(logger, "LLEGÓ GET POKEMON CON NOMBRE: %s", pokemonGet->nombre);
 
 					LocalizedPokemon * dataLocalized = administrarGetPokemon(pokemonGet->nombre);
@@ -233,47 +232,21 @@ void esperar_cliente(int socket_servidor)
 
 void iniciar_servidor(t_config* config, int socketBroker)
 {
-	/*ip = config_get_string_value(config, "IP_GAMECARD");
-	puerto = config_get_string_value(config, "PUERTO_GAMECARD");
-
-	int socket_servidor;
-
-    struct addrinfo hints, *servinfo, *p;
-
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
-
-    getaddrinfo(ip, puerto, &hints, &servinfo);
-
-    for (p=servinfo; p != NULL; p = p->ai_next)
-    {
-        if ((socket_servidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
-            continue;
-
-        if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1) {
-            close(socket_servidor);
-            continue;
-        }
-        break;
-    }
-
-	listen(socket_servidor, SOMAXCONN);
-
-    freeaddrinfo(servinfo);
-
-    printf("Socket nro: %d", socket_servidor);*/
-
     while(1){
+    	/*int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
+    	int suscripcionEnviada = enviarSuscripcion(conexionBroker, GAMECARD, 3, NEW, GET, CATCH);*/
+
+
     	OpCode codigo;
-		if(recv(socketBroker, &codigo, sizeof(OpCode), MSG_WAITALL) == -1)
-			codigo = -1;
-		else
+		if(!(recv(socketBroker, &codigo, sizeof(OpCode), MSG_WAITALL)==-1)){
 			process_request(codigo, socketBroker);
+			printf("Codigo: %d", codigo);
+			if(codigo > NUEVO_MENSAJE_SUSCRIBER || codigo < SUSCRIBER){
+				abort();
+			}
+			continue;
+		}
 
     }
-    	//esperar_cliente(socket_servidor);
-
 }
 

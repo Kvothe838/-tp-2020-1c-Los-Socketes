@@ -19,7 +19,8 @@ int main(void) {
 	IniciarServidorArgs argumentos;
 
 	logger = iniciar_logger("loggerBroker.log", "Broker");
-	config = leer_config("../configBroker.config", logger);
+	//config = leer_config("../configBroker.config", logger);
+	config = leer_config("configBroker.config", logger);
 
 	argumentos.ip = config_get_string_value(config, "IP_BROKER");
 	argumentos.puerto = config_get_string_value(config, "PUERTO_BROKER");
