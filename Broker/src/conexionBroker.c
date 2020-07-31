@@ -155,9 +155,9 @@ void processRequest(int opCode, Suscriptor* suscriptor){
 
 			break;
 		case PUBLISHER:;
-			sem_wait(&mutexNuevoMensaje);
+			//sem_wait(&mutexNuevoMensaje); acá rompe porque, seguramente, en algún lado te olvidás de hacer un post xDXDxDXD
 			manejarPublisher(suscriptor->socket);
-			sem_post(&mutexNuevoMensaje);
+			//sem_post(&mutexNuevoMensaje);
 
 			break;
 		/*case ACK:;
