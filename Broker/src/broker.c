@@ -149,6 +149,8 @@ static void sig_usr(int signo)
 
 static void sig_usr2(int signo){
 	log_info(logger, "SIGUSR2");
-	if(signo == SIGUSR2)
+	if(signo == SIGUSR2){
 		cortarPrograma();
+	}
+
 }

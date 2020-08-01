@@ -105,7 +105,8 @@ int main(void) {
 void funcionDePruebaParaGabo(t_log* logger, char* ip, char* puerto, LocalizedPokemon* pokemon){
 	int conexionBroker = crear_conexion_cliente(ip, puerto);
 
-	if(!enviarPublisherSinIDCorrelativo(conexionBroker, GAMECARD, pokemon, LOCALIZED))
+	IDMensajePublisher* respuesta;
+	if(!enviarPublisherSinIDCorrelativo(logger, conexionBroker, GAMECARD, pokemon, LOCALIZED, &respuesta))
 	{
 		log_info(logger, "ERROR - No se pudo enviar el mensaje.");
 		abort();
@@ -114,20 +115,6 @@ void funcionDePruebaParaGabo(t_log* logger, char* ip, char* puerto, LocalizedPok
 	log_info(logger, "OK - Se envió correctamente el mensaje.");
 
 	free(pokemon);
-
-	OpCode code;
-
-	recv(conexionBroker, &code, sizeof(OpCode), 0);
-
-	if(code == ID_MENSAJE){
-		IDMensajePublisher* mensaje = malloc(sizeof(IDMensajePublisher));
-		recibirIDMensajePublisher(conexionBroker, mensaje);
-		log_info(logger, "EL ID ES %ld", mensaje->IDMensaje);
-		log_info(logger, "LA COLA ES %s", tipoColaToString(mensaje->cola));
-
-	}else {
-		log_info(logger, "TODO MAL. RECIBÍ OTRO CODE.");
-	}
 
 	liberar_conexion_cliente(conexionBroker);
 }

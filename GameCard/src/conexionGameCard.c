@@ -17,24 +17,10 @@ char *ip, *puerto;
 void mandarMensajeABroker(void* datosRecibidos,	TipoModulo cola, long IDCorrelativo, t_log* logger) {
 	int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
 
-	if (!enviarPublisherConIDCorrelativo(conexionBroker, GAMECARD, datosRecibidos, cola, IDCorrelativo))
+	IDMensajePublisher* respuesta;
+	if (!enviarPublisherConIDCorrelativo(logger, conexionBroker, GAMECARD, datosRecibidos, cola, IDCorrelativo, &respuesta))
 		log_info(logger, "ERROR - No se pudo enviar el mensaje a Broker");
-	else {
-		OpCode codigoOperacion;
-		recv(conexionBroker, &codigoOperacion, sizeof(OpCode), 0);
 
-		if (codigoOperacion == ID_MENSAJE) {
-			log_info(logger, "Llegó un ID_MENSAJE");
-			IDMensajePublisher* mensajeBasura = malloc(sizeof(IDMensajePublisher));
-
-			int recibidoExitoso = recibirIDMensajePublisher(conexionBroker,	mensajeBasura);
-
-			if (recibidoExitoso)
-				log_info(logger, "Se recibió el id nuevo: %ld",	mensajeBasura->IDMensaje);
-
-			free(mensajeBasura);
-		}
-	}
 	liberar_conexion_cliente(conexionBroker);
 }
 

@@ -37,7 +37,7 @@ int main(int argc, char **argv){
 		abort();
 	}
 printf("\n\n");
-
+IDMensajePublisher* mensajeRecibido;
 
 	switch(argvToModuloGameboy(argv[1]))
 	{
@@ -53,8 +53,6 @@ printf("\n\n");
 			}
 
 			log_info(logger, "OK - Se estableció correctamente la conexión con el %s", argv[1]);
-
-			IDMensajePublisher* mensajeRecibido;
 
 			switch(argvToTipoCola(argv[2]))
 			{
@@ -79,7 +77,7 @@ printf("\n\n");
 				{
 					AppearedPokemon* pokemon = getAppearedPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 
-					if(!enviarPublisherConIDCorrelativo(conexionBroker, GAMEBOY, pokemon, APPEARED, argv[6], &mensajeRecibido))
+					if(!enviarPublisherConIDCorrelativo(logger, conexionBroker, GAMEBOY, pokemon, APPEARED, (int)argv[6], &mensajeRecibido))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
 						abort();
@@ -98,7 +96,7 @@ printf("\n\n");
 				{
 					CatchPokemon* pokemon = getCatchPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 
-					if(!enviarPublisherSinIDCorrelativo(conexionBroker, GAMEBOY, pokemon, CATCH, &mensajeRecibido))
+					if(!enviarPublisherSinIDCorrelativo(logger, conexionBroker, GAMEBOY, pokemon, CATCH, &mensajeRecibido))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %d %d", argv[1], argv[2], argv[3], argv[4], argv[5]);
 						abort();
@@ -117,7 +115,7 @@ printf("\n\n");
 				{
 					CaughtPokemon* pokemon = getCaughtPokemon(atoi(argv[3]));//usa malloc, entonces hay que hacer un free
 
-					if(!enviarPublisherSinIDCorrelativo(conexionBroker, GAMEBOY, pokemon, CAUGHT, &mensajeRecibido))
+					if(!enviarPublisherSinIDCorrelativo(logger, conexionBroker, GAMEBOY, pokemon, CAUGHT, &mensajeRecibido))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %d", argv[1], argv[2], argv[3]);
 						abort();
@@ -136,7 +134,7 @@ printf("\n\n");
 				{
 					GetPokemon* pokemon = getGetPokemon(argv[3]);//usa malloc, entonces hay que hacer un free
 
-					if(!enviarPublisherSinIDCorrelativo(conexionBroker, GAMEBOY, pokemon, GET, &mensajeRecibido))
+					if(!enviarPublisherSinIDCorrelativo(logger, conexionBroker, GAMEBOY, pokemon, GET, &mensajeRecibido))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s", argv[1], argv[2], argv[3]);
 						abort();
@@ -181,7 +179,7 @@ printf("\n\n");
 				{
 					AppearedPokemon* pokemon = getAppearedPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 
-					if(!enviarPublisherSinIDCorrelativo(conexionTeam, GAMEBOY, pokemon, APPEARED))
+					if(!enviarPublisherSinIDCorrelativo(logger, conexionTeam, GAMEBOY, pokemon, APPEARED, &mensajeRecibido))
 					{
 						log_info(logger, "ERROR. No se pudo enviar el mensaje %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
 						abort();

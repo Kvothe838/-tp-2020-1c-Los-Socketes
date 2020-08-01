@@ -315,6 +315,9 @@ void iniciarServidor(IniciarServidorArgs* argumentos){
         if ((socket_servidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
             continue;
 
+        int one = 1;
+        setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)); //ESTO ES ESENCIAL.
+
         if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1) {
             close(socket_servidor);
             continue;
@@ -324,11 +327,15 @@ void iniciarServidor(IniciarServidorArgs* argumentos){
 
 	listen(socket_servidor, SOMAXCONN);
 
+	log_info(logger, "socket: %d", socket_servidor);
+
     freeaddrinfo(servinfo);
 
     while(seguirEjecutando){
     	esperarCliente(socket_servidor);
     }
+
+    liberar_conexion_cliente(socket_servidor);
 }
 
 void cortarPrograma(){
