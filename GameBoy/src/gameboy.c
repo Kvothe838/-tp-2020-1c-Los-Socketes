@@ -7,7 +7,7 @@
 #include <string.h>
 
 int main(int argc, char **argv){
-	int const cantidadMinArgc = 4, cantidadMaxArgc = 20;
+	int const cantidadMinArgc = 2, cantidadMaxArgc = 20;
 
 	int conexionBroker, conexionTeam, conexionGamecard;
 	char *ipBroker, *ipTeam, *ipGamecard;
@@ -19,25 +19,20 @@ int main(int argc, char **argv){
 	logger = iniciar_logger("loggerGameBoy.log", "GameBoy");
 	config = leer_config("configGameBoy.config", logger);
 
-    printf("El nombre del programa es: %s\n",argv[0]);
     if(argc == 1){
         printf("\nNo se ha ingresado ningún argumento de línea de comando adicional que no sea el nombre del programa\n");
 		printf("Formato de ejecución: ./gameboy [BROKER|GAMECARD|TEAM|SUSCRIPTOR] [NEW_POKEMON|APPEARED_POKEMON|CATCH_POKEMON|CAUGHT_POKEMON|GET_POKEMON] [ARGUMENTOS]*\n");
 		abort();
 	}
-    if(argc >= cantidadMinArgc && argc <= cantidadMaxArgc)
+
+    if(argc < cantidadMinArgc || argc > cantidadMaxArgc)
     {
-        printf("\nNumero de argumentos ingresados: %d",argc);
-        printf("\n----Los siguientes son los argumentos de la línea de comando ingresados----");
-        for(int counter = 0;counter<argc;counter++)
-            printf("\nargv[%d]: %s",counter,argv[counter]);
-	}
-	else {
 		printf("\nPor favor, revise que está ingresando como MINIMO %d argumentos, y como MAXIMO %d argumentos, y vuelva a intentar\n", cantidadMinArgc, cantidadMaxArgc);
 		abort();
 	}
-printf("\n\n");
-IDMensajePublisher* mensajeRecibido;
+
+	printf("\n\n");
+	IDMensajePublisher* mensajeRecibido;
 
 	switch(argvToModuloGameboy(argv[1]))
 	{
@@ -302,7 +297,6 @@ IDMensajePublisher* mensajeRecibido;
 
 		ipBroker = config_get_string_value(config, "IP_BROKER");
 		puertoBroker = config_get_string_value(config, "PUERTO_BROKER");
-		log_info(logger, "IP_BROKER   %s y PUERTO_BROKER   %s", ipBroker, puertoBroker);
 
 		conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
 		if(conexionBroker == 0)
@@ -310,8 +304,6 @@ IDMensajePublisher* mensajeRecibido;
 			log_info(logger, "ERROR - No se pudo crear la conexión con BROKER");
 			abort();
 		}
-
-		log_info(logger, "OK - Se estableció correctamente la conexión con el BROKER");
 
 		if((colaDeMensaje = argvToTipoCola(argv[2])) == -1)
 		{
@@ -322,16 +314,46 @@ IDMensajePublisher* mensajeRecibido;
 		int tiempo = atoi(argv[3]);
 		time_t start = time(0);
 
+		int enviado = enviarSuscripcion(conexionBroker, GAMEBOY, 1, colaDeMensaje);
+
+		if(enviado)
+		{
+			//Log obligatorio
+			log_info(logger, "Suscripción a la cola %s.", tipoColaToString(colaDeMensaje));
+		} else {
+			log_info(logger, "Error intentando suscribirse a la cola.");
+		}
+
 		while ((time(0) - start) <= tiempo )
 		{
+			OpCode codigo;
+			int recibido;
 
-			enviarSuscripcion(conexionBroker, GAMEBOY, 1, colaDeMensaje);
+			recibido = recv(conexionBroker, &codigo, sizeof(OpCode), MSG_WAITALL);
 
-			//recibir mensaje
-			char *mensaje = recibirMensaje(conexionBroker);
+			if(recibido == -1 || recibido == 0){
+				log_info(logger, "Error recibiendo código");
+				abort();
+			}
 
-			//loguear mensaje recibido
-			log_info(logger, "El mensaje recibido de la cola de mensajes %s es: %s\n", tipoColaToString(colaDeMensaje), mensaje);
+			if(codigo != NUEVO_MENSAJE_SUSCRIBER)
+			{
+				log_info(logger, "Recibí otro código");
+				abort();
+			}
+
+			MensajeParaSuscriptor* mensaje = NULL;
+			int recepcionExitosa = recibirMensajeSuscriber(conexionBroker, logger, GAMEBOY, &mensaje, ipBroker, puertoBroker);
+
+			if(recepcionExitosa)
+			{
+				//Log obligatorio
+				log_info(logger, "Llegó nuevo mensaje de cola %s.", tipoColaToString(mensaje->cola));
+			} else {
+				log_info(logger, "Error enviando mensaje.");
+			}
+
+			free(mensaje);
 		}
 
 		break;
@@ -339,23 +361,10 @@ IDMensajePublisher* mensajeRecibido;
 
 		default:
 		{
-			log_info(logger, "ERROR - No se reconoce el tipo de mensaje ingresada.");
+			log_info(logger, "ERROR - No se reconoce el tipo de mensaje ingresado.");
 			abort();
 		}
 	}
-
-
-	//enviar_mensaje
-
-	//NewPokemon = {"Pikachu",5,10,2};
-
-	//AppearedPokemon = {"Pikachu",1,5};
-
-	//CatchPokemon = {"Pikachu",1,5};
-
-	//CaughtPokemon = {0};
-
-	//GetPokemon = {"Pikachu"};
 
 	terminar_programa(logger, config);
 

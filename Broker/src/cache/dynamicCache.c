@@ -44,14 +44,16 @@ int calcularFIFO(){
 }
 
 int calcularLRU(){
+	log_info(logger, "ENTRÉ A LRU");
 	int oldestposicion = 0;
-	char* oldestDate = tablaElementos[0].fechaCreacion;
+	char* oldestDate = NULL;
 
 	if(tamanioTabla > 1){
 		for(int i = 1; i < tamanioTabla; i++){
+			log_info(logger, "OLDESTDATE: %s", oldestDate);
 			ItemTablaDinamica current = tablaElementos[i];
 
-			if(!current.estaVacio && esTiempoMasAntiguo(oldestDate, current.fechaUltimoUso)){
+			if(oldestDate == NULL || (!current.estaVacio && esTiempoMasAntiguo(current.fechaUltimoUso, oldestDate))){
 				oldestDate = current.fechaCreacion;
 				oldestposicion = i;
 			}
@@ -65,7 +67,9 @@ void eliminarVictima(){
 	if(strcmp(algoritmoEleccionDeVictima, "FIFO") == 0){
 		eliminarItem(calcularFIFO());
 	} else{
-		eliminarItem(calcularLRU());
+		long algo = calcularLRU();
+		log_info(logger, "MALDITO ID: %ld", algo);
+		eliminarItem(algo);
 	}
 }
 
@@ -134,6 +138,8 @@ void inicializarTabla(ItemTablaDinamica **tabla, int estaVacio){
 		(*tabla)[0].posicion = 0;
 		(*tabla)[0].tamanio = tamanioCache;
 		(*tabla)[0].estaVacio = 0;
+		(*tabla)[0].fechaCreacion = NULL;
+		(*tabla)[0].fechaUltimoUso = NULL;
 	}
 
 	for(int i = estaVacio; i < tamanioTabla; i++){
@@ -141,6 +147,8 @@ void inicializarTabla(ItemTablaDinamica **tabla, int estaVacio){
 		(*tabla)[i].posicion = 0;
 		(*tabla)[i].tamanio = 0;
 		(*tabla)[i].estaVacio = 1;
+		(*tabla)[i].fechaCreacion = NULL;
+		(*tabla)[i].fechaUltimoUso = NULL;
 	}
 }
 
@@ -302,7 +310,7 @@ void compactarCache(){
 			tablaCompactada[posicionTablaNueva].posicion = posicionNueva;
 			tablaCompactada[posicionTablaNueva].estaVacio = 0;
 			moverBloque(elementoActual.tamanio, posicionVieja, posicionNueva);
-			posicionNueva += obtenerDesplazamientoMinimo(tamanioParticionMinima, elementoActual.tamanio);
+			posicionNueva += obtenerDesplazamientoMinimo(elementoActual.tamanio);
 			posicionTablaNueva++;
 		}
 	}
@@ -317,12 +325,16 @@ void compactarCache(){
 }
 
 void eliminarItem(long ID){
+	log_info(logger, "ajgndajgkaga");
+	log_info(logger, "VALOR: %d", mutexCache.__align);
 	sem_wait(&mutexCache);
+
+	log_info(logger, "ELIMINO ITEM");
 
 	particionesLiberadas++;
 	int posDatoAEliminar = obtenerPosicionPorID(ID);
 	int posNuevoVacio = obtenerPrimeraParticion(tablaVacios, 1);
-	int espacioVacio = obtenerDesplazamientoMinimo(tamanioParticionMinima, tablaElementos[posDatoAEliminar].tamanio);
+	int espacioVacio = obtenerDesplazamientoMinimo(tablaElementos[posDatoAEliminar].tamanio);
 
 	tablaVacios[posNuevoVacio].ID = posNuevoVacio;
 	tablaVacios[posNuevoVacio].posicion = tablaElementos[posDatoAEliminar].posicion;

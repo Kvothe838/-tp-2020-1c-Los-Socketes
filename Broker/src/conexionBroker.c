@@ -110,20 +110,12 @@ void manejarPublisher(int socketCliente){
 	free(buffer);
 }
 
-/*Ack recibirACK(int socket)
-{
-	Ack contenido;
-
-	recv(socket, &(contenido.IDMensaje), sizeof(long), MSG_WAITALL);
-
-	return contenido;
-}*/
-
 int recibirAck(int socket, Ack** respuesta)
 {
 	long IDMensaje;
+	int recibido = recv(socket, &IDMensaje, sizeof(long), MSG_WAITALL);
 
-	if(recv(socket, &IDMensaje, sizeof(long), MSG_WAITALL) == -1)
+	if(recibido == -1 || recibido == 0)
 	{
 		return 0;
 	}
@@ -147,6 +139,8 @@ void processRequest(int opCode, Suscriptor* suscriptor){
 		return;
 	}
 
+	sem_wait(&mutexNuevoMensaje);
+
 	switch ((OpCode)opCode) {
 		case SUSCRIBER:;
 			int cantidadColas;
@@ -155,19 +149,14 @@ void processRequest(int opCode, Suscriptor* suscriptor){
 
 			break;
 		case PUBLISHER:;
-			//sem_wait(&mutexNuevoMensaje); acá rompe porque, seguramente, en algún lado te olvidás de hacer un post xDXDxDXD
 			manejarPublisher(suscriptor->socket);
-			//sem_post(&mutexNuevoMensaje);
 
 			break;
-		/*case ACK:;
-			Ack ack = recibirACK(suscriptor->socket);
-			manejarACK(ack, suscriptor);
-
-			break;*/
 		default:
 			break;
 	}
+
+	sem_post(&mutexNuevoMensaje);
 }
 
 void serveClient(int* socketCliente){
@@ -260,6 +249,8 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 
 				int recibidoExitoso = recibirAck(suscriptor->socket, &respuesta);
 
+				log_info(logger, "Recibido exitoso? %d", recibidoExitoso);
+
 				if(recibidoExitoso)
 				{
 					if(respuesta->IDMensaje == *IDMensaje)
@@ -326,8 +317,6 @@ void iniciarServidor(IniciarServidorArgs* argumentos){
     }
 
 	listen(socket_servidor, SOMAXCONN);
-
-	log_info(logger, "socket: %d", socket_servidor);
 
     freeaddrinfo(servinfo);
 
