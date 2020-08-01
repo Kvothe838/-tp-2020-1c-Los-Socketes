@@ -12,8 +12,6 @@
 
 #include "conexionGameCard.h"
 
-char *ip, *puerto;
-
 void mandarMensajeABroker(void* datosRecibidos,	TipoModulo cola, long IDCorrelativo, t_log* logger) {
 	int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
 
@@ -120,25 +118,25 @@ void process_request(MensajeParaSuscriptor* mensaje){
 }
 
 
-void serve_client(int* socket)
+void atenderMensajeGameboy(int* socket)
 {
 	OpCode codigo;
+
 	if(recv(*socket, &codigo, sizeof(OpCode), MSG_WAITALL) == -1)
 		codigo = -1;
-	//process_request(codigo, *socket);
-}
 
-void esperar_cliente(int socket_servidor)
-{
-	struct sockaddr_in dir_cliente;
-	socklen_t tam_direccion;
-	int socket_cliente;
+	if(codigo == NUEVO_MENSAJE_SUSCRIBER)
+	{
+		t_log* logger = log_create("nuevoMensajeSuscriber.log", "Nuevo mensaje suscriber", true, LOG_LEVEL_INFO);
+		MensajeParaSuscriptor* mensaje = NULL;
+		int recepcionExitosa = recibirMensajeSuscriber(*socket, logger, TEAM, &mensaje, ipBroker, puertoBroker);
 
-	tam_direccion = sizeof(struct sockaddr_in);
-	socket_cliente = accept(socket_servidor, (void*)&dir_cliente, &tam_direccion);
+		if(!recepcionExitosa) return;
 
-	pthread_create(&thread,NULL,(void*)serve_client,&socket_cliente);
-	pthread_detach(thread);
+		pthread_create(&threadGameBoy, NULL, (void*)process_request, mensaje);
+		pthread_detach(thread);
+
+	}
 }
 
 void iniciar_servidor(t_config* config, int socketBroker)
@@ -159,7 +157,10 @@ void iniciar_servidor(t_config* config, int socketBroker)
 				t_log* logger = log_create("respuesta.log", "RESPUESTA", true, LOG_LEVEL_TRACE);
 				log_trace(logger, "Llegó algo");
 				MensajeParaSuscriptor* mensaje = NULL;
-				int recepcionExitosa = recibirMensajeSuscriber(socketActual, logger, TEAM, &mensaje, ip, puerto);
+				int recepcionExitosa = recibirMensajeSuscriber(socketActual, logger, TEAM, &mensaje, ipBroker, puertoBroker);
+
+				if(!recepcionExitosa) continue;
+
 				pthread_create(&thread,NULL,(void*)process_request,mensaje);
 				pthread_detach(thread);
 				//process_request(codigo, socketBroker);
@@ -186,3 +187,59 @@ void iniciar_servidor(t_config* config, int socketBroker)
 
     }
 }
+
+void esperarGameBoy(int socket_servidor)
+{
+	struct sockaddr_in dir_cliente;
+	socklen_t tam_direccion;
+	int socketCliente;
+
+	tam_direccion = sizeof(struct sockaddr_in);
+	socketCliente = accept(socket_servidor, (void*)&dir_cliente, &tam_direccion);
+
+	if(socketCliente == -1) return;
+
+	pthread_create(&thread,NULL,(void*)atenderMensajeGameboy,&socketCliente);
+	pthread_join(thread, NULL);
+
+}
+
+void iniciarServidorGameboy(IniciarServidorArgs* argumentos){
+	int socket_servidor;
+
+    struct addrinfo hints, *servinfo, *p;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    hints.ai_flags = AI_PASSIVE;
+
+    getaddrinfo(argumentos->ip, argumentos->puerto, &hints, &servinfo);
+
+    for (p=servinfo; p != NULL; p = p->ai_next)
+    {
+        if ((socket_servidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
+            continue;
+
+        int one = 1;
+        setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)); //ESTO ES ESENCIAL.
+
+        if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1) {
+            close(socket_servidor);
+            continue;
+        }
+        break;
+    }
+
+	listen(socket_servidor, SOMAXCONN);
+
+    freeaddrinfo(servinfo);
+
+    while(1){
+    	esperarGameBoy(socket_servidor);
+    }
+
+    liberar_conexion_cliente(socket_servidor);
+}
+
+

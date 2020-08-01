@@ -6,6 +6,7 @@
 #include <shared/serialize.h>
 
 pthread_t thread;
+pthread_t threadGameBoy;
 
 char* ipBroker, *puertoBroker;
 
