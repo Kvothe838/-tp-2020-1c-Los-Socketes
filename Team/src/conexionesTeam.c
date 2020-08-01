@@ -46,6 +46,7 @@ void conectarse_broker(Config** configTeam){ // FUNCION PARA ESCUCHAR A BROKER C
 	conexionBroker = crear_conexion_cliente((*configTeam)->ip, (*configTeam)->puerto);
 	int sigo;int indice;
 	suscripcionEnviada = enviarSuscripcion(conexionBroker, (*configTeam)->ID, 3, APPEARED, LOCALIZED, CAUGHT);
+	logger = iniciar_logger("PRUEBA2.bin", "TEAM");
 	printf("\nsuscripcionEnviada: %d\n",suscripcionEnviada);
 	if(suscripcionEnviada != (-1)){
 		sigo=1;
@@ -59,7 +60,8 @@ void conectarse_broker(Config** configTeam){ // FUNCION PARA ESCUCHAR A BROKER C
 	}
 
 	while(1){
-		if( recv(conexionBroker, &codigo, sizeof(OpCode), 0) == 0 || recv(conexionBroker, &codigo, sizeof(OpCode), 0) == (-1)){// NO HAY CONEXION
+		int recepcion = recv(conexionBroker, &codigo, sizeof(OpCode), 0);
+		if( recepcion == 0 || recepcion == (-1)){// NO HAY CONEXION
 			printf("\nERROR - Broker no conectado(1)\n");
 			sleep(2);
 			conexionBroker = crear_conexion_cliente((*configTeam)->ip, (*configTeam)->puerto);

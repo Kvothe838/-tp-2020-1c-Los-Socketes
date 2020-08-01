@@ -30,7 +30,7 @@ void metricas(){
 
 int main(void) {
 	Config* configTeam = malloc(sizeof(Config));
-	t_log* logger;
+	t_log* logger = iniciar_logger("PRUEBA.log", "TEAM");
 	logger = iniciar_logger("Team.log", "Team");
 	cargarConfig(configTeam, logger);
 	Team team = inicializarTeam(configTeam->posiciones,configTeam->pertenecientes,configTeam->objetivos);
