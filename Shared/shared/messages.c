@@ -274,18 +274,20 @@ LocalizedPokemon* getLocalizedConList(char* nombre, int cantidadParesPosiciones,
 	return pokemon;
 }
 
-int enviarMensajeASuscriptor(int socketSuscriptor, long ID, long IDCorrelativo, TipoCola cola, void* data){
-	int resultado = 1, tamanioDato, bytes;
-	void *mensajeAEnviar, *datoSerializado;
+int enviarMensajeASuscriptor(int socketSuscriptor, long ID, TipoCola cola, void* data){
+	int resultado = 1, tamanioDato, bytes, bytesMensajeSuscriptor;
 
-	datoSerializado = serializarDato(data, &tamanioDato, cola);
-	mensajeAEnviar = serializarMensajeSuscriptor(ID, IDCorrelativo, datoSerializado, tamanioDato, cola, &bytes);
+	void* datoSerializado = serializarDato(data, &tamanioDato, cola);
+	void* stream = serializarMensajeSuscriptor(ID, 0, datoSerializado, tamanioDato, cola, &bytesMensajeSuscriptor);
+	void* paqueteSerializado = armarPaqueteYSerializar(NUEVO_MENSAJE_SUSCRIBER, bytesMensajeSuscriptor, stream, &bytes);
+	free(datoSerializado);
+	free(stream);
 
-	if(send(socketSuscriptor, mensajeAEnviar, bytes, 0) == -1){
+	if(send(socketSuscriptor, paqueteSerializado, bytes, 0) == -1){
 		resultado = 0;
 	}
 
-	free(mensajeAEnviar);
+	free(paqueteSerializado);
 
 	return resultado;
 }
@@ -333,6 +335,22 @@ int recibirIDMensajePublisher(int socket, IDMensajePublisher* mensaje)
 {
 	recv(socket, &(mensaje->IDMensaje), sizeof(long), MSG_WAITALL);
 	recv(socket, &(mensaje->cola), sizeof(TipoCola), MSG_WAITALL);
+
+	return 1;
+}
+
+int recibirAck(int socket, Ack** respuesta)
+{
+	long IDMensaje;
+	int recibido = recv(socket, &IDMensaje, sizeof(long), MSG_WAITALL);
+
+	if(recibido == -1 || recibido == 0)
+	{
+		return 0;
+	}
+
+	*respuesta = malloc(sizeof(Ack));
+	(*respuesta)->IDMensaje = IDMensaje;
 
 	return 1;
 }

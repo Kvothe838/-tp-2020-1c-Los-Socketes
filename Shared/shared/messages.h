@@ -5,7 +5,7 @@
 #include "../shared/connection.h"
 
 int enviarSuscripcion(int socket, TipoModulo modulo, int cantidadColasASuscribir, ...);
-int enviarMensajeASuscriptor(int socketSuscriptor, long ID, long IDCorrelativo, TipoCola cola, void* data);
+int enviarMensajeASuscriptor(int socketSuscriptor, long ID, TipoCola cola, void* data);
 void* recibirMensaje(int socket_cliente);
 int enviarPublisherSinIDCorrelativo(t_log* logger, int socket, TipoModulo modulo, void* dato, TipoCola cola,
 		IDMensajePublisher** mensajeRecibido);
@@ -34,5 +34,7 @@ CaughtPokemon* getCaughtPokemon(int loAtrapo);
 GetPokemon* getGetPokemon(char* nombre);
 LocalizedPokemon* getLocalized(char* nombre, int cantidadParesPosiciones, ...);
 LocalizedPokemon* getLocalizedConList(char* nombre, int cantidadParesPosiciones, t_list* posiciones);
+
+int recibirAck(int socket, Ack** respuesta);
 
 #endif

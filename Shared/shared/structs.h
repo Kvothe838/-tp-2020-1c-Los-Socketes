@@ -154,4 +154,9 @@ typedef struct
 	int estaCaido;
 } Suscriptor;
 
+typedef struct {
+	char* ip;
+	char* puerto;
+} IniciarServidorArgs;
+
 #endif

@@ -110,22 +110,6 @@ void manejarPublisher(int socketCliente){
 	free(buffer);
 }
 
-int recibirAck(int socket, Ack** respuesta)
-{
-	long IDMensaje;
-	int recibido = recv(socket, &IDMensaje, sizeof(long), MSG_WAITALL);
-
-	if(recibido == -1 || recibido == 0)
-	{
-		return 0;
-	}
-
-	*respuesta = malloc(sizeof(Ack));
-	(*respuesta)->IDMensaje = IDMensaje;
-
-	return 1;
-}
-
 void manejarACK(Ack* contenido, Suscriptor* suscriptor, long* IDMensaje){
 	//Log obligatorio.
 	log_info(logger, "Recepción del mensaje con ID %ld.", contenido->IDMensaje);

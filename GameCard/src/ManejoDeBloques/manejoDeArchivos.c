@@ -640,7 +640,7 @@ LocalizedPokemon * administrarGetPokemon(char* pokemon){
 
 
 		t_list* listaAuxiliar;
-		uint32_t offset = 0;
+		//uint32_t offset = 0;
 
 		while(!list_is_empty(lista)){
 			listaAuxiliar = list_take_and_remove(lista, 1);

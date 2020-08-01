@@ -9,6 +9,7 @@ pthread_t thread;
 
 char* ipBroker, *puertoBroker;
 
-void iniciar_servidor(t_config* config, int socketBroker);
+void escucharBroker();
+void iniciarServidorGameboy(IniciarServidorArgs* argumentos);
 
 #endif

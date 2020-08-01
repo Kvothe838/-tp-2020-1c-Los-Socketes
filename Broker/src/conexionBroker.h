@@ -22,11 +22,6 @@
 pthread_t thread;
 t_log* logger;
 
-typedef struct {
-	char* ip;
-	char* puerto;
-} IniciarServidorArgs;
-
 void iniciarServidor(IniciarServidorArgs* argumentos);
 void enviarMensajesSuscriptores();
 void inicializarMutex();

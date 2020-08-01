@@ -212,14 +212,14 @@ int main(int argc, char **argv){
 
 			log_info(logger, "OK - Se estableció correctamente la conexión con el %s", argv[1]);
 
-
 			switch(argvToTipoCola(argv[2]))
 			{
 				case CATCH:
 				{
 					CatchPokemon* pokemon = getCatchPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
-					long IDMensaje = 12345;
-					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, 0, CATCH, pokemon))
+					long IDMensaje = (long)atoi(argv[6]);
+
+					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, CATCH, pokemon))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
 						abort();
@@ -238,11 +238,9 @@ int main(int argc, char **argv){
 				case GET:
 				{
 					GetPokemon* pokemon = getGetPokemon(argv[3]);//usa malloc, entonces hay que hacer un free
-					log_info(logger, "ENTRÓ A GET, manda a %s", pokemon->nombre);
+					long IDMensaje = (long)atoi(argv[4]);
 
-					long IDMensaje = 12345;
-
-					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, 0, GET, pokemon))
+					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, GET, pokemon))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s", argv[1], argv[2], argv[3]);
 						abort();
@@ -260,16 +258,26 @@ int main(int argc, char **argv){
 				case NEW:
 				{
 					NewPokemon* pokemon = getNewPokemon(argv[3], atoi(argv[4]), atoi(argv[5]), atoi(argv[6]));
+					long IDMensaje = (long)atoi(argv[7]);
+					log_info(logger, "ID MENSAJE: %ld", IDMensaje);
 
-					long IDMensaje = 12345;
-
-					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, 0, NEW, pokemon))
+					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, NEW, pokemon))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s", argv[1], argv[2], argv[3]);
 						abort();
 					}
 
 					log_info(logger, "OK - Se envió correctamente el mensaje: %s %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
+
+					Ack* respuesta;
+
+					int recibidoExitoso = recibirAck(conexionGamecard, &respuesta);
+
+					if(recibidoExitoso){
+						log_info(logger, "Recibido ACK");
+					} else {
+						log_info(logger, "Error al recibir ACK");
+					}
 
 					liberar_conexion_cliente(conexionGamecard);
 

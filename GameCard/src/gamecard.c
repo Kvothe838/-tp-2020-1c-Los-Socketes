@@ -13,6 +13,8 @@ void funcionDePruebaParaGabo(t_log* logger, char* ip, char* puerto, LocalizedPok
 int main(void) {
 	t_log* logger = iniciar_logger("gamecard.log", "GAMECARD");
 	t_config* config = leer_config("GameCard.config", logger);
+	pthread_t threadEscucharBroker, threadEscucharGameboy;
+	IniciarServidorArgs argumentosGameboy;
 
 	inicializarData(logger);
 
@@ -20,23 +22,20 @@ int main(void) {
 
 	ipBroker = config_get_string_value(config, "IP_BROKER");
 	puertoBroker = config_get_string_value(config, "PUERTO_BROKER");
+	argumentosGameboy.ip = config_get_string_value(config, "IP_GAMECARD");
+	argumentosGameboy.puerto = config_get_string_value(config, "PUERTO_GAMECARD");
 
-	LocalizedPokemon* pikachu = getLocalized("Pikachu", 4, 1, 1, 1, 1);
+	/*LocalizedPokemon* pikachu = getLocalized("Pikachu", 4, 1, 1, 1, 1);
 	funcionDePruebaParaGabo(logger, ipBroker, puertoBroker, pikachu);
 	LocalizedPokemon* squirtle = getLocalized("Squirtle", 1, 3, 1);
-	funcionDePruebaParaGabo(logger, ipBroker, puertoBroker, squirtle);
+	funcionDePruebaParaGabo(logger, ipBroker, puertoBroker, squirtle);*/
 
+	pthread_create(&threadEscucharBroker, NULL,(void*)escucharBroker, NULL);
+	pthread_create(&threadEscucharGameboy, NULL,(void*)iniciarServidorGameboy, (void*)&argumentosGameboy);
+	pthread_join(threadEscucharBroker, NULL);
+	pthread_join(threadEscucharGameboy, NULL);
 
-
-	/*int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
-
-	int suscripcionEnviada = enviarSuscripcion(conexionBroker, GAMECARD, 3, NEW, GET, CATCH);
-
-	if(suscripcionEnviada)
-		iniciar_servidor(config, conexionBroker);*/
-	
-	/*inicializarData(logger);
-
+	/*
 	for (int i = 1; i < 5; ++i)
 		administrarNewPokemon("TesteoLoco", i*100000000, i*100000000, 3);
 	administrarNewPokemon("TesteoLoco", 1, 1, 1);
