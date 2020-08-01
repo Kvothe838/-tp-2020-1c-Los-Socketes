@@ -84,16 +84,17 @@ void conectarse_broker(Config** configTeam){ // FUNCION PARA ESCUCHAR A BROKER C
 				MensajeParaSuscriptor* mensaje= NULL;
 				int recepcionExitosa = recibirMensajeSuscriber(conexionBroker, logger, TEAM, &mensaje, (*configTeam)->ip, (*configTeam)->puerto);
 				if(recepcionExitosa){
-/*
-					if((mensaje)->cola == LOCALIZED){
-							LocalizedPokemon* pokemon = deserializarLocalized((mensaje)->contenido);
-							printf("\nMe llego un localized para %s, con %d posiciones\n",pokemon->nombre,pokemon->cantidadDeParesDePosiciones);
-							free(pokemon);
-						}*/
 
+					if((mensaje)->cola == LOCALIZED){
+						LocalizedPokemon* pokemon = deserializarLocalized((mensaje)->contenido);
+						printf("\nMe llego un localized para %s, con %d posiciones\n",pokemon->nombre,pokemon->cantidadDeParesDePosiciones);
+						free(pokemon);
+					}
+					/*
 					pthread_t tratamiento;
 					pthread_create(&tratamiento,NULL,(void*)tratamiento_mensaje,&mensaje);
 					pthread_detach(tratamiento);
+					*/
 				}
 			
 			}else{
