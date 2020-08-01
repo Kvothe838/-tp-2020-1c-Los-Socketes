@@ -19,6 +19,7 @@ void mandarMensajeABroker(void* datosRecibidos,	TipoModulo cola, long IDCorrelat
 	if (!enviarPublisherConIDCorrelativo(logger, conexionBroker, GAMECARD, datosRecibidos, cola, IDCorrelativo, &respuesta))
 		log_info(logger, "ERROR - No se pudo enviar el mensaje a Broker");
 
+	free(respuesta);
 	liberar_conexion_cliente(conexionBroker);
 }
 
@@ -127,75 +128,45 @@ void manejarMensaje(OpCode codigo, int cliente_fd){
 		pthread_exit(NULL);
 	}
 
-	switch (colaRecibida) {*/
-		/*case GET:
+	switch (colaRecibida) {
+		case GET:
 
 			log_trace(logger, "Llegó un GET");
 			msg = malloc(size);
 			recv(cliente_fd, msg, size, MSG_WAITALL);
 
-			GetPokemon* pokemonGet = (GetPokemon*)deserializarGet(msg, (int)size);
+			mandarMensajeABroker(dataLocalized, LOCALIZED, mensaje->ID, logger);
 
-			log_trace(logger, "Nombre: %s", pokemonGet->nombre);
+			//free(dataLocalized->nombre);
+			list_destroy(dataLocalized->posiciones);
+			free(dataLocalized);
 
-			log_trace(logger, "Largo nombre (strlen): %d", strlen(pokemonGet->nombre));
-
-			LocalizedPokemon * datosRecibidos = administrarGetPokemon(pokemonGet->nombre);
-
-			printf("%s\n", datosRecibidos->nombre);
-			printf("%d\n", datosRecibidos->cantidadDePosiciones);
-
-			uint32_t offset = 0;
-			uint32_t *data;
-			uint32_t ciclos = datosRecibidos->cantidadDePosiciones;
-			while(ciclos != 0){
-				ciclos--;
-
-				memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-				printf("X:%d - ", (int)data);
-				offset += sizeof(uint32_t);
-				memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-				printf("Y:%d - ", (int)data);
-				offset += sizeof(uint32_t);
-				memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-				printf("Cantidad:%d\n", (int)data);
-				offset += sizeof(uint32_t);
-			}
-
-			break;*/
-		/*case CATCH:
-			log_trace(logger, "Llegó un CATCH");
-			msg = malloc(size);
-			recv(cliente_fd, msg, size, MSG_WAITALL);
-
-			CatchPokemon* pokemonCatch = (CatchPokemon*)deserializarCatch(msg);
-			log_trace(logger, "Nombre: %s", pokemonCatch->nombre);
-			log_trace(logger, "X: %d", pokemonCatch->posX);
-			log_trace(logger, "Y: %d", pokemonCatch->posY);
-
-
-			administrarCatchPokemon(pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
-
+			free(pokemonGet);
 			break;
 
-		case NEW:
-			log_trace(logger, "Llegó un NEW");
-			msg = malloc(size);
-			recv(cliente_fd, msg, size, MSG_WAITALL);
+		case CATCH:
 
-			NewPokemon* pokemonNew = (NewPokemon*)deserializarNew(msg);
-			log_trace(logger, "Nombre: %s", pokemonNew->nombre);
-			log_trace(logger, "X: %d", pokemonNew->posX);
-			log_trace(logger, "Y: %d", pokemonNew->posY);
-			log_trace(logger, "Cantidad: %d", pokemonNew->cantidad);
+			pokemonCatch = deserializarCatch(mensaje->contenido);
 
+			log_info(logger, "LLEGÓ CATCH POKEMON CON NOMBRE: %s en la pos %d-%d", pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
 
-			administrarNewPokemon(pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY, pokemonNew->cantidad);
+			uint32_t resultado = administrarCatchPokemon(pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
+
+			CaughtPokemon* dataCaught = getCaughtPokemon(resultado);
+
+			mandarMensajeABroker(dataCaught, CAUGHT, mensaje->ID, logger);
+
+			free(dataCaught);
+
+			free(pokemonCatch);
 
 			break;
 		default:
 			pthread_exit(NULL);
-	}*/
+			break;
+	}
+
+	free(mensaje);*/
 }
 
 
@@ -210,26 +181,35 @@ void atenderMensajeGameboy(int* socket)
 void iniciarEscuchaBroker(int socketBroker)
 {
 	int socketActual = socketBroker;
+	int resultado;
     while(1){
+    	int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
+    	int suscripcionEnviada = enviarSuscripcion(conexionBroker, GAMECARD, 3, NEW, GET, CATCH);
+
+
     	OpCode codigo;
     	int resultado = recv(socketActual, &codigo, sizeof(OpCode), MSG_WAITALL);
 		if(resultado != 0 && resultado != -1){
 			manejarMensaje(codigo, socketActual);
 		} else{
-			t_log* logger = log_create("pruebaLOCA.log", "CONEXION", true, LOG_LEVEL_TRACE);
+			t_log* logger = log_create("pruebaLOCA.log", "CONEXION", true, LOG_LEVEL_INFO);
 
 			sleep(1);
 
-			//liberar_conexion_cliente(socketActual);
+			liberar_conexion_cliente(socketActual);
 			socketActual = crear_conexion_cliente(ipBroker, puertoBroker);
-			if(socketActual != 0)
+			if(socketActual != -1)
 				enviarSuscripcion(socketActual, GAMECARD, 3, NEW, GET, CATCH);
 			if(resultado == 0)
 				log_info(logger,"SE CAYÓ BROKER :0");
-			else if(resultado == -1)
-				log_info(logger,"BROKER NO ESTÁ ACTIVO");
+			if(resultado == -1)
+				log_info(logger,"BROKER SIGUE CAIDO D:");
+			//volverABUscarSocket(&socketBroker);
+
+			sleep(1);
 			log_destroy(logger);
 		}
+
     }
 }
 
