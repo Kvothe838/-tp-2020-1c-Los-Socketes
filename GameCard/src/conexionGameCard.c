@@ -20,7 +20,6 @@ void mandarMensajeABroker(void* datosRecibidos,	TipoModulo cola, long IDCorrelat
 	if (!enviarPublisherConIDCorrelativo(conexionBroker, GAMECARD, datosRecibidos, cola, IDCorrelativo))
 		log_info(logger, "ERROR - No se pudo enviar el mensaje a Broker");
 	else {
-
 		OpCode codigoOperacion;
 		recv(conexionBroker, &codigoOperacion, sizeof(OpCode), 0);
 
@@ -67,6 +66,9 @@ void process_request(OpCode codigo, int cliente_fd){
 
 					mandarMensajeABroker(dataAppeared, APPEARED, mensaje->ID, logger);
 
+					//free(dataAppeared->nombre);
+					free(dataAppeared);
+
 					free(pokemonNew);
 
 					break;
@@ -106,6 +108,10 @@ void process_request(OpCode codigo, int cliente_fd){
 
 					mandarMensajeABroker(dataLocalized, LOCALIZED, mensaje->ID, logger);
 
+					//free(dataLocalized->nombre);
+					list_destroy(dataLocalized->posiciones);
+					free(dataLocalized);
+
 					free(pokemonGet);
 					break;
 
@@ -120,6 +126,8 @@ void process_request(OpCode codigo, int cliente_fd){
 					CaughtPokemon* dataCaught = getCaughtPokemon(resultado);
 
 					mandarMensajeABroker(dataCaught, CAUGHT, mensaje->ID, logger);
+
+					free(dataCaught);
 
 					free(pokemonCatch);
 
@@ -232,21 +240,28 @@ void esperar_cliente(int socket_servidor)
 
 void iniciar_servidor(t_config* config, int socketBroker)
 {
+	int socketActual = socketBroker;
     while(1){
-    	/*int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
-    	int suscripcionEnviada = enviarSuscripcion(conexionBroker, GAMECARD, 3, NEW, GET, CATCH);*/
-
-
     	OpCode codigo;
-		if(!(recv(socketBroker, &codigo, sizeof(OpCode), MSG_WAITALL)==-1)){
+    	int resultado = recv(socketActual, &codigo, sizeof(OpCode), MSG_WAITALL);
+		if(resultado != 0 && resultado != -1){
 			process_request(codigo, socketBroker);
-			printf("Codigo: %d", codigo);
-			if(codigo > NUEVO_MENSAJE_SUSCRIBER || codigo < SUSCRIBER){
-				abort();
-			}
-			continue;
-		}
+		} else{
+			t_log* logger = log_create("pruebaLOCA.log", "CONEXION", true, LOG_LEVEL_TRACE);
 
+			log_info(logger, "RESULTADO %d", resultado);
+			sleep(1);
+
+			//liberar_conexion_cliente(socketActual);
+			socketActual = crear_conexion_cliente(ipBroker, puertoBroker);
+			if(socketActual != 0)
+				enviarSuscripcion(socketActual, GAMECARD, 3, APPEARED, LOCALIZED, CAUGHT);
+			if(resultado == 0)
+				log_info(logger,"SE CAYÓ BROKER :0");
+			else if(resultado == -1)
+				log_info(logger,"BROKER NO ESTÁ ACTIVO");
+			log_destroy(logger);
+		}
     }
 }
 

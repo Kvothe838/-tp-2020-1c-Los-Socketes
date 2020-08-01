@@ -26,6 +26,8 @@ int main(void) {
 	LocalizedPokemon* squirtle = getLocalized("Squirtle", 1, 3, 1);
 	funcionDePruebaParaGabo(logger, ipBroker, puertoBroker, squirtle);*/
 
+
+
 	int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
 
 	int suscripcionEnviada = enviarSuscripcion(conexionBroker, GAMECARD, 3, NEW, GET, CATCH);
