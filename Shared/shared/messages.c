@@ -189,6 +189,8 @@ TipoCola argvToTipoCola(char* cola)
 		return CAUGHT;
 	else if(strcmp(cola,"GET_POKEMON") == 0)
 		return GET;
+	else if(strcmp(cola, "LOCALIZED_POKEMON") == 0)
+		return LOCALIZED;
 	else
 		return -1;
 }
@@ -291,20 +293,36 @@ int enviarMensajeASuscriptor(int socketSuscriptor, long ID, long IDCorrelativo, 
 int recibirMensajeSuscriber(int socket, t_log* logger, TipoModulo modulo, MensajeParaSuscriptor** mensaje, char* ip, char* puerto){
 	*mensaje = (MensajeParaSuscriptor*)malloc(sizeof(MensajeParaSuscriptor));
 	void *respuesta;
-	int bytes;
+	int bytes, recepcion;
 
-	recv(socket, &((*mensaje)->ID), sizeof(long), 0);
-	recv(socket, &((*mensaje)->IDMensajeCorrelativo), sizeof(long), 0);
-	recv(socket, &((*mensaje)->cola), sizeof(TipoCola), 0);
-	recv(socket, &((*mensaje)->tamanioContenido), sizeof(int), 0);
+	recepcion = recv(socket, &((*mensaje)->ID), sizeof(long), MSG_WAITALL);
+
+	if(recepcion == -1 || recepcion == 0) return 0;
+
+	recepcion = recv(socket, &((*mensaje)->IDMensajeCorrelativo), sizeof(long), 0);
+
+	if(recepcion == -1 || recepcion == 0) return 0;
+
+	recepcion = recv(socket, &((*mensaje)->cola), sizeof(TipoCola), 0);
+
+	if(recepcion == -1 || recepcion == 0) return 0;
+
+	recepcion = recv(socket, &((*mensaje)->tamanioContenido), sizeof(int), 0);
+
+	if(recepcion == -1 || recepcion == 0) return 0;
+
 	(*mensaje)->contenido = malloc((*mensaje)->tamanioContenido);
-	recv(socket, (*mensaje)->contenido, (*mensaje)->tamanioContenido, 0);
+	recepcion = recv(socket, (*mensaje)->contenido, (*mensaje)->tamanioContenido, 0);
+
+	if(recepcion == -1 || recepcion == 0) return 0;
 
 	log_info(logger, "Nuevo mensaje recibido con ID %d de cola %s", (*mensaje)->ID, tipoColaToString((*mensaje)->cola));
 
 	respuesta = armarYSerializarAck((*mensaje)->ID, &bytes);
 
-	send(socket, respuesta, bytes, 0);
+	recepcion = send(socket, respuesta, bytes, 0);
+
+	if(recepcion == -1) return 0;
 
 	log_info(logger, "ACK enviado para mensaje con ID %d", (*mensaje)->ID);
 

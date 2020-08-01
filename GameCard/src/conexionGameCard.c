@@ -231,7 +231,7 @@ void iniciar_servidor(t_config* config, int socketBroker)
     	OpCode codigo;
     	int resultado = recv(socketActual, &codigo, sizeof(OpCode), MSG_WAITALL);
 		if(resultado != 0 && resultado != -1){
-			process_request(codigo, socketBroker);
+			process_request(codigo, socketActual);
 		} else{
 			t_log* logger = log_create("pruebaLOCA.log", "CONEXION", true, LOG_LEVEL_TRACE);
 
@@ -241,7 +241,7 @@ void iniciar_servidor(t_config* config, int socketBroker)
 			//liberar_conexion_cliente(socketActual);
 			socketActual = crear_conexion_cliente(ipBroker, puertoBroker);
 			if(socketActual != 0)
-				enviarSuscripcion(socketActual, GAMECARD, 3, APPEARED, LOCALIZED, CAUGHT);
+				enviarSuscripcion(socketActual, GAMECARD, 3, NEW, GET, CATCH);
 			if(resultado == 0)
 				log_info(logger,"SE CAYÓ BROKER :0");
 			else if(resultado == -1)

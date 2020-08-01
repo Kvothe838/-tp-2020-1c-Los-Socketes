@@ -19,7 +19,6 @@ int main(void) {
 	IniciarServidorArgs argumentos;
 
 	logger = iniciar_logger("loggerBroker.log", "Broker");
-	//config = leer_config("../configBroker.config", logger);
 	config = leer_config("configBroker.config", logger);
 
 	argumentos.ip = config_get_string_value(config, "IP_BROKER");
@@ -144,12 +143,14 @@ int main(void) {
 static void sig_usr(int signo)
 {
 	if(signo == SIGUSR1)
+	{
 		obtenerDump();
+	}
 }
 
 static void sig_usr2(int signo){
-	log_info(logger, "SIGUSR2");
-	if(signo == SIGUSR2){
+	if(signo == SIGUSR2)
+	{
 		cortarPrograma();
 	}
 
