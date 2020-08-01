@@ -96,12 +96,12 @@ int obtenerPrimeraParticion(ItemTablaDinamica *tabla, int estaVacio){
 	return -1;
 }
 
-int obtenerDesplazamientoMinimo(int tamanioParticionMinima, int espacioRequerido){
+int obtenerDesplazamientoMinimo(int espacioRequerido){
 	return espacioRequerido < tamanioParticionMinima ? tamanioParticionMinima : espacioRequerido;
 }
 
 void modificarTablaVacio(ItemTablaDinamica *tabla, int espacioRequerido, int posicionVector){
-	int desplazamiento = obtenerDesplazamientoMinimo(tamanioParticionMinima, espacioRequerido);
+	int desplazamiento = obtenerDesplazamientoMinimo(espacioRequerido);
 	if((tabla[posicionVector].tamanio -= desplazamiento) <= 0){
 		tabla[posicionVector].posicion = 0;
 		tabla[posicionVector].ID = -1;
@@ -248,7 +248,7 @@ void consolidarCache(ItemTablaDinamica* elementoVacio, int posicionElementoVacio
 
 			ItemTablaDinamica elementoActual = tablaVacios[i];
 			int posicionConsolidada, posicionAEliminar, posicionAModificar, consolidar = 1;
-
+			//USAR obtenerDesplazamientoMinimo
 			if(elementoActual.posicion == posicionBuscada){
 				posicionConsolidada = elementoVacio->posicion;
 			} else if(elementoVacio->posicion != 0 && elementoActual.posicion + elementoActual.tamanio == elementoVacio->posicion){
@@ -297,6 +297,7 @@ void compactarCache(){
 			tablaCompactada[posicionTablaNueva].tamanio = elementoActual.tamanio;
 			tablaCompactada[posicionTablaNueva].fechaCreacion = elementoActual.fechaCreacion;
 			tablaCompactada[posicionTablaNueva].fechaUltimoUso = elementoActual.fechaUltimoUso;
+			tablaCompactada[posicionTablaNueva].cola = elementoActual.cola;
 			posicionVieja = elementoActual.posicion;
 			tablaCompactada[posicionTablaNueva].posicion = posicionNueva;
 			tablaCompactada[posicionTablaNueva].estaVacio = 0;
