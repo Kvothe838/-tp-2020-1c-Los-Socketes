@@ -40,6 +40,16 @@ int enviarGet(char* nombre, Config* configTeam){
 	return sigo;
 }
 
+void manejarNuevoMensajeSuscriptor(MensajeParaSuscriptor* mensaje)
+{
+	if((mensaje)->cola == LOCALIZED){
+		LocalizedPokemon* pokemon = deserializarLocalized((mensaje)->contenido);
+		printf("\nMe llego un localized para %s, con %d posiciones\n",pokemon->nombre,pokemon->cantidadDeParesDePosiciones);
+		fflush(stdout);
+		free(pokemon);
+	}
+}
+
 void conectarse_broker(Config** configTeam){ // FUNCION PARA ESCUCHAR A BROKER CONSTANTEMENTE
 	int conexionBroker;int suscripcionEnviada;
 	OpCode codigo;
@@ -87,11 +97,7 @@ void conectarse_broker(Config** configTeam){ // FUNCION PARA ESCUCHAR A BROKER C
 				int recepcionExitosa = recibirMensajeSuscriber(conexionBroker, logger, TEAM, &mensaje, (*configTeam)->ip, (*configTeam)->puerto);
 				if(recepcionExitosa){
 
-					if((mensaje)->cola == LOCALIZED){
-						LocalizedPokemon* pokemon = deserializarLocalized((mensaje)->contenido);
-						printf("\nMe llego un localized para %s, con %d posiciones\n",pokemon->nombre,pokemon->cantidadDeParesDePosiciones);
-						free(pokemon);
-					}
+					manejarNuevoMensajeSuscriptor(mensaje);
 					/*
 					pthread_t tratamiento;
 					pthread_create(&tratamiento,NULL,(void*)tratamiento_mensaje,&mensaje);
@@ -121,5 +127,79 @@ void conexiones(Config* configTeam, t_log* logger){
 	pthread_join(c_broker,NULL);
 
 	//pthread_detach(c_gameboy);
+}
+
+void atenderMensaje(int* socket)
+{
+	OpCode codigo;
+
+	if(recv(*socket, &codigo, sizeof(OpCode), MSG_WAITALL) == -1)
+		codigo = -1;
+
+	if(codigo == NUEVO_MENSAJE_SUSCRIBER)
+	{
+		t_log* logger = log_create("nuevoMensajeSuscriber.log", "Nuevo mensaje suscriber", true, LOG_LEVEL_INFO);
+		MensajeParaSuscriptor* mensaje = NULL;
+		int recepcionExitosa = recibirMensajeSuscriber(*socket, logger, TEAM, &mensaje, ipBroker, puertoBroker);
+
+		if(!recepcionExitosa) return;
+
+		pthread_create(&threadMensajeGameBoy, NULL, (void*)manejarNuevoMensajeSuscriptor, mensaje);
+		pthread_detach(thread);
+	}
+}
+
+void esperarConexionGameBoy(int socket)
+{
+	struct sockaddr_in dir_cliente;
+	socklen_t tam_direccion;
+	int socketCliente;
+
+	tam_direccion = sizeof(struct sockaddr_in);
+	socketCliente = accept(socket, (void*)&dir_cliente, &tam_direccion);
+
+	if(socketCliente == -1) return;
+
+	pthread_create(&thread,NULL,(void*)atenderMensaje,&socketCliente);
+	pthread_join(thread, NULL);
+}
+
+void iniciarServidorTeam(IniciarServidorArgs* argumentos)
+{
+	int socket_servidor;
+
+	struct addrinfo hints, *servinfo, *p;
+
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_UNSPEC;
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = AI_PASSIVE;
+
+	getaddrinfo(argumentos->ip, argumentos->puerto, &hints, &servinfo);
+
+	for (p=servinfo; p != NULL; p = p->ai_next)
+	{
+		if ((socket_servidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
+			continue;
+
+		int one = 1;
+		setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)); //ESTO ES ESENCIAL.
+
+		if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1) {
+			close(socket_servidor);
+			continue;
+		}
+		break;
+	}
+
+	listen(socket_servidor, SOMAXCONN);
+
+	freeaddrinfo(servinfo);
+
+	while(1){
+		esperarConexionGameBoy(socket_servidor);
+	}
+
+	liberar_conexion_cliente(socket_servidor);
 }
 
