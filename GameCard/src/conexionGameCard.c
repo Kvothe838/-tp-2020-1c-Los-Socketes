@@ -21,185 +21,102 @@ void mandarMensajeABroker(void* datosRecibidos,	TipoModulo cola, long IDCorrelat
 	if (!enviarPublisherConIDCorrelativo(logger, conexionBroker, GAMECARD, datosRecibidos, cola, IDCorrelativo, &respuesta))
 		log_info(logger, "ERROR - No se pudo enviar el mensaje a Broker");
 
+	free(respuesta);
 	liberar_conexion_cliente(conexionBroker);
 }
 
-void process_request(OpCode codigo, int cliente_fd){
-	if(codigo == NUEVO_MENSAJE_SUSCRIBER)
+void process_request(MensajeParaSuscriptor* mensaje){
+	t_log* logger = log_create("pruebaLOCA.log", "CONEXION", true, LOG_LEVEL_INFO);
+	NewPokemon* pokemonNew;
+	GetPokemon* pokemonGet;
+	CatchPokemon* pokemonCatch;
+
+	switch (mensaje->cola)
 	{
-		t_log* logger = log_create("respuesta.log", "RESPUESTA", true, LOG_LEVEL_TRACE);
-		log_trace(logger, "Llegó algo");
-		MensajeParaSuscriptor* mensaje = NULL;
-		int recepcionExitosa = recibirMensajeSuscriber(cliente_fd, logger, TEAM, &mensaje, ip, puerto);
+		case NEW:
 
-		NewPokemon* pokemonNew;
-		GetPokemon* pokemonGet;
-		CatchPokemon* pokemonCatch;
+			pokemonNew = deserializarNew(mensaje->contenido);
 
-		if(recepcionExitosa)
-		{
-			switch (mensaje->cola)
-			{
-				case NEW:
+			log_info(logger, "LLEGÓ NEW POKEMON CON NOMBRE: %s en la pos %d-%d y son %d", pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY, pokemonNew->cantidad);
 
-					pokemonNew = deserializarNew(mensaje->contenido);
+			administrarNewPokemon(pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY, pokemonNew->cantidad);
 
-					log_info(logger, "LLEGÓ NEW POKEMON CON NOMBRE: %s en la pos %d-%d y son %d", pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY, pokemonNew->cantidad);
+			AppearedPokemon* dataAppeared = getAppearedPokemon(pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY);
 
-					administrarNewPokemon(pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY, pokemonNew->cantidad);
+			mandarMensajeABroker(dataAppeared, APPEARED, mensaje->ID, logger);
 
-					AppearedPokemon* dataAppeared = getAppearedPokemon(pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY);
+			//free(dataAppeared->nombre);
+			free(dataAppeared);
 
-					mandarMensajeABroker(dataAppeared, APPEARED, mensaje->ID, logger);
-
-					//free(dataAppeared->nombre);
-					free(dataAppeared);
-
-					free(pokemonNew);
-
-					break;
-
-				case GET:
-
-					pokemonGet = deserializarGet(mensaje->contenido);
-
-					log_info(logger, "LLEGÓ GET POKEMON CON NOMBRE: %s", pokemonGet->nombre);
-
-					LocalizedPokemon * dataLocalized = administrarGetPokemon(pokemonGet->nombre);
-
-					printf("Nombre completo: %s\n", dataLocalized->nombre);
-					printf("Larog del nombre: %d\n", dataLocalized->largoNombre);
-					printf("Posiciones en el mapa: %d\n", dataLocalized->cantidadDeParesDePosiciones);
-					printf("Cantidad de elementos en la lista %d\n", list_size(dataLocalized->posiciones));
-
-
-					//Esto está solamente para poder confirmar que el contenido de la lista está bien
-					uint32_t *data;
-					uint32_t ciclos = dataLocalized->cantidadDeParesDePosiciones, X = 0, Y = 1;
-					while(ciclos != 0){
-						ciclos--;
-
-						data = list_get(dataLocalized->posiciones, X);
-						log_info(logger, "X:%d", *data);
-						data = list_get(dataLocalized->posiciones, Y);
-						log_info(logger, "Y:%d", *data);
-
-						X += 2;
-						Y += 2;
-
-
-					}
-
-					//Acá terminó de leer el contenido y empiezo a mandar el mensaje
-
-					mandarMensajeABroker(dataLocalized, LOCALIZED, mensaje->ID, logger);
-
-					//free(dataLocalized->nombre);
-					list_destroy(dataLocalized->posiciones);
-					free(dataLocalized);
-
-					free(pokemonGet);
-					break;
-
-				case CATCH:
-
-					pokemonCatch = deserializarCatch(mensaje->contenido);
-
-					log_info(logger, "LLEGÓ CATCH POKEMON CON NOMBRE: %s en la pos %d-%d", pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
-
-					uint32_t resultado = administrarCatchPokemon(pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
-
-					CaughtPokemon* dataCaught = getCaughtPokemon(resultado);
-
-					mandarMensajeABroker(dataCaught, CAUGHT, mensaje->ID, logger);
-
-					free(dataCaught);
-
-					free(pokemonCatch);
-
-					break;
-				default:
-					pthread_exit(NULL);
-					break;
-			}
-
-			free(mensaje);
-		}
-
-	}
-	/*if(colaRecibida <= 0){
-		pthread_exit(NULL);
-	}
-
-	switch (colaRecibida) {*/
-		/*case GET:
-
-			log_trace(logger, "Llegó un GET");
-			msg = malloc(size);
-			recv(cliente_fd, msg, size, MSG_WAITALL);
-
-			GetPokemon* pokemonGet = (GetPokemon*)deserializarGet(msg, (int)size);
-
-			log_trace(logger, "Nombre: %s", pokemonGet->nombre);
-
-			log_trace(logger, "Largo nombre (strlen): %d", strlen(pokemonGet->nombre));
-
-			LocalizedPokemon * datosRecibidos = administrarGetPokemon(pokemonGet->nombre);
-
-			printf("%s\n", datosRecibidos->nombre);
-			printf("%d\n", datosRecibidos->cantidadDePosiciones);
-
-			uint32_t offset = 0;
-			uint32_t *data;
-			uint32_t ciclos = datosRecibidos->cantidadDePosiciones;
-			while(ciclos != 0){
-				ciclos--;
-
-				memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-				printf("X:%d - ", (int)data);
-				offset += sizeof(uint32_t);
-				memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-				printf("Y:%d - ", (int)data);
-				offset += sizeof(uint32_t);
-				memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
-				printf("Cantidad:%d\n", (int)data);
-				offset += sizeof(uint32_t);
-			}
-
-			break;*/
-		/*case CATCH:
-			log_trace(logger, "Llegó un CATCH");
-			msg = malloc(size);
-			recv(cliente_fd, msg, size, MSG_WAITALL);
-
-			CatchPokemon* pokemonCatch = (CatchPokemon*)deserializarCatch(msg);
-			log_trace(logger, "Nombre: %s", pokemonCatch->nombre);
-			log_trace(logger, "X: %d", pokemonCatch->posX);
-			log_trace(logger, "Y: %d", pokemonCatch->posY);
-
-
-			administrarCatchPokemon(pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
+			free(pokemonNew);
 
 			break;
 
-		case NEW:
-			log_trace(logger, "Llegó un NEW");
-			msg = malloc(size);
-			recv(cliente_fd, msg, size, MSG_WAITALL);
+		case GET:
 
-			NewPokemon* pokemonNew = (NewPokemon*)deserializarNew(msg);
-			log_trace(logger, "Nombre: %s", pokemonNew->nombre);
-			log_trace(logger, "X: %d", pokemonNew->posX);
-			log_trace(logger, "Y: %d", pokemonNew->posY);
-			log_trace(logger, "Cantidad: %d", pokemonNew->cantidad);
+			pokemonGet = deserializarGet(mensaje->contenido);
+
+			log_info(logger, "LLEGÓ GET POKEMON CON NOMBRE: %s", pokemonGet->nombre);
+
+			LocalizedPokemon * dataLocalized = administrarGetPokemon(pokemonGet->nombre);
+
+			printf("Nombre completo: %s\n", dataLocalized->nombre);
+			printf("Larog del nombre: %d\n", dataLocalized->largoNombre);
+			printf("Posiciones en el mapa: %d\n", dataLocalized->cantidadDeParesDePosiciones);
+			printf("Cantidad de elementos en la lista %d\n", list_size(dataLocalized->posiciones));
 
 
-			administrarNewPokemon(pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY, pokemonNew->cantidad);
+			//Esto está solamente para poder confirmar que el contenido de la lista está bien
+			uint32_t *data;
+			uint32_t ciclos = dataLocalized->cantidadDeParesDePosiciones, X = 0, Y = 1;
+			while(ciclos != 0){
+				ciclos--;
+
+				data = list_get(dataLocalized->posiciones, X);
+				log_info(logger, "X:%d", *data);
+				data = list_get(dataLocalized->posiciones, Y);
+				log_info(logger, "Y:%d", *data);
+
+				X += 2;
+				Y += 2;
+
+
+			}
+
+			//Acá terminó de leer el contenido y empiezo a mandar el mensaje
+
+			mandarMensajeABroker(dataLocalized, LOCALIZED, mensaje->ID, logger);
+
+			//free(dataLocalized->nombre);
+			list_destroy(dataLocalized->posiciones);
+			free(dataLocalized);
+
+			free(pokemonGet);
+			break;
+
+		case CATCH:
+
+			pokemonCatch = deserializarCatch(mensaje->contenido);
+
+			log_info(logger, "LLEGÓ CATCH POKEMON CON NOMBRE: %s en la pos %d-%d", pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
+
+			uint32_t resultado = administrarCatchPokemon(pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
+
+			CaughtPokemon* dataCaught = getCaughtPokemon(resultado);
+
+			mandarMensajeABroker(dataCaught, CAUGHT, mensaje->ID, logger);
+
+			free(dataCaught);
+
+			free(pokemonCatch);
 
 			break;
 		default:
 			pthread_exit(NULL);
-	}*/
+			break;
+	}
+
+	free(mensaje);
 }
 
 
@@ -208,7 +125,7 @@ void serve_client(int* socket)
 	OpCode codigo;
 	if(recv(*socket, &codigo, sizeof(OpCode), MSG_WAITALL) == -1)
 		codigo = -1;
-	process_request(codigo, *socket);
+	//process_request(codigo, *socket);
 }
 
 void esperar_cliente(int socket_servidor)
@@ -227,27 +144,46 @@ void esperar_cliente(int socket_servidor)
 void iniciar_servidor(t_config* config, int socketBroker)
 {
 	int socketActual = socketBroker;
+	int resultado;
     while(1){
+    	/*int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
+    	int suscripcionEnviada = enviarSuscripcion(conexionBroker, GAMECARD, 3, NEW, GET, CATCH);*/
+
+
     	OpCode codigo;
-    	int resultado = recv(socketActual, &codigo, sizeof(OpCode), MSG_WAITALL);
-		if(resultado != 0 && resultado != -1){
-			process_request(codigo, socketBroker);
+
+    	resultado = recv(socketActual, &codigo, sizeof(OpCode), MSG_WAITALL);
+		if(resultado != 0 && resultado != -1 && socketActual != 0){
+			if(codigo == NUEVO_MENSAJE_SUSCRIBER)
+			{
+				t_log* logger = log_create("respuesta.log", "RESPUESTA", true, LOG_LEVEL_TRACE);
+				log_trace(logger, "Llegó algo");
+				MensajeParaSuscriptor* mensaje = NULL;
+				int recepcionExitosa = recibirMensajeSuscriber(socketActual, logger, TEAM, &mensaje, ip, puerto);
+				pthread_create(&thread,NULL,(void*)process_request,mensaje);
+				pthread_detach(thread);
+				//process_request(codigo, socketBroker);
+			}
+
 		} else{
-			t_log* logger = log_create("pruebaLOCA.log", "CONEXION", true, LOG_LEVEL_TRACE);
+			t_log* logger = log_create("pruebaLOCA.log", "CONEXION", true, LOG_LEVEL_INFO);
 
 			log_info(logger, "RESULTADO %d", resultado);
-			sleep(1);
 
-			//liberar_conexion_cliente(socketActual);
+			liberar_conexion_cliente(socketActual);
 			socketActual = crear_conexion_cliente(ipBroker, puertoBroker);
-			if(socketActual != 0)
-				enviarSuscripcion(socketActual, GAMECARD, 3, APPEARED, LOCALIZED, CAUGHT);
+			if(socketActual != -1)
+				enviarSuscripcion(socketActual, GAMECARD, 3, NEW, GET, CATCH);
 			if(resultado == 0)
 				log_info(logger,"SE CAYÓ BROKER :0");
-			else if(resultado == -1)
-				log_info(logger,"BROKER NO ESTÁ ACTIVO");
+			if(resultado == -1)
+				log_info(logger,"BROKER SIGUE CAIDO D:");
+			//volverABUscarSocket(&socketBroker);
+
+			sleep(1);
 			log_destroy(logger);
 		}
+
     }
 }
 

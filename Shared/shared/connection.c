@@ -15,7 +15,7 @@ int crear_conexion_cliente(char *ip, char* puerto)
 	int socket_cliente = socket(server_info->ai_family, server_info->ai_socktype, server_info->ai_protocol);
 
 	if(connect(socket_cliente, server_info->ai_addr, server_info->ai_addrlen) == -1){
-		socket_cliente = 0;
+		socket_cliente = -1;
 	}
 
 	freeaddrinfo(server_info);
