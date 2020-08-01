@@ -30,7 +30,7 @@ typedef struct {
 char *puntoDeMontaje;
 char *numeroMagico;
 uint32_t blockCantBits, blockCantBytes, blockSize;
-uint32_t reintentoConexion, retardoDeOperacion;
+uint32_t reintentoConexion, retardoDeOperacion, reintentoOperacion;
 
 pokemonDatoPosicion aComparar;
 

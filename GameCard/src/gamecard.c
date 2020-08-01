@@ -13,8 +13,6 @@ void funcionDePruebaParaGabo(t_log* logger, char* ip, char* puerto, LocalizedPok
 int main(void) {
 	t_log* logger = iniciar_logger("gamecard.log", "GAMECARD");
 	t_config* config = leer_config("GameCard.config", logger);
-	pthread_t threadEscucharBroker, threadEscucharGameboy;
-	IniciarServidorArgs argumentosGameboy;
 
 	inicializarData(logger);
 
@@ -22,40 +20,36 @@ int main(void) {
 
 	ipBroker = config_get_string_value(config, "IP_BROKER");
 	puertoBroker = config_get_string_value(config, "PUERTO_BROKER");
-	argumentosGameboy.ip = config_get_string_value(config, "IP_GAMECARD");
-	argumentosGameboy.puerto = config_get_string_value(config, "PUERTO_GAMECARD");
 
 	/*LocalizedPokemon* pikachu = getLocalized("Pikachu", 4, 1, 1, 1, 1);
 	funcionDePruebaParaGabo(logger, ipBroker, puertoBroker, pikachu);
 	LocalizedPokemon* squirtle = getLocalized("Squirtle", 1, 3, 1);
 	funcionDePruebaParaGabo(logger, ipBroker, puertoBroker, squirtle);*/
 
-	pthread_create(&threadEscucharBroker, NULL,(void*)escucharBroker, NULL);
-	pthread_create(&threadEscucharGameboy, NULL,(void*)iniciarServidorGameboy, (void*)&argumentosGameboy);
-	pthread_join(threadEscucharBroker, NULL);
-	pthread_join(threadEscucharGameboy, NULL);
 
-	/*
+
+	int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
+
+	int suscripcionEnviada = enviarSuscripcion(conexionBroker, GAMECARD, 3, NEW, GET, CATCH);
+
+	if(suscripcionEnviada)
+		iniciar_servidor(config, conexionBroker);
+
+	/*inicializarData(logger);
 	for (int i = 1; i < 5; ++i)
 		administrarNewPokemon("TesteoLoco", i*100000000, i*100000000, 3);
 	administrarNewPokemon("TesteoLoco", 1, 1, 1);
-
 	administrarCatchPokemon("TesteoLoco", 400000000, 400000000);
-
 	for (int i = 1; i < 100; ++i)
 		administrarNewPokemon("Pikachu", i, i, 3);
-
 	LocalizedPokemon * datosRecibidos = administrarGetPokemon("Pikachu");
-
 	printf("%s\n", datosRecibidos->nombre);
 	printf("%d\n", datosRecibidos->cantidadDePosiciones);
-
 	uint32_t offset = 0;
 	uint32_t *data;
 	uint32_t ciclos = datosRecibidos->cantidadDePosiciones;
 	while(ciclos != 0){
 		ciclos--;
-
 		memcpy(&data, (datosRecibidos->data + offset), sizeof(uint32_t));
 		printf("X:%d - ", (int)data);
 		offset += sizeof(uint32_t);
@@ -66,7 +60,6 @@ int main(void) {
 		printf("Cantidad:%d\n", (int)data);
 		offset += sizeof(uint32_t);
 	}
-
 	free(datosRecibidos->data);
 	free(datosRecibidos);*/
 
@@ -78,14 +71,12 @@ int main(void) {
 	funcionDePruebaParaGabo(logger, ip, puerto);*/
 	//int socketCliente = crear_conexion_cliente(ip, puerto);
 	/*enviarSuscripcion(socketCliente, GAMECARD, 3, NEW, GET, CAUGHT);
-
 	while(1){
 		OpCode codigo;
 		recv(socketCliente, &codigo, sizeof(OpCode), 0);
 		if(codigo == NUEVO_MENSAJE_SUSCRIBER){
 			MensajeParaSuscriptor* mensaje;
 			int recepcionExitosa = recibirMensajeSuscriber(socketCliente, logger, GAMECARD, &mensaje, ip, puerto);
-
 			if(recepcionExitosa)
 			{
 				free(mensaje);
@@ -117,12 +108,3 @@ void funcionDePruebaParaGabo(t_log* logger, char* ip, char* puerto, LocalizedPok
 
 	liberar_conexion_cliente(conexionBroker);
 }
-
-
-
-
-
-
-
-
-

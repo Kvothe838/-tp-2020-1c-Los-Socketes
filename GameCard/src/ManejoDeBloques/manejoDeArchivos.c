@@ -126,6 +126,7 @@ void inicializarData(t_log* logger) {
 
 	reintentoConexion = config_get_int_value(configGameBoy, "TIEMPO_DE_REINTENTO_CONEXION");
 	retardoDeOperacion = config_get_int_value(configGameBoy, "TIEMPO_RETARDO_OPERACION");
+	reintentoOperacion = config_get_int_value(configGameBoy, "TIEMPO_DE_REINTENTO_OPERACION");
 
 	blockCantBits = config_get_int_value(metadata, "BLOCKS");
 	blockCantBytes = blockCantBits / 8;
@@ -211,7 +212,7 @@ t_config * validarArchivoAbierto(char path[1000], pokemonMetadata* datosPokemon)
 
 		if (!datosPokemon->abierto) {
 			config_destroy(configPokemon);
-			sleep(reintentoConexion);
+			sleep(reintentoOperacion);
 		}
 	} while (!datosPokemon->abierto);
 
