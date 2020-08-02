@@ -95,7 +95,8 @@ typedef struct{
 	char** objetivos;
 	char* ip;
 	char* puerto;
-	char* puertoBroker;
+	char* ipTeam;
+	char* puertoTeam;
 	char* planificacion;
 	int quantum;
 	int tiempoReconexion;

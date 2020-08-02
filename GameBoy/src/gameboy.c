@@ -9,9 +9,8 @@
 int main(int argc, char **argv){
 	int const cantidadMinArgc = 2, cantidadMaxArgc = 20;
 
-	int conexionBroker, conexionTeam, conexionGamecard;
-	char *ipBroker, *ipTeam, *ipGamecard;
-	char *puertoBroker, *puertoTeam, *puertoGamecard;
+	int conexionBroker, conexionGamecard, cantidadTeams;
+	char *ipBroker, *ipGamecard, *puertoBroker, *puertoGamecard, **ipsPuertosTeam;
 
 	t_log* logger;
 	t_config* config;
@@ -155,44 +154,49 @@ int main(int argc, char **argv){
 
 		case TEAM_GAMEBOY:
 		{
-			ipTeam = config_get_string_value(config, "IP_TEAM");
-			puertoTeam = config_get_string_value(config, "PUERTO_TEAM");
-			log_info(logger, "IP_TEAM     %s y PUERTO_TEAM     %s", ipTeam, puertoTeam);
-			conexionTeam = crear_conexion_cliente(ipTeam, puertoTeam);
+			ipsPuertosTeam = config_get_array_value(config, "IPS_PUERTOS_TEAM");
+			cantidadTeams = config_get_int_value(config, "CANTIDAD_TEAMS");
 
-			if(conexionTeam == 0){
-				log_info(logger, "ERROR - No se pudo crear la conexión con %s", argv[1]);
-				abort();
-			}
+			for(int i = 0; i < cantidadTeams; i = i+2){
+				char* ipTeam = ipsPuertosTeam[i];
+				char* puertoTeam = ipsPuertosTeam[i+1];
 
-			log_info(logger, "OK - Se estableció correctamente la conexión con el %s", argv[1]);
+				int conexionTeam = crear_conexion_cliente(ipTeam, puertoTeam);
 
-
-			switch(argvToTipoCola(argv[2]))
-			{
-				case APPEARED:
-				{
-					AppearedPokemon* pokemon = getAppearedPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
-
-					if(!enviarPublisherSinIDCorrelativo(logger, conexionTeam, GAMEBOY, pokemon, APPEARED, &mensajeRecibido))
-					{
-						log_info(logger, "ERROR. No se pudo enviar el mensaje %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
-						abort();
-					}
-
-					log_info(logger, "OK - Se envió correctamente el mensaje: %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
-
-					liberar_conexion_cliente(conexionTeam);
-
-					free(pokemon);
-
-					break;
+				if(conexionTeam == 0){
+					log_info(logger, "ERROR - No se pudo crear la conexión con %s", argv[1]);
+					abort();
 				}
 
-				default:
+				log_info(logger, "OK - Se estableció correctamente la conexión con el %s", argv[1]);
+
+
+				switch(argvToTipoCola(argv[2]))
 				{
-					log_info(logger, "ERROR. No se reconoce el tipo de cola ingresada.");
-					abort();
+					case APPEARED:
+					{
+						AppearedPokemon* pokemon = getAppearedPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
+
+						if(!enviarMensajeASuscriptor(conexionTeam, 1, APPEARED, pokemon))
+						{
+							log_info(logger, "ERROR. No se pudo enviar el mensaje %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
+							abort();
+						}
+
+						log_info(logger, "OK - Se envió correctamente el mensaje: %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
+
+						liberar_conexion_cliente(conexionTeam);
+
+						free(pokemon);
+
+						break;
+					}
+
+					default:
+					{
+						log_info(logger, "ERROR. No se reconoce el tipo de cola ingresada.");
+						abort();
+					}
 				}
 			}
 		break;

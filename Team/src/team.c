@@ -31,10 +31,25 @@ void metricas(){
 int main(void) {
 	Config* configTeam = malloc(sizeof(Config));
 	t_log* logger = iniciar_logger("PRUEBA.log", "TEAM");
+	pthread_t threadIniciarServidor;
+	IniciarServidorArgs argumentos;
+
 	logger = iniciar_logger("Team.log", "Team");
 	cargarConfig(configTeam, logger);
+
+	argumentos.ip = configTeam->ipTeam;
+	argumentos.puerto = configTeam->puertoTeam;
+
+	ipBroker = configTeam->ip;
+	puertoBroker = configTeam->puerto;
 	Team team = inicializarTeam(configTeam->posiciones,configTeam->pertenecientes,configTeam->objetivos);
+
+	//pthread_create(&threadIniciarServidor, NULL,(void*)iniciarServidorTeam, (void*)&argumentos);
+
+	//Team team = inicializarTeam(configTeam->posiciones,configTeam->pertenecientes,configTeam->objetivos);
 	conexiones(configTeam,logger);
+
+	//pthread_join(threadIniciarServidor, NULL);
 
 	//printf("\n--------------------------------------------\n");
 	//planificacion_fifo(logger,configTeam);

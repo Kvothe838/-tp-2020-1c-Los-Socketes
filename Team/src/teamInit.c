@@ -631,6 +631,8 @@ void cargarConfig(Config* conexionConfig, t_log* logger){
 	conexionConfig->objetivos = config_get_array_value(config,"OBJETIVOS_ENTRENADORES");
 	conexionConfig->ip = config_get_string_value(config, "IP_BROKER");
 	conexionConfig->puerto = config_get_string_value(config, "PUERTO_BROKER");
+	conexionConfig->ipTeam = config_get_string_value(config, "IP_TEAM");
+	conexionConfig->puertoTeam = config_get_string_value(config, "PUERTO_TEAM");
 	conexionConfig->tiempoReconexion = config_get_int_value(config, "TIEMPO_RECONEXION");
 	conexionConfig->ID = 4 + config_get_int_value(config, "ID"); //Cosas turbias del Broker.
 	
