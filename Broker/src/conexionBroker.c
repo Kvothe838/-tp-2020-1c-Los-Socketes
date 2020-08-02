@@ -125,9 +125,9 @@ void processRequest(int opCode, Suscriptor* suscriptor){
 		pthread_exit(NULL);
 		return;
 	}
-
+	log_info(logger, "ANTES DEL SEMÁFORO %ld", mutexNuevoMensaje.__align);
 	sem_wait(&mutexNuevoMensaje);
-
+	log_info(logger, "DESPUÉS DEL SEMÁFORO");
 	switch ((OpCode)opCode) {
 		case SUSCRIBER:;
 			int cantidadColas;
@@ -143,7 +143,9 @@ void processRequest(int opCode, Suscriptor* suscriptor){
 			break;
 	}
 
+	log_info(logger, "ANTES DEL POST SEMÁFORO %ld", mutexNuevoMensaje.__align);
 	sem_post(&mutexNuevoMensaje);
+	log_info(logger, "DESPUES DEL POST SEMÁFORO %ld", mutexNuevoMensaje.__align);
 }
 
 void serveClient(int* socketCliente){
@@ -199,7 +201,7 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 	ColaConSuscriptores* cola = obtenerCola(tipoCola);
 
 	for(int i = 0; i < list_size(cola->IDMensajes); i++){
-		log_info(logger, "Entro a enviarMensajesPorCola");
+		//log_info(logger, "Entro a enviarMensajesPorCola");
 		long* IDMensaje = list_get(cola->IDMensajes, i);
 
 		void* mensaje = obtenerItem(*IDMensaje);
@@ -255,7 +257,7 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 
 		free(mensaje);
 
-		log_info(logger, "Me fui");
+		//log_info(logger, "Me fui");
 	}
 }
 
@@ -264,9 +266,15 @@ void enviarMensajesSuscriptores(){
 		int colas[] = {NEW, GET, CATCH, APPEARED, LOCALIZED, CAUGHT};
 
 		for (int i = 0; i < 6; i++){
+			log_info(logger, "EnviarMensaje:ANTES DEL SEMÁFORO %ld", mutexNuevoMensaje.__align);
 			sem_wait(&mutexNuevoMensaje);
+			log_info(logger, "EnviarMensaje:DESPUES DEL SEMÁFORO %ld", mutexNuevoMensaje.__align);
+
 			enviarMensajesPorCola(colas[i]);
+
+			log_info(logger, "EnviarMensaje:ANTES DEL POST SEMÁFORO %ld", mutexNuevoMensaje.__align);
 			sem_post(&mutexNuevoMensaje);
+			log_info(logger, "EnviarMensaje:DESPUES DEL SEMÁFORO %ld", mutexNuevoMensaje.__align);
 		}
 	}
 }

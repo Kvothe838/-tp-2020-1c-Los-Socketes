@@ -39,7 +39,7 @@ int main(void) {
 	if(suscripcionEnviada)
 		iniciar_servidor(config, conexionBroker);
 
-	pthread_join(threadEscucharGameboy, NULL);
+	//pthread_join(threadEscucharGameboy, NULL);
 
 	//liberarVariablesGlobales();
 

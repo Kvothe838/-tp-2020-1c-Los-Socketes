@@ -21,8 +21,6 @@ void mandarMensajeABroker(void* datosRecibidos,	TipoModulo cola, long IDCorrelat
 	else
 		log_info(logger, "ERROR - No se pudo enviar el mensaje a Broker");
 
-
-
 	liberar_conexion_cliente(conexionBroker);
 }
 
@@ -163,7 +161,7 @@ void iniciar_servidor(t_config* config, int socketBroker)
 				int recepcionExitosa = recibirMensajeSuscriber(socketActual, logger, TEAM, &mensaje, ipBroker, puertoBroker);
 
 				if(!recepcionExitosa) continue;
-
+				log_trace(logger, "Llegó algo de la cola %s", tipoColaToString(mensaje->cola));
 				pthread_create(&thread,NULL,(void*)process_request,mensaje);
 				pthread_detach(thread);
 				//process_request(codigo, socketBroker);

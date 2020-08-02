@@ -18,6 +18,7 @@ void tratamiento_mensaje(MensajeParaSuscriptor** mensaje){
 }
 */
 int enviarGet(char* nombre, Config* configTeam){
+	sleep(1);
 	t_log* logger2 = iniciar_logger("loggerBroker2.log", "Broker");
 	int sigo=1;
 	GetPokemon* pokemon = getGetPokemon(nombre);
@@ -42,7 +43,7 @@ void manejarNuevoMensajeSuscriptor(MensajeParaSuscriptor* mensaje)
 				printf("\nPOSICIONES: ");
 				int i=0;
 				while(i < list_size(pokemon->posiciones)){
-					printf("(%zu,%zu) ",(list_get(pokemon->posiciones,i)),(list_get(pokemon->posiciones,i+1)));
+					printf("(%d,%d) ",*(uint32_t*)(list_get(pokemon->posiciones,i)),*(uint32_t*)(list_get(pokemon->posiciones,i+1)));
 					i++;
 					i++;
 				}
