@@ -342,10 +342,10 @@ NewPokemon* deserializarNew(void* mensaje){
 	memcpy(&pokemon->largoNombre, mensaje + offset, sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
-	char* stringRecibido = malloc(pokemon->largoNombre+1);
-	memcpy(stringRecibido, mensaje + offset, pokemon->largoNombre+1);
+	char* stringRecibido = malloc(pokemon->largoNombre);
+	memcpy(stringRecibido, mensaje + offset, pokemon->largoNombre);
 
-	pokemon->nombre = malloc(pokemon->largoNombre);
+	pokemon->nombre = malloc(pokemon->largoNombre + 1);
 	strncpy(pokemon->nombre, stringRecibido, pokemon->largoNombre);
 	pokemon->nombre[pokemon->largoNombre] = '\0';
 
@@ -363,11 +363,11 @@ AppearedPokemon* deserializarAppeared(void* mensaje){
 	memcpy(&pokemon->largoNombre, mensaje + offset, sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
-	char* stringRecibido = malloc(pokemon->largoNombre+1);
-	memcpy(stringRecibido, mensaje + offset, pokemon->largoNombre + 1);
-	offset += pokemon->largoNombre + 1;
+	char* stringRecibido = malloc(pokemon->largoNombre);
+	memcpy(stringRecibido, mensaje + offset, pokemon->largoNombre);
+	offset += pokemon->largoNombre;
 
-	pokemon->nombre = malloc(pokemon->largoNombre);
+	pokemon->nombre = malloc(pokemon->largoNombre + 1);
 	strncpy(pokemon->nombre, stringRecibido, pokemon->largoNombre);
 	pokemon->nombre[pokemon->largoNombre] = '\0';
 
@@ -396,10 +396,10 @@ CatchPokemon* deserializarCatch(void* mensaje){
 	memcpy(&pokemon->largoNombre, mensaje + offset, sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
-	char* stringRecibido = malloc(pokemon->largoNombre+1);
-	memcpy(stringRecibido, mensaje + offset, pokemon->largoNombre+1);
+	char* stringRecibido = malloc(pokemon->largoNombre);
+	memcpy(stringRecibido, mensaje + offset, pokemon->largoNombre);
 
-	pokemon->nombre = malloc(pokemon->largoNombre);
+	pokemon->nombre = malloc(pokemon->largoNombre + 1);
 	strncpy(pokemon->nombre, stringRecibido, pokemon->largoNombre);
 	pokemon->nombre[pokemon->largoNombre] = '\0';
 
@@ -442,17 +442,11 @@ LocalizedPokemon* deserializarLocalized(void* mensaje){
 	pokemon->nombre = malloc(pokemon->largoNombre + 1);
 	strncpy(pokemon->nombre, stringRecibido, pokemon->largoNombre);
 	pokemon->nombre[pokemon->largoNombre] = '\0';
-	//printf("String pokemon: %s", pokemon->nombre);
 
 	free(stringRecibido);
 
 	memcpy(&pokemon->cantidadDeParesDePosiciones, mensaje + offset, sizeof(uint32_t));
 	offset += sizeof(uint32_t);
-
-
-	//printf("Cantidad: %d", pokemon->cantidadDeParesDePosiciones);
-
-	//fflush(stdout);
 
 	pokemon->posiciones = list_create();
 
