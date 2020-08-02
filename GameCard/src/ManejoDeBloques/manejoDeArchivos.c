@@ -75,7 +75,6 @@ void crearDiccionarioSemaforo()
 	DIR * d = opendir(path);
 	if(d==NULL) return;
 	struct dirent * dir;
-	printf(path);
 	while((dir = readdir(d)) != NULL)
 	{
 		if(dir -> d_type == DT_DIR && strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0 )
