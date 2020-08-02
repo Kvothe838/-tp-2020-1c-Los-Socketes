@@ -6,6 +6,7 @@ void inicializarCache(int tamanio){
 }
 
 void guardarValor(void* valor, int tamanio, int posicion){
+	log_info(logger, "Guardo valor con tamanio %d y posicion %d", tamanio, posicion);
 	memcpy(cachePrincipal + posicion, valor, tamanio);
 }
 

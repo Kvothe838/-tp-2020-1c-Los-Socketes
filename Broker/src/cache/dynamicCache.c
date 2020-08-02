@@ -44,16 +44,14 @@ int calcularFIFO(){
 }
 
 int calcularLRU(){
-	log_info(logger, "ENTRÉ A LRU");
 	int oldestposicion = 0;
 	char* oldestDate = NULL;
 
 	if(tamanioTabla > 1){
 		for(int i = 1; i < tamanioTabla; i++){
-			log_info(logger, "OLDESTDATE: %s", oldestDate);
 			ItemTablaDinamica current = tablaElementos[i];
 
-			if(oldestDate == NULL || (!current.estaVacio && esTiempoMasAntiguo(current.fechaUltimoUso, oldestDate))){
+			if(current.ID != -1 && (oldestDate == NULL || (!current.estaVacio && esTiempoMasAntiguo(current.fechaUltimoUso, oldestDate)))){
 				oldestDate = current.fechaCreacion;
 				oldestposicion = i;
 			}
@@ -63,17 +61,29 @@ int calcularLRU(){
 	return tablaElementos[oldestposicion].ID;
 }
 
-void eliminarVictima(){
+int eliminarVictima(){
+	long itemAEliminar;
+
 	if(strcmp(algoritmoEleccionDeVictima, "FIFO") == 0){
-		eliminarItem(calcularFIFO());
+		itemAEliminar = calcularFIFO();
 	} else{
-		long algo = calcularLRU();
-		log_info(logger, "MALDITO ID: %ld", algo);
-		eliminarItem(algo);
+		log_info(logger, "Entro a calcular LRU");
+		itemAEliminar = calcularLRU();
+		log_info(logger, "Salgo de calcular LRU con item: %ld", itemAEliminar);
 	}
+
+	if(itemAEliminar == -1) return 0;
+
+	eliminarItem(itemAEliminar);
+
+	return 1;
 }
 
 int hayEspacio(int espacioRequerido, int *posicion){
+	log_info(logger, "Espacio requerido: %d", espacioRequerido);
+
+	obtenerDump();
+
 	if(strcmp(algoritmoEleccionDeParticionLibre, "FF") == 0){
 		for(*posicion = 0; *posicion < tamanioTabla; (*posicion)++){
 			if(!tablaVacios[*posicion].estaVacio && tablaVacios[*posicion].tamanio >= espacioRequerido)
@@ -159,7 +169,7 @@ void inicializarDataBasica(t_config* config, t_log* loggerParaAsignar) {
 	tamanioParticionMinima = (int)config_get_int_value(config, "TAMANO_MINIMO_PARTICION");
 	algoritmoEleccionDeParticionLibre = config_get_string_value(config,"ALGORITMO_PARTICION_LIBRE");
 	algoritmoEleccionDeVictima = config_get_string_value(config,"ALGORITMO_REEMPLAZO");
-	frecuenciaCompactacion = (int)config_get_string_value(config, "FRECUENCIA_COMPACTACION");
+	frecuenciaCompactacion = (int)config_get_int_value(config, "FRECUENCIA_COMPACTACION");
 	tamanioTabla = tamanioCache / tamanioParticionMinima;
 	logger = loggerParaAsignar;
 
@@ -190,13 +200,25 @@ void agregarItem(void* item, int tamanioItem, long ID, long IDCorrelativo, TipoC
 
 	int posicionVacioAModificar;
 	int hayEspacioParaItem = hayEspacio(tamanioItem, &posicionVacioAModificar);
+	int logrado = 1;
 
 	while(!hayEspacioParaItem){
-		eliminarVictima();
+		log_info(logger, "No hay espacio.");
+		logrado = eliminarVictima();
+
+		if(!logrado) break;
+
+		log_info(logger, "Elimino víctima.");
 		hayEspacioParaItem = hayEspacio(tamanioItem, &posicionVacioAModificar);
+		log_info(logger, "Una vez más: ¿hay espacio? %d", hayEspacioParaItem);
 	}
 
-	agregarElementoValido(posicionVacioAModificar, tamanioItem, item, ID, IDCorrelativo, cola);
+	if(logrado)
+	{
+		agregarElementoValido(posicionVacioAModificar, tamanioItem, item, ID, IDCorrelativo, cola);
+	} else {
+		log_info(logger, "No se encontró víctima");
+	}
 
 	sem_post(&mutexCache);
 }
@@ -246,7 +268,8 @@ void cambiarLRU(long ID)
 	}
 }
 
-void consolidarCache(ItemTablaDinamica* elementoVacio, int posicionElementoVacio, int posicionElemento){
+void consolidarCache(int posicionElementoVacio, int posicionElemento){
+	ItemTablaDinamica* elementoVacio = &(tablaVacios[posicionElementoVacio]);
 	int posicionBuscada = elementoVacio->posicion + elementoVacio->tamanio;
 	int i = 0;
 
@@ -325,12 +348,6 @@ void compactarCache(){
 }
 
 void eliminarItem(long ID){
-	log_info(logger, "ajgndajgkaga");
-	log_info(logger, "VALOR: %d", mutexCache.__align);
-	sem_wait(&mutexCache);
-
-	log_info(logger, "ELIMINO ITEM");
-
 	particionesLiberadas++;
 	int posDatoAEliminar = obtenerPosicionPorID(ID);
 	int posNuevoVacio = obtenerPrimeraParticion(tablaVacios, 1);
@@ -349,13 +366,11 @@ void eliminarItem(long ID){
 	//Log obligatorio.
 	log_info(logger, "Eliminada partición con posición de inicio %d.", posDatoAEliminar);
 
-	consolidarCache(&(tablaVacios[posNuevoVacio]), posNuevoVacio, posDatoAEliminar);
+	consolidarCache(posNuevoVacio, posDatoAEliminar);
 
 	if(frecuenciaCompactacion <= 1 || particionesLiberadas == frecuenciaCompactacion){
 		compactarCache();
 	}
-
-	sem_post(&mutexCache);
 }
 
 //DUMP DE CACHE (COMIENZO)

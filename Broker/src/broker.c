@@ -44,19 +44,12 @@ int main(void) {
 	char* mensaje = "HOLA SOY UN STRING MUUUUUUUUUUY LAAAAAAARGO";
 	int hasta = 5;
 
-	agregarItem(&a, sizeof(int), 0, NULL, NEW);
-	agregarItem(&b, sizeof(double), 1, NULL, NEW);
-	agregarItem(mensaje, strlen(mensaje)+1, 2, NULL, NEW);
-	agregarItem(&b, sizeof(double), 3, NULL, NEW);
+	agregarItem(&a, sizeof(int), 0, 0, NEW);
+	agregarItem(&b, sizeof(double), 1, 0, NEW);
+	agregarItem(mensaje, strlen(mensaje)+1, 2, 0, NEW);
+	agregarItem(&b, sizeof(double), 3, 0, NEW);
 
 	log_info(logger, "ANTES");
-
-	eliminarItem(2);
-
-	while(1){
-		printf("%d\n", process_getpid());
-		sleep(2);
-	}
 
 	for (int i = 0; i <= hasta; i++){
 		log_info(logger, "[ELEMENTO] ID %d, tamaño %d, posicion %d",
@@ -68,6 +61,17 @@ int main(void) {
 		tablaVacios[i].ID, tablaVacios[i].tamanio, tablaVacios[i].posicion);
 	}
 
+	eliminarItem(0);
+
+	for (int i = 0; i <= hasta; i++){
+		log_info(logger, "[ELEMENTO] ID %d, tamaño %d, posicion %d",
+		tablaElementos[i].ID, tablaElementos[i].tamanio, tablaElementos[i].posicion);
+	}
+
+	for (int i = 0; i <= hasta; i++){
+		log_info(logger, "[VACIO] ID %d, tamaño %d, posicion %d",
+		tablaVacios[i].ID, tablaVacios[i].tamanio, tablaVacios[i].posicion);
+	}
 
 	eliminarItem(1);
 
@@ -97,9 +101,9 @@ int main(void) {
 		tablaVacios[i].ID, tablaVacios[i].tamanio, tablaVacios[i].posicion);
 	}
 
-	agregarItem(&a, sizeof(int), 4, NULL, NEW);
+	eliminarVictima();
 
-	log_info(logger, "AGREGADO ITEM 4");
+	log_info(logger, "LUEGO DE VÍCTIMA ELIMINADA");
 
 	for (int i = 0; i <= hasta; i++){
 		log_info(logger, "[ELEMENTO] ID %d, tamaño %d, posicion %d",
@@ -111,10 +115,23 @@ int main(void) {
 		tablaVacios[i].ID, tablaVacios[i].tamanio, tablaVacios[i].posicion);
 	}
 
+	eliminarVictima();
 
-	compactarCache();
+	log_info(logger, "LUEGO DE SEGUNDA VÍCTIMA ELIMINADA");
 
-	log_info(logger, "COMPACTADO");
+	for (int i = 0; i <= hasta; i++){
+		log_info(logger, "[ELEMENTO] ID %d, tamaño %d, posicion %d",
+		tablaElementos[i].ID, tablaElementos[i].tamanio, tablaElementos[i].posicion);
+	}
+
+	for (int i = 0; i <= hasta; i++){
+		log_info(logger, "[VACIO] ID %d, tamaño %d, posicion %d",
+		tablaVacios[i].ID, tablaVacios[i].tamanio, tablaVacios[i].posicion);
+	}
+
+	agregarItem(&a, sizeof(int), 4, 0, NEW);
+
+	log_info(logger, "AGREGADO ITEM 4");
 
 	for (int i = 0; i <= hasta; i++){
 		log_info(logger, "[ELEMENTO] ID %d, tamaño %d, posicion %d",

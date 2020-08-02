@@ -91,11 +91,13 @@ void manejarPublisher(int socketCliente){
 	//Creo el nuevo MensajeEnCola y lo agrego a la cola correspondiente.
 
 	agregarMensaje(publicacion->cola, ID);
+	log_info(logger, "Agrego item para ID: %ld", *ID);
 	agregarItem(publicacion->dato, publicacion->tamanioDato, *ID, publicacion->IDCorrelativo, publicacion->cola);
 
 	//Log obligatorio.
 	log_info(logger, "Almacenado mensaje con ID %ld y posición de inicio de partición %d.", *ID, obtenerPosicionPorID(*ID));
 
+	obtenerDump();
 	//Le devuelvo el id del mensaje y el tipo de cola al cliente.
 	stream = serializarStreamIdMensajePublisher(ID, &(publicacion->cola), &tamanio);
 	buffer = armarPaqueteYSerializar(ID_MENSAJE, tamanio, stream, &bytes);
@@ -108,9 +110,10 @@ void manejarPublisher(int socketCliente){
 	free(publicacion);
 	free(stream);
 	free(buffer);
+	log_info(logger, "Salgo de manejarPublisher");
 }
 
-void manejarACK(Ack* contenido, Suscriptor* suscriptor, long* IDMensaje){
+void manejarACK(Ack* contenido, Suscriptor* suscriptor){
 	//Log obligatorio.
 	log_info(logger, "Recepción del mensaje con ID %ld.", contenido->IDMensaje);
 
@@ -196,6 +199,7 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 	ColaConSuscriptores* cola = obtenerCola(tipoCola);
 
 	for(int i = 0; i < list_size(cola->IDMensajes); i++){
+		log_info(logger, "Entro a enviarMensajesPorCola");
 		long* IDMensaje = list_get(cola->IDMensajes, i);
 
 		void* mensaje = obtenerItem(*IDMensaje);
@@ -203,6 +207,7 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 		long* IDCorrelativo = obtenerIDCorrelativoItem(*IDMensaje);
 
 		if(mensaje == NULL || tamanioItem == NULL || IDCorrelativo == NULL){
+			log_info(logger, "Error al obtener datos de la cache");
 			abort();
 		}
 
@@ -228,36 +233,29 @@ void enviarMensajesPorCola(TipoCola tipoCola){
 			void* paqueteSerializado = armarPaqueteYSerializar(NUEVO_MENSAJE_SUSCRIBER, bytesMensajeSuscriptor, stream, &bytes);
 			free(stream);
 
-			if((send(suscriptor->socket, paqueteSerializado, bytes, MSG_NOSIGNAL)) > 0){
-				Ack* respuesta;
+			if((send(suscriptor->socket, paqueteSerializado, bytes, MSG_NOSIGNAL)) <= 0) continue;
 
-				int recibidoExitoso = recibirAck(suscriptor->socket, &respuesta);
+			Ack* respuesta;
 
-				log_info(logger, "Recibido exitoso? %d", recibidoExitoso);
+			int recibidoExitoso = recibirAck(suscriptor->socket, &respuesta);
 
-				if(recibidoExitoso)
-				{
-					if(respuesta->IDMensaje == *IDMensaje)
-					{
-						agregarSuscriptorEnviado(*IDMensaje, &suscriptor);
+			log_info(logger, "Recibido exitoso? %d", recibidoExitoso);
 
-						//Log obligatorio.
-						log_info(logger, "Envío de mensaje con ID %ld a suscriptor %s", *IDMensaje, tipoModuloToString(suscriptor->modulo));
+			if(!recibidoExitoso || respuesta->IDMensaje != *IDMensaje) manejarSuscriptorCaido(suscriptor);
 
-						manejarACK(respuesta, suscriptor, IDMensaje);
-						free(respuesta);
-					} else {
-						manejarSuscriptorCaido(suscriptor);
-					}
-				}
-				else
-				{
-					manejarSuscriptorCaido(suscriptor);
-				}
-			}
+			agregarSuscriptorEnviado(*IDMensaje, &suscriptor);
+
+			//Log obligatorio.
+			log_info(logger, "Envío de mensaje con ID %ld a suscriptor %s", *IDMensaje, tipoModuloToString(suscriptor->modulo));
+
+			manejarACK(respuesta, suscriptor);
+			free(respuesta);
+
 		}
 
 		free(mensaje);
+
+		log_info(logger, "Me fui");
 	}
 }
 
