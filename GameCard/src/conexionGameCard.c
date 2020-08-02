@@ -16,10 +16,13 @@ void mandarMensajeABroker(void* datosRecibidos,	TipoModulo cola, long IDCorrelat
 	int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
 
 	IDMensajePublisher* respuesta;
-	if (!enviarPublisherConIDCorrelativo(logger, conexionBroker, GAMECARD, datosRecibidos, cola, IDCorrelativo, &respuesta))
+	if (enviarPublisherConIDCorrelativo(logger, conexionBroker, GAMECARD, datosRecibidos, cola, IDCorrelativo, &respuesta))
+		free(respuesta);
+	else
 		log_info(logger, "ERROR - No se pudo enviar el mensaje a Broker");
 
-	free(respuesta);
+
+
 	liberar_conexion_cliente(conexionBroker);
 }
 

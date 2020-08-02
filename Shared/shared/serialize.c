@@ -442,16 +442,17 @@ LocalizedPokemon* deserializarLocalized(void* mensaje){
 	pokemon->nombre = malloc(pokemon->largoNombre + 1);
 	strncpy(pokemon->nombre, stringRecibido, pokemon->largoNombre);
 	pokemon->nombre[pokemon->largoNombre] = '\0';
-	printf("String pokemon: %s", pokemon->nombre);
+	//printf("String pokemon: %s", pokemon->nombre);
 
 	free(stringRecibido);
 
 	memcpy(&pokemon->cantidadDeParesDePosiciones, mensaje + offset, sizeof(uint32_t));
 	offset += sizeof(uint32_t);
 
-	printf("Cantidad: %d", pokemon->cantidadDeParesDePosiciones);
 
-	fflush(stdout);
+	//printf("Cantidad: %d", pokemon->cantidadDeParesDePosiciones);
+
+	//fflush(stdout);
 
 	pokemon->posiciones = list_create();
 

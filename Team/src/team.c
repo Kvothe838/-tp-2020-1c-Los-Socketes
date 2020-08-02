@@ -42,13 +42,14 @@ int main(void) {
 
 	ipBroker = configTeam->ip;
 	puertoBroker = configTeam->puerto;
-
-	pthread_create(&threadIniciarServidor, NULL,(void*)iniciarServidorTeam, (void*)&argumentos);
-
 	Team team = inicializarTeam(configTeam->posiciones,configTeam->pertenecientes,configTeam->objetivos);
+
+	//pthread_create(&threadIniciarServidor, NULL,(void*)iniciarServidorTeam, (void*)&argumentos);
+
+	//Team team = inicializarTeam(configTeam->posiciones,configTeam->pertenecientes,configTeam->objetivos);
 	conexiones(configTeam,logger);
 
-	pthread_join(threadIniciarServidor, NULL);
+	//pthread_join(threadIniciarServidor, NULL);
 
 	//printf("\n--------------------------------------------\n");
 	//planificacion_fifo(logger,configTeam);
