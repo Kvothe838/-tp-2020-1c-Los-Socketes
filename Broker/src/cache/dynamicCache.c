@@ -76,7 +76,7 @@ int eliminarVictima(TipoCola cola){
 
 	eliminarItem(itemAEliminar);
 	//log_info(loggerObligatorio, "Me FUI DE ELIMINARITEM");
-	eliminarMensajeDeLista(itemAEliminar, cola);
+	//eliminarMensajeDeLista(itemAEliminar, cola);
 	//log_info(loggerObligatorio, "Me FUI DE ELIMINARMENSAJEDELISTA");
 
 	obtenerDump();

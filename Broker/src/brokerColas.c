@@ -75,7 +75,7 @@ t_list* obtenerSuscriptoresPorCola(TipoCola colaClave){
 	ColaConSuscriptores* colaEspecifica = obtenerCola(colaClave);
 	return colaEspecifica->suscriptores;
 }
-
+/*
 void eliminarMensajeDeLista(int IDMensaje, TipoCola colaClave)
 {
 	//sem_wait(semColaMensajes);
@@ -106,5 +106,5 @@ void eliminarMensajeDeLista(int IDMensaje, TipoCola colaClave)
 	//log_info(loggerObligatorio, "Salgo de eliminar mensaje de lista");
 
 	//sem_post(semColaMensajes);
-}
+}*/
 

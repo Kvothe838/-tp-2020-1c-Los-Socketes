@@ -20,7 +20,7 @@ void crearDiccionario();
 void liberarDiccionario();
 ColaConSuscriptores* crearColaConSuscriptores();
 ColaConSuscriptores* obtenerCola(TipoCola colaClave);
-void eliminarMensajeDeLista(int IDMensaje, TipoCola colaClave);
+/*void eliminarMensajeDeLista(int IDMensaje, TipoCola colaClave);*/
 
 /*
  * Devuelve 1 si fue agregado exitosamente, o 0 si ya existía y su socket fue actualizado
