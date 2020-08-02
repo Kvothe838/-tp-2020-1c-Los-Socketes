@@ -681,7 +681,7 @@ LocalizedPokemon * administrarGetPokemon(char* pokemon){
 		t_list * lista;// = list_create();
 		cantidadDeBlocks = obtenerDataFileSystem(datosPokemon->tamanio, datosPokemon->bloquesAsociados, &lista);
 
-		//datosDePosicionPokemon->cantidadDeParesDePosiciones = (uint32_t)list_size(lista);
+		datosDePosicionPokemon->cantidadDeParesDePosiciones = (uint32_t)list_size(lista);
 
 
 
@@ -693,15 +693,8 @@ LocalizedPokemon * administrarGetPokemon(char* pokemon){
 			pokemonDatoPosicion* structADeserializar;
 			structADeserializar = list_get(listaAuxiliar, 0);
 
-
-			printf("X de struct %d\n",structADeserializar->posX);
-			printf("Y de struct %d\n",structADeserializar->posY);
-			for (int i = 0; i < structADeserializar->cantidad; ++i) {
-				list_add(datosDePosicionPokemon->posiciones, &(structADeserializar->posX));
-				list_add(datosDePosicionPokemon->posiciones, &(structADeserializar->posY));
-				datosDePosicionPokemon->cantidadDeParesDePosiciones++;
-			}
-
+			list_add(datosDePosicionPokemon->posiciones, &(structADeserializar->posX));
+			list_add(datosDePosicionPokemon->posiciones, &(structADeserializar->posY));
 
 			list_destroy(listaAuxiliar);
 		}
