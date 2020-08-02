@@ -44,7 +44,7 @@ char * generarNuevaLinea(pokemonDatoPosicion* data){
 	return nuevaLinea;
 }
 char* agregarPuntoDeMontaje(char directorio[]){
-	char* nuevoValor = malloc(100);
+	char* nuevoValor = malloc(1000);
 	strcpy(nuevoValor, puntoDeMontaje);
 	//strcat(nuevoValor, numeroMagico);
 	strcat(nuevoValor, "/");
@@ -246,8 +246,11 @@ t_config * validarArchivoAbierto(char* pokemonNombre, char path[1000], pokemonMe
 		datosPokemon->abierto =	(strcmp(config_get_string_value(configPokemon, "OPEN"), "Y") == 0) ? 1 : 0;
 
 		if (!datosPokemon->abierto) {
+			t_log* log = iniciar_logger("SeBloqueoPorEsperar.log", "GAMECARD");
+			log_trace(log, "A DORMIR");
 			config_destroy(configPokemon);
 			sleep(reintentoOperacion);
+			log_destroy(log);
 		}
 	} while (!datosPokemon->abierto);
 
