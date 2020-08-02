@@ -19,7 +19,7 @@ int enviarPublisherConIDCorrelativo(t_log* logger, int socket, TipoModulo modulo
 
 	if(send(socket, paquete, bytes, 0) == -1)
 	{
-		log_info(logger, "Mensaje enviado.");
+		log_info(logger, "send(socket) retorno (-1)");
 		resultado = 0;
 	}
 

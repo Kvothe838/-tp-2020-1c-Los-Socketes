@@ -50,6 +50,7 @@ void manejarNuevoMensajeSuscriptor(MensajeParaSuscriptor* mensaje)
 			log_info(logConexiones,"LLEGO UN LOCALIZED(%s) con %d pares",localized->nombre, localized->cantidadDeParesDePosiciones);
 
 			if(localized->cantidadDeParesDePosiciones <= 0){
+				log_info(logConexiones,"EL LOCALIZED NO TIENE PARES");
 				free(localized);
 				break;
 			}
@@ -105,7 +106,8 @@ void funcionDeMierda(Config* configTeam){
 				int recepcion = recv(conexionBroker, &codigo, sizeof(OpCode), MSG_WAITALL);
 
 				while(recepcion == 0 || recepcion == (-1)){
-					log_info(logger, "Se cayó Broker o está apagado.");
+					log_info(logger, "NO HAY CONEXION CON BROKER");
+					sleep(2);
 
 					enviarGet(getObj(list_get(OBJETIVO_GLOBAL,indice))->especie,(configTeam));
 
@@ -133,6 +135,7 @@ void escucharABroker(Config* configTeam, int socketBroker){
 	int socketActual = socketBroker;
 	int resultado;
 	while(1){
+		log_info(logConexiones,"VOY A ESCUCHAR AL BROKER");
 		OpCode codigo;
 		resultado = recv(socketActual, &codigo, sizeof(OpCode), MSG_WAITALL);
 		if(resultado != 0 && resultado != -1 && socketActual != 0){
