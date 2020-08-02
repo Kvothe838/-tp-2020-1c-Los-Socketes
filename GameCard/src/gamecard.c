@@ -32,6 +32,8 @@ int main(void) {
 
 	pthread_create(&threadEscucharGameboy, NULL,(void*)iniciarServidorGameboy, (void*)&argumentosGameboy);
 
+	//crearDiccionarioSemaforo();
+
 	int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
 
 	int suscripcionEnviada = enviarSuscripcion(conexionBroker, GAMECARD, 3, NEW, GET, CATCH);
@@ -39,7 +41,7 @@ int main(void) {
 	if(suscripcionEnviada)
 		iniciar_servidor(config, conexionBroker);
 
-	//pthread_join(threadEscucharGameboy, NULL);
+	pthread_join(threadEscucharGameboy, NULL);
 
 	//liberarVariablesGlobales();
 

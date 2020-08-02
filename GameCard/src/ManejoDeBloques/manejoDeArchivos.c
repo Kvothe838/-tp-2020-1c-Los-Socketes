@@ -1,4 +1,8 @@
 #include "manejoDeArchivos.h"
+#include <dirent.h>
+#include <semaphore.h>
+
+t_dictionary* diccionarioSemaforo = NULL;
 
 pokemonDatoPosicion* obtenerDataDePosicion(char* stringData){
 	char** primeraSeparacion = string_split(stringData, "-");
@@ -56,6 +60,33 @@ char* agregarPuntoDeMontajeConMagicNumber(char directorio[]){
 	strcat(archivoFinal, directorio);
 	return archivoFinal;
 }
+
+
+void crearSemaforoEspecifico(char* nombre){
+	sem_t* mutex = malloc(sizeof(sem_t));
+	sem_init(mutex, 0, 1);
+	dictionary_put(diccionarioSemaforo, nombre, mutex);
+}
+
+
+void crearDiccionarioSemaforo()
+{
+	char * path = agregarPuntoDeMontajeConMagicNumber("/Files/.");
+	DIR * d = opendir(path);
+	if(d==NULL) return;
+	struct dirent * dir;
+	printf(path);
+	while((dir = readdir(d)) != NULL)
+	{
+		if(dir -> d_type == DT_DIR && strcmp(dir->d_name,".")!=0 && strcmp(dir->d_name,"..")!=0 )
+		{
+			crearSemaforoEspecifico(dir->d_name);
+			//printf("%s\n", dir->d_name);
+		}
+	}
+	closedir(d); // finally close the directory
+}
+
 
 void iniciarMetadataBase(t_config * gameBoy){
 	char *bloques, *bloquesTamanio, *magicNumber;
@@ -192,6 +223,8 @@ void inicializarData(t_log* logger) {
 	}
 	free(metadataArchivo);
 
+	diccionarioSemaforo = dictionary_create();
+	crearDiccionarioSemaforo();
 }
 
 void liberarVariablesGlobales(){
@@ -200,10 +233,12 @@ void liberarVariablesGlobales(){
 	free(numeroMagico);
 }
 
-t_config * validarArchivoAbierto(char path[1000], pokemonMetadata* datosPokemon) {
+t_config * validarArchivoAbierto(char* pokemonNombre, char path[1000], pokemonMetadata* datosPokemon) {
 	t_config *configPokemon;
 	do {
+		sem_wait(dictionary_get(diccionarioSemaforo, pokemonNombre));
 		configPokemon = config_create(path);
+		sem_post(dictionary_get(diccionarioSemaforo, pokemonNombre));
 		datosPokemon->esDirectorio = (strcmp(config_get_string_value(configPokemon, "DIRECTORY"), "Y") == 0) ? 1 : 0;
 		datosPokemon->tamanio = config_get_int_value(configPokemon, "SIZE");
 		//datosPokemon->bloquesAsociados = malloc(1000);
@@ -369,7 +404,8 @@ void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t
 		strcat(path, "/Metadata.bin");
 
 		char nuevoStringBloques[1000];
-		t_config * configMetadata = validarArchivoAbierto(path, datosPokemon);
+
+		t_config * configMetadata = validarArchivoAbierto(pokemon, path, datosPokemon);
 
 		t_list * lista;// = list_create();
 		cantidadDeBlocks = obtenerDataFileSystem(datosPokemon->tamanio, datosPokemon->bloquesAsociados, &lista);
@@ -398,6 +434,7 @@ void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t
 					char* str = malloc(10);
 					snprintf(str, 10, "%d", nuevoBloque);
 					datosPokemon->bloquesAsociados[cantidadDeBlocks] = str;
+
 
 				}
 			}
@@ -484,12 +521,19 @@ void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t
 		free(datosPokemon);
 		if(path != NULL)
 			free(path);
+
+		crearSemaforoEspecifico(pokemon);
+
 		administrarNewPokemon(pokemon, posX, posY, cantidad);
 		return;
 
 	}
 	free(datosPokemon);
 	//free(posicionPokemon);
+	t_log* logger = iniciar_logger("Ejemplo.log", "TEAM");
+	log_info(logger, "DICCIONARIO %d", dictionary_size(diccionarioSemaforo));
+	log_destroy(logger);
+
 	if(path != NULL)
 		free(path);
 	return;
@@ -511,7 +555,7 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 			posicionPokemon->cantidad=1;
 
 			strcat(path, "/Metadata.bin");
-			t_config * configMetadata = validarArchivoAbierto(path, datosPokemon);
+			t_config * configMetadata = validarArchivoAbierto(pokemon, path, datosPokemon);
 
 			t_list * lista;// = list_create();
 			cantidadDeBlocks = obtenerDataFileSystem(datosPokemon->tamanio, datosPokemon->bloquesAsociados, &lista);
@@ -632,7 +676,7 @@ LocalizedPokemon * administrarGetPokemon(char* pokemon){
 
 	pokemonMetadata* datosPokemon = malloc(sizeof(pokemonMetadata));
 	if(access(path, F_OK) != -1){
-		t_config * configMetadata = validarArchivoAbierto(path, datosPokemon);
+		t_config * configMetadata = validarArchivoAbierto(pokemon, path, datosPokemon);
 
 		t_list * lista;// = list_create();
 		cantidadDeBlocks = obtenerDataFileSystem(datosPokemon->tamanio, datosPokemon->bloquesAsociados, &lista);
