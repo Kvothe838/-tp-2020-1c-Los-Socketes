@@ -28,19 +28,17 @@ int calcularBestFit(int desiredSize) {
 }
 
 int calcularFIFO(){
-	//log_info(loggerObligatorio, "Entro a calcular FIFO");
 	int oldestposicion = 0;
 	char* oldestDate = tablaElementos[0].fechaCreacion;
 
 	for(int i = 1; i < tamanioTabla; i++){
 		ItemTablaDinamica current = tablaElementos[i];
 
-		if(!current.estaVacio && current.fechaCreacion != NULL && esTiempoMasAntiguo(current.fechaCreacion, oldestDate)){
+		if(!current.estaVacio && current.fechaCreacion != NULL && (oldestDate == NULL || esTiempoMasAntiguo(current.fechaCreacion, oldestDate))){
 			oldestDate = current.fechaCreacion;
 			oldestposicion = i;
 		}
 	}
-	//log_info(loggerObligatorio, "Salgo de calcular FIFO");
 
 	return tablaElementos[oldestposicion].ID;
 }
@@ -207,21 +205,15 @@ void agregarItem(void* item, int tamanioItem, long ID, long IDCorrelativo, TipoC
 	//log_info(loggerObligatorio, "agregarItem: después wait");
 
 	int posicionVacioAModificar;
-	//log_info(loggerObligatorio, "HAY ESPACIO?");
 	int hayEspacioParaItem = hayEspacio(tamanioItem, &posicionVacioAModificar);
-	//log_info(loggerObligatorio, "HAY ESPACIO");
 	int logrado = 1;
 
 	while(!hayEspacioParaItem){
-		//log_info(loggerObligatorio, "ELIMINAR VÍCTIMA");
 		logrado = eliminarVictima(cola);
-		//log_info(loggerObligatorio, "ELIMINÉ VÍCTIMA");
 
 		if(!logrado) break;
 
-		//log_info(loggerObligatorio, "ANTES HAYESPACIO");
 		hayEspacioParaItem = hayEspacio(tamanioItem, &posicionVacioAModificar);
-		//log_info(loggerObligatorio, "DESPUÉS HAYESPACIO");
 	}
 
 	if(logrado)
@@ -381,6 +373,7 @@ void compactarCache(){
 }
 
 void eliminarItem(long ID){
+	log_info(loggerObligatorio, "Entro a eliminarItem gg");
 	particionesLiberadas++;
 	int posDatoAEliminar = obtenerPosicionPorID(ID);
 	int posNuevoVacio = obtenerPrimeraParticion(tablaVacios, 1);

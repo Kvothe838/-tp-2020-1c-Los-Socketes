@@ -6,6 +6,15 @@
 #include <shared/structs.h>
 #include <string.h>
 
+typedef struct {
+	char* ip;
+	char* puerto;
+	int socket;
+	t_log* logger;
+} ArgumentosEscucharBroker;
+
+void escucharBroker(ArgumentosEscucharBroker* argumentos);
+
 int main(int argc, char **argv){
 	int const cantidadMinArgc = 2, cantidadMaxArgc = 20;
 
@@ -306,6 +315,8 @@ int main(int argc, char **argv){
 		//   argv[0]   argv[1]      argv[2]         argv[3]
 
 		TipoCola colaDeMensaje;
+		pthread_t threadEscuchaBroker;
+		ArgumentosEscucharBroker argumentos;
 
 		ipBroker = config_get_string_value(config, "IP_BROKER");
 		puertoBroker = config_get_string_value(config, "PUERTO_BROKER");
@@ -336,37 +347,17 @@ int main(int argc, char **argv){
 			log_info(logger, "Error intentando suscribirse a la cola.");
 		}
 
-		while ((time(0) - start) <= tiempo )
-		{
-			OpCode codigo;
-			int recibido;
+		argumentos.ip = ipBroker;
+		argumentos.puerto = puertoBroker;
+		argumentos.logger = logger;
+		argumentos.socket = conexionBroker;
 
-			recibido = recv(conexionBroker, &codigo, sizeof(OpCode), MSG_WAITALL);
+		pthread_create(&threadEscuchaBroker, NULL, (void*)escucharBroker, &argumentos);
+		pthread_detach(threadEscuchaBroker);
 
-			if(recibido == -1 || recibido == 0){
-				log_info(logger, "Error recibiendo código");
-				abort();
-			}
+		while ((time(0) - start) <= tiempo );
 
-			if(codigo != NUEVO_MENSAJE_SUSCRIBER)
-			{
-				log_info(logger, "Recibí otro código");
-				abort();
-			}
-
-			MensajeParaSuscriptor* mensaje = NULL;
-			int recepcionExitosa = recibirMensajeSuscriber(conexionBroker, logger, GAMEBOY, &mensaje, ipBroker, puertoBroker);
-
-			if(recepcionExitosa)
-			{
-				//Log obligatorio
-				log_info(logger, "Llegó nuevo mensaje de cola %s.", tipoColaToString(mensaje->cola));
-			} else {
-				log_info(logger, "Error enviando mensaje.");
-			}
-
-			free(mensaje);
-		}
+		pthread_cancel(threadEscuchaBroker);
 
 		break;
 	}
@@ -381,4 +372,39 @@ int main(int argc, char **argv){
 	terminar_programa(logger, config);
 
 	return EXIT_SUCCESS;
+}
+
+void escucharBroker(ArgumentosEscucharBroker* argumentos)
+{
+	while(1)
+	{
+		OpCode codigo;
+		int recibido;
+
+		recibido = recv(argumentos->socket, &codigo, sizeof(OpCode), MSG_WAITALL);
+
+		if(recibido == -1 || recibido == 0){
+			log_info(argumentos->logger, "Error recibiendo código");
+			abort();
+		}
+
+		if(codigo != NUEVO_MENSAJE_SUSCRIBER)
+		{
+			log_info(argumentos->logger, "Recibí otro código");
+			abort();
+		}
+
+		MensajeParaSuscriptor* mensaje = NULL;
+		int recepcionExitosa = recibirMensajeSuscriber(argumentos->socket, argumentos->logger, GAMEBOY, &mensaje, argumentos->ip, argumentos->puerto);
+
+		if(recepcionExitosa)
+		{
+			//Log obligatorio
+			log_info(argumentos->logger, "Llegó nuevo mensaje de cola %s.", tipoColaToString(mensaje->cola));
+		} else {
+			log_info(argumentos->logger, "Error enviando mensaje.");
+		}
+
+		free(mensaje);
+	}
 }

@@ -133,8 +133,7 @@ void manejarPublisher(int socketCliente) {
 
 void manejarACK(Ack* contenido, Suscriptor* suscriptor) {
 	//Log obligatorio.
-	log_info(loggerObligatorio, "Recepción del mensaje con ID %ld.",
-			contenido->IDMensaje);
+	log_info(loggerObligatorio, "Recepción del mensaje con ID %ld.", contenido->IDMensaje);
 
 	agregarSuscriptorRecibido(contenido->IDMensaje, suscriptor);
 }
@@ -238,30 +237,20 @@ void enviarMensajesPorCola(TipoCola tipoCola) {
 		}
 
 		for (int j = 0; j < tamanioCola; j++) {
-			Suscriptor* suscriptor = (Suscriptor*) list_get(cola->suscriptores,
-					j);
+			Suscriptor* suscriptor = (Suscriptor*) list_get(cola->suscriptores, j);
 
-			if (suscriptor->estaCaido)
-				continue;
+			if (suscriptor->estaCaido) continue;
 
-			t_list* suscriptoresEnviados = obtenerSuscriptoresEnviados(
-					*IDMensaje);
+			t_list* suscriptoresEnviados = obtenerSuscriptoresEnviados(*IDMensaje);
 
-			if (suscriptoresEnviados != NULL
-					&& esSuscriptorEnviado(suscriptoresEnviados, *suscriptor))
-				continue;
+			if (suscriptoresEnviados != NULL && esSuscriptorEnviado(suscriptoresEnviados, *suscriptor)) continue;
 
 			int bytes, bytesMensajeSuscriptor;
-			void* stream = serializarMensajeSuscriptor(*IDMensaje,
-					*IDCorrelativo, mensaje, *tamanioItem, tipoCola,
-					&bytesMensajeSuscriptor);
-			void* paqueteSerializado = armarPaqueteYSerializar(
-					NUEVO_MENSAJE_SUSCRIBER, bytesMensajeSuscriptor, stream,
-					&bytes);
+			void* stream = serializarMensajeSuscriptor(*IDMensaje, *IDCorrelativo, mensaje, *tamanioItem, tipoCola, &bytesMensajeSuscriptor);
+			void* paqueteSerializado = armarPaqueteYSerializar(NUEVO_MENSAJE_SUSCRIBER, bytesMensajeSuscriptor, stream, &bytes);
 			free(stream);
 
-			if ((send(suscriptor->socket, paqueteSerializado, bytes,
-					MSG_NOSIGNAL)) <= 0)
+			if ((send(suscriptor->socket, paqueteSerializado, bytes, MSG_NOSIGNAL)) <= 0)
 				continue;
 
 			Ack* respuesta;
@@ -274,9 +263,7 @@ void enviarMensajesPorCola(TipoCola tipoCola) {
 			agregarSuscriptorEnviado(*IDMensaje, &suscriptor);
 
 			//Log obligatorio.
-			log_info(loggerObligatorio,
-					"Envío de mensaje con ID %ld a suscriptor %s", *IDMensaje,
-					tipoModuloToString(suscriptor->modulo));
+			log_info(loggerObligatorio,	"Envío de mensaje con ID %ld a suscriptor %s", *IDMensaje, tipoModuloToString(suscriptor->modulo));
 
 			manejarACK(respuesta, suscriptor);
 			free(respuesta);
