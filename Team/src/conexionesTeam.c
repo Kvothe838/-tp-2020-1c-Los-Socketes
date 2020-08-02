@@ -18,22 +18,24 @@ void tratamiento_mensaje(MensajeParaSuscriptor** mensaje){
 }
 */
 int enviarGet(char* nombre, Config* configTeam){
-	t_log* logger2 = iniciar_logger("loggerBroker2.log", "Broker");
+	//t_log* logger2 = iniciar_logger("loggerBroker2.log", "Broker");
 	int exito = 1;
 	GetPokemon* pokemon = getGetPokemon(nombre);
 	int conexionBroker2 = crear_conexion_cliente((configTeam)->ip, (configTeam)->puerto);
 	IDMensajePublisher* respuesta;
 
-	if(!enviarPublisherSinIDCorrelativo(logger2,conexionBroker2, configTeam->ID, pokemon, GET, &respuesta)){
+	if(!enviarPublisherSinIDCorrelativo(logConexiones,conexionBroker2, configTeam->ID, pokemon, GET, &respuesta)){
 		//printf("\nERROR - No se pudo enviar el mensaje GET(%s)\n",nombre); // hacer el caso de retornar 2 ponele, y que se repita el envio
+		log_info(logConexiones, "NO SE PUDO MANDAR EL GET(%s)",nombre);
 		exito = 0;
 	} else{
 		//printf("\nSe pudo enviar el mensaje GET(%s)\n",nombre);
+		log_info(logConexiones, "SE PUDO MANDAR EL GET(%s)",nombre);
 		//printf("\nID Correlativo: %ld\n",respuesta->IDMensaje);
 	}
 
-	log_info(logger2, "RESPUESTA: %ld", respuesta->IDMensaje);
-	log_destroy(logger2);
+	log_info(logConexiones, "RESPUESTA: %ld", respuesta->IDMensaje);
+	//log_destroy(logger2);
 	liberar_conexion_cliente(conexionBroker2);
 
 	return exito;
@@ -83,48 +85,102 @@ void manejarNuevoMensajeSuscriptor(MensajeParaSuscriptor* mensaje)
 	}
 }
 
-void conectarse_broker(Config** configTeam){ // FUNCION PARA ESCUCHAR A BROKER CONSTANTEMENTE
+void funcionDeMierda(Config* configTeam){
 	int conexionBroker;int suscripcionEnviada;
 	OpCode codigo;
-	conexionBroker = crear_conexion_cliente((*configTeam)->ip, (*configTeam)->puerto);
+	conexionBroker = crear_conexion_cliente((configTeam)->ip, (configTeam)->puerto);
 	int sigo;int indice;
-	suscripcionEnviada = enviarSuscripcion(conexionBroker, (*configTeam)->ID, 3, APPEARED, LOCALIZED, CAUGHT);
+	suscripcionEnviada = enviarSuscripcion(conexionBroker, (configTeam)->ID, 3, APPEARED, LOCALIZED, CAUGHT);
 	logger = iniciar_logger("PRUEBA2", "TEAM");
-
 	if(suscripcionEnviada != -1){
-		sigo = 1;
-		indice = 0;
+		log_info(logConexiones,"VOY A MANDAR LOS GETS");
+			sigo = 1;
+			indice = 0;
 
-		while(indice < list_size(OBJETIVO_GLOBAL) && sigo){
-			if(!enviarGet(getObj(list_get(OBJETIVO_GLOBAL,indice))->especie, *configTeam)){
-				sigo = 0;
-			}
-
-			int recepcion = recv(conexionBroker, &codigo, sizeof(OpCode), MSG_WAITALL);
-
-			while(recepcion == 0 || recepcion == -1)
-			{
-				log_info(logger, "Se cayó Broker o está apagado.");
-
-				enviarGet(getObj(list_get(OBJETIVO_GLOBAL,indice))->especie,(*configTeam));
-
-				conexionBroker = crear_conexion_cliente((*configTeam)->ip, (*configTeam)->puerto);
-
-				recepcion = recv(conexionBroker, &codigo, sizeof(OpCode), MSG_WAITALL);
-			}
-
-			if(codigo == NUEVO_MENSAJE_SUSCRIBER){
-				MensajeParaSuscriptor* mensaje= NULL;
-				int recepcionExitosa = recibirMensajeSuscriber(conexionBroker, logger, (*configTeam)->ID, &mensaje, (*configTeam)->ip, (*configTeam)->puerto);
-				if(recepcionExitosa){
-					log_info(logger, "Mensaje recibido bien.");
-					manejarNuevoMensajeSuscriptor(mensaje);
+			while(indice < list_size(OBJETIVO_GLOBAL) && sigo){
+				if(!enviarGet(getObj(list_get(OBJETIVO_GLOBAL,indice))->especie, configTeam)){
+					sigo = 0;
 				}
-			}
 
-			indice++;
+				int recepcion = recv(conexionBroker, &codigo, sizeof(OpCode), MSG_WAITALL);
+
+				while(recepcion == 0 || recepcion == (-1)){
+					log_info(logger, "Se cayó Broker o está apagado.");
+
+					enviarGet(getObj(list_get(OBJETIVO_GLOBAL,indice))->especie,(configTeam));
+
+					conexionBroker = crear_conexion_cliente((configTeam)->ip, (configTeam)->puerto);
+
+					recepcion = recv(conexionBroker, &codigo, sizeof(OpCode), MSG_WAITALL);
+				}
+
+				if(codigo == NUEVO_MENSAJE_SUSCRIBER){
+					MensajeParaSuscriptor* mensaje= NULL;
+					int recepcionExitosa = recibirMensajeSuscriber(conexionBroker, logger, (configTeam)->ID, &mensaje, (configTeam)->ip, (configTeam)->puerto);
+					if(recepcionExitosa){
+						log_info(logger, "RECIBI UN MENSAJE PARA TRATAR");
+						manejarNuevoMensajeSuscriptor(mensaje);
+					}
+				}
+
+				indice++;
+			}
 		}
+}
+
+void escucharABroker(Config* configTeam, int socketBroker){
+	int suscripcionEnviada;
+	int socketActual = socketBroker;
+	int resultado;
+	while(1){
+		OpCode codigo;
+		resultado = recv(socketActual, &codigo, sizeof(OpCode), MSG_WAITALL);
+		if(resultado != 0 && resultado != -1 && socketActual != 0){
+			if(codigo == NUEVO_MENSAJE_SUSCRIBER){
+				//t_log* logger = log_create("respuesta.log", "RESPUESTA", true, LOG_LEVEL_TRACE);
+				log_info(logConexiones, "LLEGO ALGO");
+				MensajeParaSuscriptor* mensaje = NULL;
+				int recepcionExitosa = recibirMensajeSuscriber(socketActual, logConexiones, TEAM, &mensaje, ipBroker, puertoBroker);
+
+				if(!recepcionExitosa) continue;
+				//log_trace(logger, "Llegó algo de la cola %s", tipoColaToString(mensaje->cola));
+				pthread_create(&thread,NULL,(void*)manejarNuevoMensajeSuscriptor,(mensaje));
+				pthread_detach(thread);
+				//process_request(codigo, socketBroker);
+			}
+		}else{
+			log_info(logConexiones, "RESULTADO %d, NO HAY CONEXION CON BROKER", resultado);
+
+			liberar_conexion_cliente(socketActual);
+			log_info(logConexiones,"VOY A ESPERAR UNOS SEGUNDOS PARA VOLVER A RECONECTARME");
+			sleep(2);
+			socketActual = crear_conexion_cliente(ipBroker, puertoBroker);
+			suscripcionEnviada = enviarSuscripcion(socketActual, (configTeam)->ID, 3, APPEARED, LOCALIZED, CAUGHT);
+			if(socketActual != -1 && suscripcionEnviada != -1){
+				funcionDeMierda(configTeam);
+				//enviarSuscripcion(socketActual, (configTeam)->ID, 3, APPEARED, LOCALIZED, CAUGHT);
+			}
+			/*
+			if(resultado == 0)
+				log_info(logConexiones,"SE CAYÓ BROKER");
+			if(resultado == -1)
+				log_info(logConexiones,"BROKER SIGUE CAIDO");
+			*/
+			//volverABUscarSocket(&socketBroker);
+			//log_destroy(logger);
+		}
+
 	}
+}
+
+void conectarse_broker(Config** configTeam){// FUNCION PARA ESCUCHAR A BROKER CONSTANTEMENTE
+	funcionDeMierda((*configTeam));
+	int conexionBroker;int suscripcionEnviada;
+	conexionBroker = crear_conexion_cliente((*configTeam)->ip, (*configTeam)->puerto);
+	suscripcionEnviada = enviarSuscripcion(conexionBroker, (*configTeam)->ID, 3, APPEARED, LOCALIZED, CAUGHT);
+
+	escucharABroker((*configTeam),conexionBroker);
+
 
 	/*while(1){
 		int recepcion = recv(conexionBroker, &codigo, sizeof(OpCode), MSG_WAITALL);
