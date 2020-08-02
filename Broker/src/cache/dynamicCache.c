@@ -373,7 +373,6 @@ void compactarCache(){
 }
 
 void eliminarItem(long ID){
-	log_info(loggerObligatorio, "Entro a eliminarItem gg");
 	particionesLiberadas++;
 	int posDatoAEliminar = obtenerPosicionPorID(ID);
 	int posNuevoVacio = obtenerPrimeraParticion(tablaVacios, 1);

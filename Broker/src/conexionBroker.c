@@ -211,14 +211,14 @@ void esperarCliente(int socket_servidor) {
 
 }
 
-void manejarSuscriptorCaido(Suscriptor* suscriptor) {
-	suscriptor->estaCaido = 1;
+void manejarSuscriptorCaido(Suscriptor** suscriptor) {
+	(*suscriptor)->estaCaido = 1;
 }
 
 void enviarMensajesPorCola(TipoCola tipoCola) {
 	ColaConSuscriptores* cola = obtenerCola(tipoCola);
 
-	for (int i = 0; i < list_size(cola->IDMensajes); i++) {
+	for(int i = 0; i < list_size(cola->IDMensajes); i++) {
 		long* IDMensaje = list_get(cola->IDMensajes, i);
 
 		void* mensaje = obtenerItem(*IDMensaje);
@@ -232,33 +232,35 @@ void enviarMensajesPorCola(TipoCola tipoCola) {
 
 		int tamanioCola = list_size(cola->suscriptores);
 
-		if (tamanioCola > 0) {
+		if(tamanioCola > 0) {
 			cambiarLRU(*IDMensaje);
 		}
 
-		for (int j = 0; j < tamanioCola; j++) {
+		for(int j = 0; j < tamanioCola; j++) {
 			Suscriptor* suscriptor = (Suscriptor*) list_get(cola->suscriptores, j);
 
-			if (suscriptor->estaCaido) continue;
+			if(suscriptor->estaCaido) continue;
 
 			t_list* suscriptoresEnviados = obtenerSuscriptoresEnviados(*IDMensaje);
 
-			if (suscriptoresEnviados != NULL && esSuscriptorEnviado(suscriptoresEnviados, *suscriptor)) continue;
+			if(suscriptoresEnviados != NULL && esSuscriptorEnviado(suscriptoresEnviados, *suscriptor)) continue;
 
 			int bytes, bytesMensajeSuscriptor;
 			void* stream = serializarMensajeSuscriptor(*IDMensaje, *IDCorrelativo, mensaje, *tamanioItem, tipoCola, &bytesMensajeSuscriptor);
 			void* paqueteSerializado = armarPaqueteYSerializar(NUEVO_MENSAJE_SUSCRIBER, bytesMensajeSuscriptor, stream, &bytes);
 			free(stream);
 
-			if ((send(suscriptor->socket, paqueteSerializado, bytes, MSG_NOSIGNAL)) <= 0)
-				continue;
+			if ((send(suscriptor->socket, paqueteSerializado, bytes, MSG_NOSIGNAL)) <= 0) continue;
 
 			Ack* respuesta;
 
 			int recibidoExitoso = recibirAck(suscriptor->socket, &respuesta);
 
 			if (!recibidoExitoso || respuesta->IDMensaje != *IDMensaje)
-				manejarSuscriptorCaido(suscriptor);
+			{
+				manejarSuscriptorCaido(&suscriptor);
+				continue;
+			}
 
 			agregarSuscriptorEnviado(*IDMensaje, &suscriptor);
 
