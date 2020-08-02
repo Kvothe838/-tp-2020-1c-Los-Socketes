@@ -435,7 +435,7 @@ void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t
 
 		arrayStringToArrayConfig(cantidadDeBlocks, nuevoStringBloques, datosPokemon);
 
-
+		sleep(retardoDeOperacion);
 		config_set_value(configMetadata, "OPEN", "Y");
 		char* nuevoSize = string_itoa(datosPokemon->tamanio);
 		config_set_value(configMetadata, "SIZE", nuevoSize);
@@ -569,7 +569,7 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 				else
 					list_destroy(lista);
 
-
+				sleep(retardoDeOperacion);
 				config_set_value(configMetadata, "OPEN", "Y");
 				config_save(configMetadata);
 
@@ -599,6 +599,7 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 			}
 			free(datosPokemon->bloquesAsociados);
 
+			sleep(retardoDeOperacion);
 			config_set_value(configMetadata, "OPEN", "Y");
 			config_save(configMetadata);
 			config_destroy(configMetadata);
@@ -670,6 +671,7 @@ LocalizedPokemon * administrarGetPokemon(char* pokemon){
 
 		free(datosPokemon->bloquesAsociados);
 
+		sleep(retardoDeOperacion);
 		config_set_value(configMetadata, "OPEN", "Y");
 		config_save(configMetadata);
 
