@@ -29,13 +29,11 @@ int enviarPublisherConIDCorrelativo(t_log* logger, int socket, TipoModulo modulo
 
 	OpCode code;
 
-	log_info(logger, "LaLALALA: %d | %s", socket, tipoModuloToString(modulo));
 	if(recv(socket, &code, sizeof(OpCode), 0) == -1)
 	{
 		log_info(logger, "Error al recibir OpCode para Publisher");
 		return 0;
 	}
-	log_info(logger, "SERERSESRESGSGSGGARGAGAGKGAGADNKGDANBDAGBJGAD");
 
 	if(code == ID_MENSAJE){
 		*mensajeRecibido = malloc(sizeof(IDMensajePublisher));

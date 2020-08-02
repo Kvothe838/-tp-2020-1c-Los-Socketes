@@ -1,6 +1,6 @@
 #include "dynamicCache.h"
+#include "../brokerColas.h"
 
-sem_t mutexCache;
 int particionesLiberadas = 0;
 
 int esTiempoMasAntiguo(char* masAntiguo, char* masNuevo){
@@ -28,17 +28,19 @@ int calcularBestFit(int desiredSize) {
 }
 
 int calcularFIFO(){
+	//log_info(loggerObligatorio, "Entro a calcular FIFO");
 	int oldestposicion = 0;
-	char* oldestDate = "";
+	char* oldestDate = tablaElementos[0].fechaCreacion;
 
-	for(int i = 0; i < tamanioTabla; i++){
+	for(int i = 1; i < tamanioTabla; i++){
 		ItemTablaDinamica current = tablaElementos[i];
 
-		if(!current.estaVacio && esTiempoMasAntiguo(oldestDate, current.fechaCreacion)){
+		if(!current.estaVacio && current.fechaCreacion != NULL && esTiempoMasAntiguo(current.fechaCreacion, oldestDate)){
 			oldestDate = current.fechaCreacion;
 			oldestposicion = i;
 		}
 	}
+	//log_info(loggerObligatorio, "Salgo de calcular FIFO");
 
 	return tablaElementos[oldestposicion].ID;
 }
@@ -61,28 +63,29 @@ int calcularLRU(){
 	return tablaElementos[oldestposicion].ID;
 }
 
-int eliminarVictima(){
+int eliminarVictima(TipoCola cola){
 	long itemAEliminar;
 
 	if(strcmp(algoritmoEleccionDeVictima, "FIFO") == 0){
 		itemAEliminar = calcularFIFO();
 	} else{
-		log_info(logger, "Entro a calcular LRU");
 		itemAEliminar = calcularLRU();
-		log_info(logger, "Salgo de calcular LRU con item: %ld", itemAEliminar);
 	}
 
 	if(itemAEliminar == -1) return 0;
 
 	eliminarItem(itemAEliminar);
+	//log_info(loggerObligatorio, "Me FUI DE ELIMINARITEM");
+	eliminarMensajeDeLista(itemAEliminar, cola);
+	//log_info(loggerObligatorio, "Me FUI DE ELIMINARMENSAJEDELISTA");
+
+	obtenerDump();
 
 	return 1;
 }
 
 int hayEspacio(int espacioRequerido, int *posicion){
-	log_info(logger, "Espacio requerido: %d", espacioRequerido);
-
-	obtenerDump();
+	//log_info(loggerInterno, "Espacio requerido: %d", espacioRequerido);
 
 	if(strcmp(algoritmoEleccionDeParticionLibre, "FF") == 0){
 		for(*posicion = 0; *posicion < tamanioTabla; (*posicion)++){
@@ -162,8 +165,9 @@ void inicializarTabla(ItemTablaDinamica **tabla, int estaVacio){
 	}
 }
 
-void inicializarDataBasica(t_config* config, t_log* loggerParaAsignar) {
-	sem_init(&mutexCache, 0, 1);
+void inicializarDataBasica(t_config* config, t_log* loggerObligatorioAsignar, t_log* loggerInternoAsignar) {
+	//semCacheTabla = malloc(sizeof(sem_t));
+	//sem_init(semCacheTabla, 0, 1);
 
 	tamanioCache = (int)config_get_int_value(config, "TAMANO_MEMORIA");
 	tamanioParticionMinima = (int)config_get_int_value(config, "TAMANO_MINIMO_PARTICION");
@@ -171,7 +175,8 @@ void inicializarDataBasica(t_config* config, t_log* loggerParaAsignar) {
 	algoritmoEleccionDeVictima = config_get_string_value(config,"ALGORITMO_REEMPLAZO");
 	frecuenciaCompactacion = (int)config_get_int_value(config, "FRECUENCIA_COMPACTACION");
 	tamanioTabla = tamanioCache / tamanioParticionMinima;
-	logger = loggerParaAsignar;
+	loggerObligatorio = loggerObligatorioAsignar;
+	loggerInterno = loggerInternoAsignar;
 
 	inicializarTabla(&tablaElementos, 0);
 	inicializarTabla(&tablaVacios, 1);
@@ -196,31 +201,42 @@ void agregarElementoValido(int posicionVacioAModificar, int tamanioItem, void* i
 }
 
 void agregarItem(void* item, int tamanioItem, long ID, long IDCorrelativo, TipoCola cola){
-	sem_wait(&mutexCache);
+	obtenerDump();
+	//log_info(loggerObligatorio, "agregarItem: antes wait");
+	//sem_wait(semCacheTabla);
+	//log_info(loggerObligatorio, "agregarItem: después wait");
 
 	int posicionVacioAModificar;
+	//log_info(loggerObligatorio, "HAY ESPACIO?");
 	int hayEspacioParaItem = hayEspacio(tamanioItem, &posicionVacioAModificar);
+	//log_info(loggerObligatorio, "HAY ESPACIO");
 	int logrado = 1;
 
 	while(!hayEspacioParaItem){
-		log_info(logger, "No hay espacio.");
-		logrado = eliminarVictima();
+		//log_info(loggerObligatorio, "ELIMINAR VÍCTIMA");
+		logrado = eliminarVictima(cola);
+		//log_info(loggerObligatorio, "ELIMINÉ VÍCTIMA");
 
 		if(!logrado) break;
 
-		log_info(logger, "Elimino víctima.");
+		//log_info(loggerObligatorio, "ANTES HAYESPACIO");
 		hayEspacioParaItem = hayEspacio(tamanioItem, &posicionVacioAModificar);
-		log_info(logger, "Una vez más: ¿hay espacio? %d", hayEspacioParaItem);
+		//log_info(loggerObligatorio, "DESPUÉS HAYESPACIO");
 	}
 
 	if(logrado)
 	{
+		//log_info(loggerObligatorio, "ANTES AGREGARELEMENTOVALIDO");
 		agregarElementoValido(posicionVacioAModificar, tamanioItem, item, ID, IDCorrelativo, cola);
+		//log_info(loggerObligatorio, "DESPUÉS AGREGARELEMENTOVALIDO");
+		obtenerDump();
 	} else {
-		log_info(logger, "No se encontró víctima");
+		//log_info(loggerInterno, "No se encontró víctima");
 	}
 
-	sem_post(&mutexCache);
+	//log_info(loggerObligatorio, "agregarItem: antes post");
+	//sem_post(semCacheTabla);
+	//log_info(loggerObligatorio, "agregarItem: después post");
 }
 
 ItemTablaDinamica* obtenerItemTablaDinamica(long ID){
@@ -250,12 +266,26 @@ long* obtenerIDCorrelativoItem(long ID)
 	return &(item->IDCorrelativo);
 }
 
-void* obtenerItem(long ID){
+void* obtenerItem(long ID)
+{
+	//log_info(loggerObligatorio, "obtenerItem: antes wait");
+	//sem_wait(semCacheTabla);
+	//log_info(loggerObligatorio, "obtenerItem: después wait");
+
 	ItemTablaDinamica* item = obtenerItemTablaDinamica(ID);
 
-	if(item == NULL) return NULL;
+	if(item == NULL) {
+		//sem_post(semCacheTabla);
+		return NULL;
+	}
 
-	return obtenerValor(item->tamanio, item->posicion);
+	void* valorDeMierda = obtenerValor(item->tamanio, item->posicion);
+
+	//log_info(loggerObligatorio, "obtenerItem: antes post");
+	//sem_post(semCacheTabla);
+	//log_info(loggerObligatorio, "obtenerItem: después post");
+
+	return valorDeMierda;
 }
 
 void cambiarLRU(long ID)
@@ -274,12 +304,14 @@ void consolidarCache(int posicionElementoVacio, int posicionElemento){
 	int i = 0;
 
 	while(i < tamanioTabla){
+		//log_info(loggerObligatorio, "HOLA");
 		for(i = 0; i < tamanioTabla; i++){
+			//log_info(loggerObligatorio, "KOMO ESTAS");
 			if(i == posicionElementoVacio) continue;
 
 			ItemTablaDinamica elementoActual = tablaVacios[i];
 			int posicionConsolidada, posicionAEliminar, posicionAModificar, consolidar = 1;
-			//USAR obtenerDesplazamientoMinimo
+
 			if(elementoActual.posicion == posicionBuscada){
 				posicionConsolidada = elementoVacio->posicion;
 			} else if(elementoVacio->posicion != 0 && elementoActual.posicion + elementoActual.tamanio == elementoVacio->posicion){
@@ -288,27 +320,28 @@ void consolidarCache(int posicionElementoVacio, int posicionElemento){
 				consolidar = 0;
 			}
 
-			if(consolidar){
-				posicionAEliminar = i > posicionElementoVacio ? i : posicionElementoVacio;
-				posicionAModificar = i < posicionElementoVacio ? i : posicionElementoVacio;
+			if(!consolidar) continue; //FORROOOOOOOOOOOOOOOOOOOO
 
-				tablaVacios[posicionAModificar].tamanio = elementoVacio->tamanio + tablaVacios[i].tamanio;
-				tablaVacios[posicionAModificar].posicion = posicionConsolidada;
-				tablaVacios[posicionAEliminar].estaVacio = 1;
-				tablaVacios[posicionAEliminar].ID = -1;
-				tablaVacios[posicionAEliminar].tamanio = 0;
-				tablaVacios[posicionAEliminar].posicion = 0;
+			posicionAEliminar = i > posicionElementoVacio ? i : posicionElementoVacio;
+			posicionAModificar = i < posicionElementoVacio ? i : posicionElementoVacio;
 
-				posicionElementoVacio = posicionAModificar;
-				elementoVacio = &(tablaVacios[posicionAModificar]);
+			tablaVacios[posicionAModificar].tamanio = elementoVacio->tamanio + tablaVacios[i].tamanio;
+			tablaVacios[posicionAModificar].posicion = posicionConsolidada;
+			tablaVacios[posicionAEliminar].estaVacio = 1;
+			tablaVacios[posicionAEliminar].ID = -1;
+			tablaVacios[posicionAEliminar].tamanio = 0;
+			tablaVacios[posicionAEliminar].posicion = 0;
 
-				break;
-			}
+			posicionElementoVacio = posicionAModificar;
+			elementoVacio = &(tablaVacios[posicionAModificar]);
+
+			break;
 		}
 	}
 }
 
 void compactarCache(){
+	obtenerDump();
 	ItemTablaDinamica *tablaCompactada = NULL;
 	int posicionNueva = 0, posicionVieja, posicionTablaNueva = 0;
 
@@ -342,7 +375,7 @@ void compactarCache(){
 	memcpy(tablaElementos, tablaCompactada, sizeof(ItemTablaDinamica) * tamanioTabla);
 
 	//Log obligatorio.
-	log_info(logger, "Ejecución de compactación.");
+	log_info(loggerObligatorio, "Ejecución de compactación.");
 
 	particionesLiberadas = 0;
 }
@@ -363,13 +396,32 @@ void eliminarItem(long ID){
 	tablaElementos[posDatoAEliminar].estaVacio = 1;
 	tablaElementos[posDatoAEliminar].tamanio = 0;
 
+	if(tablaElementos[posDatoAEliminar].fechaCreacion != NULL)
+	{
+		free(tablaElementos[posDatoAEliminar].fechaCreacion);
+		tablaElementos[posDatoAEliminar].fechaCreacion = NULL;
+	}
+
+	if(tablaElementos[posDatoAEliminar].fechaUltimoUso != NULL)
+	{
+		free(tablaElementos[posDatoAEliminar].fechaUltimoUso);
+		tablaElementos[posDatoAEliminar].fechaUltimoUso = NULL;
+	}
+
 	//Log obligatorio.
-	log_info(logger, "Eliminada partición con posición de inicio %d.", posDatoAEliminar);
+	log_info(loggerObligatorio, "Eliminada partición con posición de inicio %d.", posDatoAEliminar);
 
 	consolidarCache(posNuevoVacio, posDatoAEliminar);
 
+	//log_info(loggerObligatorio, "UNO");
+
+	obtenerDump();
+
 	if(frecuenciaCompactacion <= 1 || particionesLiberadas == frecuenciaCompactacion){
+		//log_info(loggerObligatorio, "DOS");
 		compactarCache();
+		//log_info(loggerObligatorio, "TRES");
+		obtenerDump();
 	}
 }
 
@@ -384,8 +436,6 @@ void imprimirDatos(t_list* listaDeParticiones){
 
 	sprintf(stringFinal, "Dump: %d/%d/%d - %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, temporal_get_string_time());
 	fwrite(stringFinal, string_length(stringFinal), 1, archivoDump);
-
-
 
 	while(posicion < list_size(listaDeParticiones)){
 		ItemTablaDinamica *dato = list_get(listaDeParticiones, posicion);

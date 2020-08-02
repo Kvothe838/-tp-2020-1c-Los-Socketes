@@ -9,7 +9,6 @@
 typedef void* CacheBasica;
 CacheBasica* cachePrincipal;
 CacheBasica* cacheAlternativa; //Sólo para compactar.
-t_log* logger;
 
 void inicializarCache(int tamanio);
 void guardarValor(void* valor, int tamanio, int posicion);

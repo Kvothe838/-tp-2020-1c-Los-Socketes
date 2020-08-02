@@ -7,6 +7,7 @@
 #include "../shared/messages.h"
 
 t_log* iniciar_logger(char* nombreLogger, char* nombrePrograma);
+t_log* iniciarLoggerSinConsola(char* nombreLogger, char* nombrePrograma);
 t_config* leer_config(char* nombreConfig, t_log* logger);
 void terminar_programa(t_log* logger, t_config* config);
 

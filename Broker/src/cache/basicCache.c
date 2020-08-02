@@ -1,4 +1,5 @@
 #include "basicCache.h"
+#include "../conexionBroker.h"
 
 void inicializarCache(int tamanio){
 	cachePrincipal = (CacheBasica*)malloc(tamanio);
@@ -6,7 +7,7 @@ void inicializarCache(int tamanio){
 }
 
 void guardarValor(void* valor, int tamanio, int posicion){
-	log_info(logger, "Guardo valor con tamanio %d y posicion %d", tamanio, posicion);
+	log_info(loggerInterno, "Intento guardar valor con tamanio %d y posicion %d", tamanio, posicion);
 	memcpy(cachePrincipal + posicion, valor, tamanio);
 }
 
@@ -18,6 +19,7 @@ void* obtenerValor(int tamanio, int posicion){
 }
 
 void moverBloque(int tamanio, int posicionVieja, int posicionNueva){
+
 	void* item = obtenerValor(tamanio, posicionVieja);
 	memcpy(cacheAlternativa + posicionNueva, item, tamanio);
 }

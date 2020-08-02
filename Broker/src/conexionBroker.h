@@ -18,13 +18,12 @@
 #include <shared/connection.h>
 #include <shared/commonsExtensions.h>
 #include <semaphore.h>
+#include "cache/dynamicCache.h"
 
 pthread_t thread;
-t_log* logger;
 
 void iniciarServidor(IniciarServidorArgs* argumentos);
 void enviarMensajesSuscriptores();
-void inicializarMutex();
 void cortarPrograma();
 
 #endif

@@ -76,3 +76,35 @@ t_list* obtenerSuscriptoresPorCola(TipoCola colaClave){
 	return colaEspecifica->suscriptores;
 }
 
+void eliminarMensajeDeLista(int IDMensaje, TipoCola colaClave)
+{
+	//sem_wait(semColaMensajes);
+	//log_info(loggerObligatorio, "Elimino mensaje de lista. ID: %ld, cola: %s", IDMensaje, tipoColaToString(colaClave));
+	ColaConSuscriptores* colaEspecifica = obtenerCola(colaClave);
+	//log_info(loggerObligatorio, "Cola obtenida");
+	int indiceEliminar = -1;
+
+	for(int i = 0; i < list_size(colaEspecifica->IDMensajes); i++)
+	{
+		//log_info(loggerObligatorio, "Itero cola");
+		long* ID = list_get(colaEspecifica->IDMensajes, i);
+		//log_info(loggerObligatorio, "Obtengo Id: %ld", *ID);
+
+		if(IDMensaje == *ID)
+		{
+			//log_info(loggerObligatorio, "Indice encontrado: %d", i);
+			indiceEliminar = i;
+		}
+	}
+
+	if(indiceEliminar != -1)
+	{
+		log_info(loggerObligatorio, "Eliminado mensaje %ld", IDMensaje);
+		list_remove(colaEspecifica->IDMensajes, indiceEliminar);
+	}
+
+	//log_info(loggerObligatorio, "Salgo de eliminar mensaje de lista");
+
+	//sem_post(semColaMensajes);
+}
+
