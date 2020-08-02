@@ -12,5 +12,5 @@ char* ipBroker, *puertoBroker;
 
 void escucharBroker();
 void iniciarServidorGameboy(IniciarServidorArgs* argumentos);
-
+void iniciar_servidor(t_config* config, int socketBroker);
 #endif

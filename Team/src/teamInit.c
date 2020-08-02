@@ -56,31 +56,40 @@ int transformar_indice(Entrenador* entrenador,char* pokemonDar){
 }
 
 int a_e1_le_interesa_alguno_de_e2(Entrenador* e1, Entrenador* e2){
-	int encontrado=1;
-	t_list* objetivos2 = list_map(e1->objetivosActuales,(void*) retornarNombreFantasia);
-	t_list* pertenecientes1 = list_map(e2->pertenecientesIntercambiables,(void*) retornarNombrePosta);
-	int x1=0,y1;
-		while((x1<list_size(pertenecientes1))&&encontrado){
-				y1=0;
-				while(y1<list_size(objetivos2)&&encontrado){
-					if(strcmp(list_get(pertenecientes1,x1),list_get(objetivos2,y1))==0){
-						encontrado=0;	// E2 TIENE UN POKEMON QUE LE INTERESA A E1
-						e2->indiceDar = x1;
-					}else{
-						y1++;
-					}
-				}
-				if(encontrado){
-					x1++;
-				}
+	int encontrado = 1;
+	t_list* objetivos2 = list_map(e1->objetivosActuales,(void*)retornarNombreFantasia);
+	t_list* pertenecientes1 = list_map(e2->pertenecientesIntercambiables,(void*)retornarNombrePosta);
+	int x1 = 0, y1;
+
+	while((x1<list_size(pertenecientes1))&&encontrado){
+		y1 = 0;
+
+		while(y1<list_size(objetivos2) && encontrado){
+			if(strcmp(list_get(pertenecientes1,x1), list_get(objetivos2,y1))==0){
+				encontrado = 0;	// E2 TIENE UN POKEMON QUE LE INTERESA A E1
+				e2->indiceDar = x1;
+			} else {
+				y1++;
 			}
-		if(encontrado==0){
-			//printf("\nhay interes de %d por %d",e1->idEntrenador,e2->idEntrenador);
-			return 1;
-		}else{
-			//printf("\nno hay interes de %d por %d",e1->idEntrenador,e2->idEntrenador);
-			return 0;
 		}
+
+		if(encontrado){
+			x1++;
+		}
+	}
+
+	if(encontrado==0){ //KHÉEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+
+		//RETURN !ENCONTRADO;
+		//LA PUTA MADRE.
+
+
+		//printf("\nhay interes de %d por %d",e1->idEntrenador,e2->idEntrenador);
+		return 1;
+	}else{
+		//printf("\nno hay interes de %d por %d",e1->idEntrenador,e2->idEntrenador);
+		return 0;
+	}
 }
 
 void intercambio_forzoso(Entrenador* mover, Entrenador* quieto){
@@ -148,15 +157,19 @@ void verificar_espera_circular(){
 		int esperaCircular[3][columnas];
 		int contador = -1;
 		int b;
+
 		for(temporal=0;temporal < queue_size(DEADLOCKS);temporal++){
-			b = temporal;sigo=1;
+			b = temporal;
+			sigo = 1;
+
 			do{
 				if(datos[0][b] != -1 && datos[1][b] != -1){
 					b = datos[0][b];
 				}else{
 					sigo=0;
 				}
-			}while(sigo && b != temporal);
+			} while(sigo && b != temporal);
+
 			if(sigo){
 				contador++;
 				esperaCircular[0][contador] = datos[2][temporal];
@@ -164,6 +177,7 @@ void verificar_espera_circular(){
 				esperaCircular[2][contador] = datos[1][temporal];
 			}
 		}
+
 		if(contador >= 2){
 			DEADLOCKS_RESUELTOS += 1;
 			printf("\nhay espera circular");
@@ -461,7 +475,6 @@ void moverse(Entrenador* persona){
 								sleep(configTeam->retardo_cpu);
 							}
 						}
-						
 					}
 		}
 	}
@@ -1010,8 +1023,6 @@ void liberarTeam(Team team){
 	queue_destroy(POKEMONS);
 	queue_destroy(EJECUTADOS);
 	queue_destroy(ESPERANDO);
-
-
 
 	//free(team);
 }
