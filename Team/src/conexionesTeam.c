@@ -41,26 +41,45 @@ int enviarGet(char* nombre, Config* configTeam){
 
 void manejarNuevoMensajeSuscriptor(MensajeParaSuscriptor* mensaje)
 {
-	if((mensaje)->cola == LOCALIZED){
-		LocalizedPokemon* pokemon = deserializarLocalized((mensaje)->contenido);
-		log_info(logConexiones,"LLEGO UN LOCALIZED(%s) con %d pares",pokemon->nombre,pokemon->cantidadDeParesDePosiciones);
-			if((pokemon->cantidadDeParesDePosiciones)>0){
-				printf("\nPOSICIONES: ");
-				int i=0;
-				while(i < list_size(pokemon->posiciones)){
-					printf("(%d,%d) ",*(uint32_t*)(list_get(pokemon->posiciones,i)),*(uint32_t*)(list_get(pokemon->posiciones,i+1)));
-					i++;
-					i++;
-				}
-				printf("\n");
+	switch(mensaje->cola)
+	{
+		case LOCALIZED:;
+			LocalizedPokemon* localized = deserializarLocalized(mensaje->contenido);
+			log_info(logConexiones,"LLEGO UN LOCALIZED(%s) con %d pares",localized->nombre, localized->cantidadDeParesDePosiciones);
+
+			if(localized->cantidadDeParesDePosiciones <= 0){
+				free(localized);
+				break;
 			}
 
-		free(pokemon);
-	}
-	if((mensaje)->cola == APPEARED){
-		AppearedPokemon* pokemon = deserializarAppeared((mensaje)->contenido);
-		log_info(logConexiones,"LLEGO UN APPEARED(%s) en (%d,%d)",pokemon->nombre,pokemon->posX,pokemon->posY);
-		free(pokemon);
+			printf("\nPOSICIONES: ");
+			int i = 0;
+
+			while(i < list_size(localized->posiciones)){
+				printf("(%d,%d) ", *(uint32_t*)list_get(localized->posiciones, i), *(uint32_t*)list_get(localized->posiciones, i+1));
+				i += 2;
+			}
+
+			printf("\n");
+
+			free(localized);
+
+			break;
+
+		case APPEARED:;
+			AppearedPokemon* appeared = deserializarAppeared(mensaje->contenido);
+			log_info(logConexiones,"LLEGO UN APPEARED(%s) en (%d,%d)", appeared->nombre, appeared->posX, appeared->posY);
+			free(appeared);
+
+			break;
+
+		case CAUGHT:;
+			CaughtPokemon* caught = deserializarCaught(mensaje->contenido);
+			free(caught);
+			break;
+
+		default:
+			log_info(logConexiones, "LA CAGUÉ");
 	}
 }
 
@@ -99,7 +118,7 @@ void conectarse_broker(Config** configTeam){ // FUNCION PARA ESCUCHAR A BROKER C
 				int recepcionExitosa = recibirMensajeSuscriber(conexionBroker, logger, (*configTeam)->ID, &mensaje, (*configTeam)->ip, (*configTeam)->puerto);
 				if(recepcionExitosa){
 					log_info(logger, "Mensaje recibido bien.");
-					//manejarNuevoMensajeSuscriptor(mensaje);
+					manejarNuevoMensajeSuscriptor(mensaje);
 				}
 			}
 
