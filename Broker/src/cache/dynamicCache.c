@@ -29,12 +29,13 @@ int calcularBestFit(int desiredSize) {
 
 int calcularFIFO(){
 	int oldestposicion = 0;
-	char* oldestDate = tablaElementos[0].fechaCreacion;
+	char* oldestDate = NULL;
 
-	for(int i = 1; i < tamanioTabla; i++){
+	for(int i = 0; i < tamanioTabla; i++){
 		ItemTablaDinamica current = tablaElementos[i];
 
-		if(!current.estaVacio && current.fechaCreacion != NULL && (oldestDate == NULL || esTiempoMasAntiguo(current.fechaCreacion, oldestDate))){
+		if(!current.estaVacio && current.fechaCreacion != NULL && (oldestDate == NULL || esTiempoMasAntiguo(current.fechaCreacion, oldestDate)))
+		{
 			oldestDate = current.fechaCreacion;
 			oldestposicion = i;
 		}
@@ -47,14 +48,13 @@ int calcularLRU(){
 	int oldestposicion = 0;
 	char* oldestDate = NULL;
 
-	if(tamanioTabla > 1){
-		for(int i = 1; i < tamanioTabla; i++){
-			ItemTablaDinamica current = tablaElementos[i];
+	for(int i = 0; i < tamanioTabla; i++){
+		ItemTablaDinamica current = tablaElementos[i];
 
-			if(current.ID != -1 && (oldestDate == NULL || (!current.estaVacio && esTiempoMasAntiguo(current.fechaUltimoUso, oldestDate)))){
-				oldestDate = current.fechaCreacion;
-				oldestposicion = i;
-			}
+		if(!current.estaVacio && current.fechaUltimoUso != NULL && (oldestDate == NULL || esTiempoMasAntiguo(current.fechaUltimoUso, oldestDate)))
+		{
+			oldestDate = current.fechaUltimoUso;
+			oldestposicion = i;
 		}
 	}
 

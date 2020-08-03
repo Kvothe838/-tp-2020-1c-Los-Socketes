@@ -133,7 +133,8 @@ void manejarPublisher(int socketCliente) {
 
 void manejarACK(Ack* contenido, Suscriptor* suscriptor) {
 	//Log obligatorio.
-	log_info(loggerObligatorio, "Recepción del mensaje con ID %ld.", contenido->IDMensaje);
+	log_info(loggerObligatorio, "Recepción del mensaje con ID %ld.",
+			contenido->IDMensaje);
 
 	agregarSuscriptorRecibido(contenido->IDMensaje, suscriptor);
 }
@@ -218,7 +219,7 @@ void manejarSuscriptorCaido(Suscriptor** suscriptor) {
 void enviarMensajesPorCola(TipoCola tipoCola) {
 	ColaConSuscriptores* cola = obtenerCola(tipoCola);
 
-	for(int i = 0; i < list_size(cola->IDMensajes); i++) {
+	for (int i = 0; i < list_size(cola->IDMensajes); i++) {
 		long* IDMensaje = list_get(cola->IDMensajes, i);
 
 		void* mensaje = obtenerItem(*IDMensaje);
@@ -226,46 +227,55 @@ void enviarMensajesPorCola(TipoCola tipoCola) {
 		long* IDCorrelativo = obtenerIDCorrelativoItem(*IDMensaje);
 
 		if (mensaje == NULL || tamanioItem == NULL || IDCorrelativo == NULL) {
-			log_info(loggerInterno, "No se obtuvieron datos para IDMensaje %ld", *IDMensaje);
+			log_info(loggerInterno, "No se obtuvieron datos para IDMensaje %ld",
+					*IDMensaje);
 			continue;
 		}
 
-		int tamanioCola = list_size(cola->suscriptores);
+		for (int j = 0; j < list_size(cola->suscriptores); j++) {
+			Suscriptor* suscriptor = (Suscriptor*) list_get(cola->suscriptores,
+					j);
 
-		if(tamanioCola > 0) {
-			cambiarLRU(*IDMensaje);
-		}
+			if (suscriptor->estaCaido)
+				continue;
 
-		for(int j = 0; j < tamanioCola; j++) {
-			Suscriptor* suscriptor = (Suscriptor*) list_get(cola->suscriptores, j);
+			t_list* suscriptoresEnviados = obtenerSuscriptoresEnviados(
+					*IDMensaje);
 
-			if(suscriptor->estaCaido) continue;
-
-			t_list* suscriptoresEnviados = obtenerSuscriptoresEnviados(*IDMensaje);
-
-			if(suscriptoresEnviados != NULL && esSuscriptorEnviado(suscriptoresEnviados, *suscriptor)) continue;
+			if (suscriptoresEnviados != NULL
+					&& esSuscriptorEnviado(suscriptoresEnviados, *suscriptor))
+				continue;
 
 			int bytes, bytesMensajeSuscriptor;
-			void* stream = serializarMensajeSuscriptor(*IDMensaje, *IDCorrelativo, mensaje, *tamanioItem, tipoCola, &bytesMensajeSuscriptor);
-			void* paqueteSerializado = armarPaqueteYSerializar(NUEVO_MENSAJE_SUSCRIBER, bytesMensajeSuscriptor, stream, &bytes);
+			void* stream = serializarMensajeSuscriptor(*IDMensaje,
+					*IDCorrelativo, mensaje, *tamanioItem, tipoCola,
+					&bytesMensajeSuscriptor);
+			void* paqueteSerializado = armarPaqueteYSerializar(
+					NUEVO_MENSAJE_SUSCRIBER, bytesMensajeSuscriptor, stream,
+					&bytes);
 			free(stream);
 
-			if ((send(suscriptor->socket, paqueteSerializado, bytes, MSG_NOSIGNAL)) <= 0) continue;
+			if ((send(suscriptor->socket, paqueteSerializado, bytes,
+					MSG_NOSIGNAL)) <= 0)
+				continue;
 
 			Ack* respuesta;
 
 			int recibidoExitoso = recibirAck(suscriptor->socket, &respuesta);
 
-			if (!recibidoExitoso || respuesta->IDMensaje != *IDMensaje)
-			{
+			if (!recibidoExitoso || respuesta->IDMensaje != *IDMensaje) {
 				manejarSuscriptorCaido(&suscriptor);
 				continue;
 			}
 
 			agregarSuscriptorEnviado(*IDMensaje, &suscriptor);
 
+			cambiarLRU(*IDMensaje);
+
 			//Log obligatorio.
-			log_info(loggerObligatorio,	"Envío de mensaje con ID %ld a suscriptor %s", *IDMensaje, tipoModuloToString(suscriptor->modulo));
+			log_info(loggerObligatorio,
+					"Envío de mensaje con ID %ld a suscriptor %s", *IDMensaje,
+					tipoModuloToString(suscriptor->modulo));
 
 			manejarACK(respuesta, suscriptor);
 			free(respuesta);
