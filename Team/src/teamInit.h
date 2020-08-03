@@ -113,10 +113,11 @@ typedef struct{
 typedef struct{
 	char* especie;
 	int cantidad;
+	int aceptarMas;
 }Objetivo;
 
 typedef Entrenador** Team;
-Team team;
+//Team team;
 Config* configTeam;
 
 // RETORNOS
@@ -127,12 +128,13 @@ int get_posicion(Entrenador* persona,int eje);
 void mostrarEntrenador(Entrenador* entrenador);
 void mostarObjetivosActualesDe(Entrenador* entrenador);
 int cant_entrenadores(char** posiciones);
-void getObjetivosGLobales(Team team);
+void getObjetivosGlobales(Team team);
 int verificar_deadlock(Entrenador* persona);
 void mostrarPertenecientesIntercambiables(Entrenador* entrenador);
 Entrenador* getEntrenador(Entrenador* entrenador);
 void mostrarColas();
 Objetivo* getObj(Objetivo* x);
+int retornarPosicion(Pokemon* p,int eje);
 
 
 // INICIALIZAR Y CONFIGURAR

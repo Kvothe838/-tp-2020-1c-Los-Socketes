@@ -861,22 +861,12 @@ Entrenador* inicializarEntrenador(int id,char* posicion, char* pokePerteneciente
 	return entrenador;
 
 }
-/*
-int loTiene(char* z){
-	int x = 0;
-	if(list_size(OBJETIVO_GLOBAL_FILTRADO) > 0){
-		for(int i=0;i < list_size(OBJETIVO_GLOBAL_FILTRADO);i++){
-			if(strcmp(z,retornarNombreFantasia(list_get(OBJETIVO_GLOBAL_FILTRADO,i)))==0){
-				x=1;
-			}
-		}
-	}
-	return x;
-}*/
+
 void crearObjetivoGlobal(char* especiePokemon){
 	Objetivo *new = malloc(sizeof(Objetivo));
     new->especie = strdup(especiePokemon);
     new->cantidad = 1;
+    new->aceptarMas = 1;
     list_add(OBJETIVO_GLOBAL,new);
 }
 
@@ -955,7 +945,7 @@ Team inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeO
 		pthread_create(&hilo[i],NULL,(void*)iniciar_entrenador,&(team[i]));
 		pthread_detach(hilo[i]);
 	}
-	getObjetivosGlobales(team);
+	//getObjetivosGlobales(team);
 	return team;
 }
 

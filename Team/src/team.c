@@ -43,11 +43,11 @@ int main(void) {
 	ipBroker = configTeam->ip;
 	puertoBroker = configTeam->puerto;
 	Team team = inicializarTeam(configTeam->posiciones,configTeam->pertenecientes,configTeam->objetivos);
-
+	log_info(logger,"YA INICIALICE A TEAM");
 	//pthread_create(&threadIniciarServidor, NULL,(void*)iniciarServidorTeam, (void*)&argumentos);
 
 	//Team team = inicializarTeam(configTeam->posiciones,configTeam->pertenecientes,configTeam->objetivos);
-	conexiones(configTeam,logger);
+	conexiones(configTeam,logger, team);
 
 	//pthread_join(threadIniciarServidor, NULL);
 

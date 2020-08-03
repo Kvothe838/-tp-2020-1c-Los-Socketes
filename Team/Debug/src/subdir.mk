@@ -4,21 +4,18 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
-../src/conexionTeam.c \
 ../src/conexionesTeam.c \
 ../src/planificacion.c \
 ../src/team.c \
 ../src/teamInit.c 
 
 OBJS += \
-./src/conexionTeam.o \
 ./src/conexionesTeam.o \
 ./src/planificacion.o \
 ./src/team.o \
 ./src/teamInit.o 
 
 C_DEPS += \
-./src/conexionTeam.d \
 ./src/conexionesTeam.d \
 ./src/planificacion.d \
 ./src/team.d \
@@ -29,7 +26,7 @@ C_DEPS += \
 src/%.o: ../src/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler'
-	gcc -I"/home/utnso/nuevoWrksp/tp-2020-1c-Los-Socketes/Shared" -O0 -g3 -Wall -c -fmessage-length=0 -pthread -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
+	gcc -I"/home/utnso/git/tp-2020-1c-Los-Socketes/Shared" -O0 -g3 -Wall -c -fmessage-length=0 -pthread -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
