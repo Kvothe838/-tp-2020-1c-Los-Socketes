@@ -71,12 +71,12 @@ void liberarInfoBloque(Bloque* bloqueActual)
 	}
 
 	if(bloqueActual->suscriptoresEnviados != NULL){
-		free(bloqueActual->suscriptoresEnviados);
+		list_destroy(bloqueActual->suscriptoresEnviados);
 		bloqueActual->suscriptoresEnviados = NULL;
 	}
 
 	if(bloqueActual->suscriptoresRecibidos != NULL){
-		free(bloqueActual->suscriptoresRecibidos);
+		list_destroy(bloqueActual->suscriptoresRecibidos);
 		bloqueActual->suscriptoresRecibidos = NULL;
 	}
 }
@@ -166,11 +166,8 @@ void consolidarBuddySystem(Bloque* bloque, int* reiniciarConsolidacion)
 	if(bloque->izq->tamanioOcupado == 0 && bloque->der->tamanioOcupado == 0)
 	{
 		bloque->estaDividido = 0;
-		bloque->posicion = bloque->izq->posicion;
-		liberarInfoBloque(bloque->izq);
 		free(bloque->izq);
 		bloque->izq = NULL;
-		liberarInfoBloque(bloque->der);
 		free(bloque->der);
 		bloque->der = NULL;
 		*reiniciarConsolidacion = 1;
@@ -181,9 +178,8 @@ void calcularFIFOLRUBuddySystem(Bloque** bloque, Bloque*** bloqueMasAntiguo)
 {
 	if((*bloque)->tamanioOcupado > 0)
 	{
-		if((esFIFO ? (*(*bloqueMasAntiguo))->fechaCreacion == NULL : (*(*bloqueMasAntiguo))->fechaUltimoUso == NULL)
-				|| esTiempoMasAntiguo(esFIFO ? (*bloque)->fechaCreacion : (*bloque)->fechaUltimoUso,
-									  esFIFO ? (*(*bloqueMasAntiguo))->fechaCreacion : (*(*bloqueMasAntiguo))->fechaUltimoUso))
+		if(esTiempoMasAntiguo(esFIFO ? (*bloque)->fechaCreacion : (*bloque)->fechaUltimoUso,
+			esFIFO ? (*(*bloqueMasAntiguo))->fechaCreacion : (*(*bloqueMasAntiguo))->fechaUltimoUso))
 		{
 			*bloqueMasAntiguo = bloque;
 		}
