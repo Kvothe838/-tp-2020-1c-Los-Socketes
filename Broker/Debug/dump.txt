@@ -1,0 +1,5 @@
+Dump: 2/8/2020 - 22:14:34:23
+Partición 1     0x0   - 0x12        	[X]	size 19   b	LRU: 22:14:23:447   	COLA: CATCH	ID: 1430174459
+Partición 2     0x13  - 0x26        	[X]	size 20   b	LRU: 22:14:23:471   	COLA: CATCH	ID: 1430305659
+Partición 3     0x27  - 0x36        	[X]	size 16   b	LRU: 22:14:23:478   	COLA: CATCH	ID: 1430371254
+Partición 4     0x37  - 0x3F        	[L]	size 9

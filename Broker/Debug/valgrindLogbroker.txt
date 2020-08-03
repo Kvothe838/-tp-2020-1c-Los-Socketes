@@ -1,0 +1,104 @@
+==17633== Memcheck, a memory error detector
+==17633== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
+==17633== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==17633== Command: ./broker
+==17633== Parent PID: 16845
+==17633== 
+==17633== Thread 4:
+==17633== Invalid write of size 4
+==17633==    at 0x4030ED2: memcpy (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==17633==    by 0x8049148: guardarValor (basicCache.c:11)
+==17633==    by 0x8049AE8: agregarElementoValido (dynamicCache.c:198)
+==17633==    by 0x8049B81: agregarItem (dynamicCache.c:222)
+==17633==    by 0x804B295: manejarPublisher (conexionBroker.c:109)
+==17633==    by 0x804B430: processRequest (conexionBroker.c:160)
+==17633==    by 0x804B50D: serveClient (conexionBroker.c:191)
+==17633==    by 0x4057294: start_thread (pthread_create.c:333)
+==17633==    by 0x415F0AD: clone (clone.S:114)
+==17633==  Address 0x42333e4 is 4 bytes before a block of size 64 alloc'd
+==17633==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==17633==    by 0x8049100: inicializarCache (basicCache.c:6)
+==17633==    by 0x8049959: inicializarDataBasica (dynamicCache.c:181)
+==17633==    by 0x804AAF0: main (broker.c:26)
+==17633== 
+==17633== Thread 3:
+==17633== Invalid read of size 4
+==17633==    at 0x4030ED0: memcpy (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==17633==    by 0x8049184: obtenerValor (basicCache.c:16)
+==17633==    by 0x8049C7D: obtenerItem (dynamicCache.c:274)
+==17633==    by 0x804B61B: enviarMensajesPorCola (conexionBroker.c:225)
+==17633==    by 0x804B8CE: enviarMensajesSuscriptores (conexionBroker.c:298)
+==17633==    by 0x4057294: start_thread (pthread_create.c:333)
+==17633==    by 0x415F0AD: clone (clone.S:114)
+==17633==  Address 0x42333e4 is 4 bytes before a block of size 64 alloc'd
+==17633==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==17633==    by 0x8049100: inicializarCache (basicCache.c:6)
+==17633==    by 0x8049959: inicializarDataBasica (dynamicCache.c:181)
+==17633==    by 0x804AAF0: main (broker.c:26)
+==17633== 
+
+valgrind: m_mallocfree.c:303 (get_bszB_as_is): Assertion 'bszB_lo == bszB_hi' failed.
+valgrind: Heap block lo/hi size mismatch: lo = 112, hi = 4.
+This is probably caused by your program erroneously writing past the
+end of a heap block and corrupting heap metadata.  If you fix any
+invalid writes reported by Memcheck, this assertion failure will
+probably go away.  Please try that before reporting this as a bug.
+
+
+host stacktrace:
+==17633==    at 0x38031375: ??? (in /usr/lib/valgrind/memcheck-x86-linux)
+==17633==    by 0x38031481: ??? (in /usr/lib/valgrind/memcheck-x86-linux)
+==17633==    by 0x38031563: ??? (in /usr/lib/valgrind/memcheck-x86-linux)
+==17633==    by 0x3803DB82: ??? (in /usr/lib/valgrind/memcheck-x86-linux)
+==17633==    by 0x3802B058: ??? (in /usr/lib/valgrind/memcheck-x86-linux)
+==17633==    by 0x380285D2: ??? (in /usr/lib/valgrind/memcheck-x86-linux)
+==17633==    by 0x38029A35: ??? (in /usr/lib/valgrind/memcheck-x86-linux)
+==17633==    by 0x3802D691: ??? (in /usr/lib/valgrind/memcheck-x86-linux)
+==17633==    by 0x380290B1: ??? (in /usr/lib/valgrind/memcheck-x86-linux)
+==17633==    by 0x3800DBF2: ??? (in /usr/lib/valgrind/memcheck-x86-linux)
+==17633==    by 0x62B3FF5A: ???
+
+sched status:
+  running_tid=3
+
+Thread 1: status = VgTs_WaitSys (lwpid 17633)
+==17633==    at 0x40583FB: pthread_join (pthread_join.c:90)
+==17633==    by 0x804AB9E: main (broker.c:53)
+
+Thread 2: status = VgTs_WaitSys (lwpid 17634)
+==17633==    at 0x40583FB: pthread_join (pthread_join.c:90)
+==17633==    by 0x804B59B: esperarCliente (conexionBroker.c:211)
+==17633==    by 0x804BA1E: iniciarServidor (conexionBroker.c:338)
+==17633==    by 0x4057294: start_thread (pthread_create.c:333)
+==17633==    by 0x415F0AD: clone (clone.S:114)
+
+Thread 3: status = VgTs_Runnable (lwpid 17635)
+==17633==    at 0x4030EDA: memcpy (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==17633==    by 0x8049184: obtenerValor (basicCache.c:16)
+==17633==    by 0x8049C7D: obtenerItem (dynamicCache.c:274)
+==17633==    by 0x804B61B: enviarMensajesPorCola (conexionBroker.c:225)
+==17633==    by 0x804B8CE: enviarMensajesSuscriptores (conexionBroker.c:298)
+==17633==    by 0x4057294: start_thread (pthread_create.c:333)
+==17633==    by 0x415F0AD: clone (clone.S:114)
+
+Thread 4: status = VgTs_WaitSys (lwpid 17650)
+==17633==    at 0x4060549: send (send.c:35)
+==17633==    by 0x804B30F: manejarPublisher (conexionBroker.c:123)
+==17633==    by 0x804B430: processRequest (conexionBroker.c:160)
+==17633==    by 0x804B50D: serveClient (conexionBroker.c:191)
+==17633==    by 0x4057294: start_thread (pthread_create.c:333)
+==17633==    by 0x415F0AD: clone (clone.S:114)
+
+
+Note: see also the FAQ in the source distribution.
+It contains workarounds to several common problems.
+In particular, if Valgrind aborted or crashed after
+identifying problems in your program, there's a good chance
+that fixing those problems will prevent Valgrind aborting or
+crashing, especially if it happened in m_mallocfree.c.
+
+If that doesn't help, please report this bug to: www.valgrind.org
+
+In the bug report, send all the above text, the valgrind
+version, and what OS and version you are using.  Thanks.
+

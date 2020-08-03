@@ -64,6 +64,8 @@ int calcularLRU(){
 int eliminarVictima(TipoCola cola){
 	long itemAEliminar;
 
+	log_info(loggerObligatorio, "Antes de calcular FIFO");
+
 	if(strcmp(algoritmoEleccionDeVictima, "FIFO") == 0){
 		itemAEliminar = calcularFIFO();
 	} else{
@@ -72,12 +74,18 @@ int eliminarVictima(TipoCola cola){
 
 	if(itemAEliminar == -1) return 0;
 
+	log_info(loggerObligatorio, "Calculado: %ld", itemAEliminar);
+
 	eliminarItem(itemAEliminar);
+
+	log_info(loggerObligatorio, "Item eliminado.");
 	//log_info(loggerObligatorio, "Me FUI DE ELIMINARITEM");
 	//eliminarMensajeDeLista(itemAEliminar, cola);
 	//log_info(loggerObligatorio, "Me FUI DE ELIMINARMENSAJEDELISTA");
 
+	log_info(loggerObligatorio, "Antes de dump");
 	obtenerDump();
+	log_info(loggerObligatorio, "Después de dump");
 
 	return 1;
 }
@@ -209,11 +217,14 @@ void agregarItem(void* item, int tamanioItem, long ID, long IDCorrelativo, TipoC
 	int logrado = 1;
 
 	while(!hayEspacioParaItem){
+		log_info(loggerObligatorio, "Entro a eliminar víctima");
 		logrado = eliminarVictima(cola);
+		log_info(loggerObligatorio, "Elimino víctima");
 
 		if(!logrado) break;
 
 		hayEspacioParaItem = hayEspacio(tamanioItem, &posicionVacioAModificar);
+		log_info(loggerObligatorio, "¿Hay espacio? %d", hayEspacioParaItem);
 	}
 
 	if(logrado)
