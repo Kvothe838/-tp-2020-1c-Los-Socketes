@@ -222,24 +222,13 @@ long* obtenerIDCorrelativoItem(long ID)
 
 void* obtenerItem(long ID)
 {
-	//log_info(loggerObligatorio, "obtenerItem: antes wait");
-	//sem_wait(semCacheTabla);
-	//log_info(loggerObligatorio, "obtenerItem: después wait");
-
 	ItemTablaDinamica* item = obtenerItemTablaDinamica(ID);
 
-	if(item == NULL) {
-		//sem_post(semCacheTabla);
-		return NULL;
-	}
+	if(item == NULL) return NULL;
 
-	void* valorDeMierda = obtenerValor(item->tamanio, item->posicion);
+	void* valor = obtenerValor(item->tamanio, item->posicion);
 
-	//log_info(loggerObligatorio, "obtenerItem: antes post");
-	//sem_post(semCacheTabla);
-	//log_info(loggerObligatorio, "obtenerItem: después post");
-
-	return valorDeMierda;
+	return valor;
 }
 
 void cambiarLRU(long ID)
@@ -250,6 +239,8 @@ void cambiarLRU(long ID)
 		free(item->fechaUltimoUso);
 		item->fechaUltimoUso = temporal_get_string_time();
 	}
+
+	log_info(loggerObligatorio, "Fecha: %s para ID: %ld", item->fechaUltimoUso, item->ID);
 }
 
 void consolidarCache(int posicionElementoVacio, int posicionElemento){

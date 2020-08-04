@@ -14,7 +14,7 @@ typedef struct {
 	t_list* IDMensajes;
 } ColaConSuscriptores;
 
-//sem_t* semColaMensajes;
+pthread_mutex_t mutexSemaforo;
 
 void crearDiccionario();
 void liberarDiccionario();

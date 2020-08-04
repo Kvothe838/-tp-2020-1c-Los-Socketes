@@ -7,7 +7,6 @@
 
 char *algoritmoEleccionDeParticionLibre, *algoritmoEleccionDeVictima, *algoritmoMemoria;
 int frecuenciaCompactacion, tamanioCache, tamanioParticionMinima, esParticiones, esBS, esFF, esBF, esFIFO, esLRU;
-sem_t mutexCache;
 t_log* loggerObligatorio;
 t_log* loggerInterno;
 

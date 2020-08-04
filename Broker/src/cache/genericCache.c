@@ -1,8 +1,6 @@
 #include "genericCache.h"
 
 void inicializarDataBasica(t_config* config){
-	sem_init(&mutexCache, 0, 1);
-
 	tamanioCache = (int)config_get_int_value(config, "TAMANO_MEMORIA");
 	tamanioParticionMinima = (int)config_get_int_value(config, "TAMANO_MINIMO_PARTICION");
 	algoritmoMemoria = config_get_string_value(config, "ALGORITMO_MEMORIA");

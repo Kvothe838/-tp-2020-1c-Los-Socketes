@@ -213,6 +213,9 @@ void eliminarVictimaBuddySystem(){
 	log_info(loggerAriel, "Nodo elegido: %s", item->fechaCreacion);
 	eliminarItemBuddySystem(item);
 
+	//Log obligatorio.
+	log_info(loggerObligatorio, "Eliminada partición con posición de inicio %d.", item->posicion);
+
 	imprimirCache();
 
 	int reiniciarConsolidacion;
@@ -242,8 +245,6 @@ void agregarElementoValidoBuddySystem(Bloque** bloqueAModificar, void* item, int
 
 void agregarItemBuddySystem(void* item, int tamanioItem, long ID, long IDCorrelativo, TipoCola cola)
 {
-	sem_wait(&mutexCache);
-
 	Bloque* bloqueAModificar;
 
 	int hayEspacioParaItem = hayEspacioBuddySystem(tamanioItem, &bloqueAModificar);
@@ -255,7 +256,5 @@ void agregarItemBuddySystem(void* item, int tamanioItem, long ID, long IDCorrela
 	}
 
 	agregarElementoValidoBuddySystem(&bloqueAModificar, item, tamanioItem, ID, IDCorrelativo, cola);
-
-	sem_post(&mutexCache);
 }
 

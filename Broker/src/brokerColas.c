@@ -3,6 +3,8 @@
 t_dictionary* diccionario;
 
 void crearDiccionario(){
+	pthread_mutex_init(&mutexSemaforo, NULL);
+
 	diccionario = dictionary_create();
 	dictionary_put(diccionario, tipoColaToString(NEW), crearColaConSuscriptores());
 	dictionary_put(diccionario, tipoColaToString(GET), crearColaConSuscriptores());
@@ -27,9 +29,13 @@ void liberarDiccionario(){
 }
 
 ColaConSuscriptores* crearColaConSuscriptores(){
+	pthread_mutex_lock(&mutexSemaforo);
+
 	ColaConSuscriptores* cola = (ColaConSuscriptores*)malloc(sizeof(ColaConSuscriptores));
 	cola->suscriptores = list_create();
 	cola->IDMensajes = list_create();
+
+	pthread_mutex_unlock(&mutexSemaforo);
 	return cola;
 }
 
@@ -38,6 +44,8 @@ ColaConSuscriptores* obtenerCola(TipoCola colaClave){
 }
 
 int agregarSuscriptor(TipoCola colaClave, Suscriptor* nuevoSuscriptor){
+	pthread_mutex_lock(&mutexSemaforo);
+
 	ColaConSuscriptores* colaEspecifica = obtenerCola(colaClave);
 
 	_Bool buscarSuscriptor(void* suscriptorGeneric){
@@ -60,11 +68,17 @@ int agregarSuscriptor(TipoCola colaClave, Suscriptor* nuevoSuscriptor){
 
 		return 0;
 	}
+
+	pthread_mutex_unlock(&mutexSemaforo);
 }
 
 void agregarMensaje(TipoCola colaClave, long* IDMensaje){
+	pthread_mutex_lock(&mutexSemaforo);
+
 	ColaConSuscriptores* colaEspecifica = obtenerCola(colaClave);
 	list_add(colaEspecifica->IDMensajes, IDMensaje);
+
+	pthread_mutex_unlock(&mutexSemaforo);
 }
 
 void imprimir(int a){
@@ -72,7 +86,12 @@ void imprimir(int a){
 }
 
 t_list* obtenerSuscriptoresPorCola(TipoCola colaClave){
+	pthread_mutex_lock(&mutexSemaforo);
+
 	ColaConSuscriptores* colaEspecifica = obtenerCola(colaClave);
+
+	pthread_mutex_unlock(&mutexSemaforo);
+
 	return colaEspecifica->suscriptores;
 }
 /*
