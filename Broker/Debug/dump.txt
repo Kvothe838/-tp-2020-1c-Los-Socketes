@@ -1,8 +1,5 @@
-Dump: 3/8/2020 - 23:37:12:6
-Partición 1     0x0   - 0x3         	[X]	size 4    b	LRU: 23:37:01:608   	COLA: CAUGHT	ID: -1744390335
-Partición 2     0x20  - 0x23        	[X]	size 4    b	LRU: 23:37:01:617   	COLA: CAUGHT	ID: -1744324737
-Partición 3     0x40  - 0x52        	[X]	size 19   b	LRU: 23:37:01:625   	COLA: CATCH	ID: -1744259140
-Partición 4     0x60  - 0x73        	[X]	size 20   b	LRU: 23:37:01:637   	COLA: CATCH	ID: -1744193539
-Partición 5     0x80  - 0x8F        	[X]	size 16   b	LRU: 23:37:01:640   	COLA: CATCH	ID: -1744193536
-Partición 6     0xA0  - 0xB5        	[X]	size 22   b	LRU: 23:37:12:6     	COLA: CATCH	ID: 1969227898
-Partición 7     0xC0  - 0x7FF       	[L]	size 1856
+Dump: 4/8/2020 - 00:25:01:24
+Partición 1     0x0   - 0x13        	[X]	size 20   b	LRU: 00:24:50:202   	COLA: CATCH	ID: -1230004429
+Partición 2     0x14  - 0x23        	[X]	size 16   b	LRU: 00:24:50:204   	COLA: CATCH	ID: -1230004427
+Partición 3     0x24  - 0x37        	[X]	size 20   b	LRU: 00:25:01:23    	COLA: CATCH	ID: 1208382659
+Partición 4     0x38  - 0x3F        	[L]	size 8

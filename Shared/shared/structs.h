@@ -159,6 +159,6 @@ typedef struct {
 	char* puerto;
 } IniciarServidorArgs;
 
-
+void* funcionVacia();
 
 #endif

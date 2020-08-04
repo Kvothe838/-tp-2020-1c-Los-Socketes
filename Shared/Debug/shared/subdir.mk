@@ -8,6 +8,7 @@ C_SRCS += \
 ../shared/connection.c \
 ../shared/messages.c \
 ../shared/serialize.c \
+../shared/structs.c \
 ../shared/utils.c 
 
 OBJS += \
@@ -15,6 +16,7 @@ OBJS += \
 ./shared/connection.o \
 ./shared/messages.o \
 ./shared/serialize.o \
+./shared/structs.o \
 ./shared/utils.o 
 
 C_DEPS += \
@@ -22,6 +24,7 @@ C_DEPS += \
 ./shared/connection.d \
 ./shared/messages.d \
 ./shared/serialize.d \
+./shared/structs.d \
 ./shared/utils.d 
 
 

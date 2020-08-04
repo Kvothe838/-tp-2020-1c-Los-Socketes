@@ -8,7 +8,7 @@ void inicializarDataBasica(t_config* config){
 	algoritmoMemoria = config_get_string_value(config, "ALGORITMO_MEMORIA");
 	algoritmoEleccionDeParticionLibre = config_get_string_value(config,"ALGORITMO_PARTICION_LIBRE");
 	algoritmoEleccionDeVictima = config_get_string_value(config,"ALGORITMO_REEMPLAZO");
-	frecuenciaCompactacion = (int)config_get_string_value(config, "FRECUENCIA_COMPACTACION");
+	frecuenciaCompactacion = config_get_int_value(config, "FRECUENCIA_COMPACTACION");
 	tamanioTabla = tamanioCache / tamanioParticionMinima;
 
 	esParticiones = !strcmp(algoritmoMemoria, "PARTICIONES");

@@ -68,18 +68,11 @@ int eliminarVictima(TipoCola cola){
 
 	if(itemAEliminar == -1) return 0;
 
-	log_info(loggerObligatorio, "Calculado: %ld", itemAEliminar);
-
 	eliminarItem(itemAEliminar);
 
-	log_info(loggerObligatorio, "Item eliminado.");
-	//log_info(loggerObligatorio, "Me FUI DE ELIMINARITEM");
 	//eliminarMensajeDeLista(itemAEliminar, cola);
-	//log_info(loggerObligatorio, "Me FUI DE ELIMINARMENSAJEDELISTA");
 
-	log_info(loggerObligatorio, "Antes de dump");
 	obtenerDump();
-	log_info(loggerObligatorio, "Después de dump");
 
 	return 1;
 }
@@ -181,39 +174,23 @@ void agregarElementoValido(int posicionVacioAModificar, int tamanioItem, void* i
 }
 
 void agregarItem(void* item, int tamanioItem, long ID, long IDCorrelativo, TipoCola cola){
-	obtenerDump();
-	//log_info(loggerObligatorio, "agregarItem: antes wait");
-	//sem_wait(semCacheTabla);
-	//log_info(loggerObligatorio, "agregarItem: después wait");
-
 	int posicionVacioAModificar;
 	int hayEspacioParaItem = hayEspacio(tamanioItem, &posicionVacioAModificar);
 	int logrado = 1;
 
 	while(!hayEspacioParaItem){
-		log_info(loggerObligatorio, "Entro a eliminar víctima");
 		logrado = eliminarVictima(cola);
-		log_info(loggerObligatorio, "Elimino víctima");
 
 		if(!logrado) break;
 
 		hayEspacioParaItem = hayEspacio(tamanioItem, &posicionVacioAModificar);
-		log_info(loggerObligatorio, "¿Hay espacio? %d", hayEspacioParaItem);
 	}
 
 	if(logrado)
 	{
-		//log_info(loggerObligatorio, "ANTES AGREGARELEMENTOVALIDO");
 		agregarElementoValido(posicionVacioAModificar, tamanioItem, item, ID, IDCorrelativo, cola);
-		//log_info(loggerObligatorio, "DESPUÉS AGREGARELEMENTOVALIDO");
 		obtenerDump();
-	} else {
-		//log_info(loggerInterno, "No se encontró víctima");
 	}
-
-	//log_info(loggerObligatorio, "agregarItem: antes post");
-	//sem_post(semCacheTabla);
-	//log_info(loggerObligatorio, "agregarItem: después post");
 }
 
 ItemTablaDinamica* obtenerItemTablaDinamica(long ID){
@@ -318,7 +295,6 @@ void consolidarCache(int posicionElementoVacio, int posicionElemento){
 }
 
 void compactarCache(){
-	obtenerDump();
 	ItemTablaDinamica *tablaCompactada = NULL;
 	int posicionNueva = 0, posicionVieja, posicionTablaNueva = 0;
 
@@ -388,16 +364,14 @@ void eliminarItem(long ID){
 	//Log obligatorio.
 	log_info(loggerObligatorio, "Eliminada partición con posición de inicio %d.", posDatoAEliminar);
 
-	consolidarCache(posNuevoVacio, posDatoAEliminar);
-
 	//log_info(loggerObligatorio, "UNO");
 
 	obtenerDump();
 
+	consolidarCache(posNuevoVacio, posDatoAEliminar);
+
 	if(frecuenciaCompactacion <= 1 || particionesLiberadas == frecuenciaCompactacion){
-		//log_info(loggerObligatorio, "DOS");
 		compactarCache();
-		//log_info(loggerObligatorio, "TRES");
 		obtenerDump();
 	}
 }
