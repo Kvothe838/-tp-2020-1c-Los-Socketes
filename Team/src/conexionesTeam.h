@@ -9,7 +9,7 @@
 pthread_t threadMensajeGameBoy;
 char* ipBroker, *puertoBroker;
 
-void conexiones(Config* configTeam, t_log* logger, Entrenador** team);
+void conexiones(Config* configTeam, t_log* logger, Entrenador** team, IniciarServidorArgs argumentos);
 void iniciarServidorTeam(IniciarServidorArgs* argumentos);
 
 #endif /* CONEXIONESTEAM_H_ */

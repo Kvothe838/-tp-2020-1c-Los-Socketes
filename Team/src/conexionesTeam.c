@@ -1,6 +1,5 @@
 #include "conexionesTeam.h"
 
-t_list* posiciones;
 t_log* logConexiones;
 
 int enviarGet(char* nombre, Config* configTeam){
@@ -41,23 +40,9 @@ void planificarPokemonsLocalized(t_list* pokemonesAAgregar){
 			retornarNombrePosta(list_get(pokemonesAAgregar,i)),
 			retornarPosicion(list_get(pokemonesAAgregar,i),0),
 			retornarPosicion(list_get(pokemonesAAgregar,i),1));
-	}
-}
 
-float distancia(int e_x,int e_y,int p_x,int p_y){ // se calcula la distancia entre el pokemon recien aparecido y el entrenador en su posicion actual
-	int distx= p_x - e_x;
-	int disty= p_y - e_y;
-	if(distx <0){distx = distx * (-1);}
-	if(disty <0){disty = disty * (-1);}
-	if(disty==0){return ((float)distx);}
-	if(distx==0){return ((float)disty);}
-	else{
-		float distancia=0.0;
-		float suma = (float) ((distx*distx) + (disty*disty));
-		while((distancia*distancia)<suma){
-			distancia += 0.01;
-		}
-		return distancia;
+		agregar_pokemon_cola(list_get(pokemonesAAgregar,i));
+		entrenador_mas_cercano(queue_peek(POKEMONS));
 	}
 }
 
@@ -198,7 +183,7 @@ void escucharABroker(Config* configTeam){
 	suscripcionEnviada = enviarSuscripcion(conexionBroker, (configTeam)->ID, 3, APPEARED, LOCALIZED, CAUGHT);
 	int resultado;
 	while(1){
-		log_info(logConexiones,"VOY A ESCUCHAR AL BROKER");
+		log_info(logConexiones,"===== VOY A ESCUCHAR AL BROKER =====");
 		OpCode codigo;
 		resultado = recv(conexionBroker, &codigo, sizeof(OpCode), MSG_WAITALL);
 		if(resultado != 0 && resultado != -1 && conexionBroker != 0){
@@ -216,14 +201,12 @@ void escucharABroker(Config* configTeam){
 			}
 		}else{
 			log_info(logConexiones, "RESULTADO %d, NO HAY CONEXION CON BROKER", resultado);
-
 			liberar_conexion_cliente(conexionBroker);
 			log_info(logConexiones,"VOY A ESPERAR UNOS SEGUNDOS PARA VOLVER A RECONECTARME");
 			sleep(2);
 			conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
 			suscripcionEnviada = enviarSuscripcion(conexionBroker, (configTeam)->ID, 3, APPEARED, LOCALIZED, CAUGHT);
 		}
-
 	}
 }
 
@@ -232,7 +215,7 @@ void conectarse_broker(Config** configTeam){// FUNCION PARA ESCUCHAR A BROKER CO
 	escucharABroker((*configTeam));
 }
 
-void conexiones(Config* configTeam, t_log* logger, Entrenador** team){
+void conexiones(Config* configTeam, t_log* logger, Entrenador** team, IniciarServidorArgs argumentos){
 	getObjetivosGlobales(team);
 	printf("\n-----------------------------");
 	for(int i=0;i<list_size(OBJETIVO_GLOBAL);i++){
@@ -240,14 +223,16 @@ void conexiones(Config* configTeam, t_log* logger, Entrenador** team){
 	}
 	printf("\n-----------------------------\n\n\n");
 
-	logConexiones = iniciar_logger("pruebasConexiones.log", "Team");
+	logConexiones = iniciar_logger("pruebasConexiones.log", "Conexion");
 	pthread_t c_broker;
 	//pthread_t c_gameboy;
+
 	pthread_create(&c_broker,NULL,(void*)conectarse_broker,&configTeam);
+	//pthread_create(&c_gameboy, NULL,(void*)iniciarServidorTeam, (void*)&argumentos);
 
 	//pthread_create(&c_gameboy,NULL,(void*)conectarse_broker,NULL);
 	pthread_join(c_broker,NULL);
-
+	//pthread_detach(c_gameboy);
 	//pthread_detach(c_gameboy);
 }
 

@@ -104,6 +104,7 @@ typedef struct{
 	char* path;
 	int ID;
 }Config;
+Config* configTeam;
 
 typedef struct{
 	int idEntrenador;
@@ -118,7 +119,12 @@ typedef struct{
 
 typedef Entrenador** Team;
 //Team team;
-Config* configTeam;
+
+//POKEMONS
+void entrenador_mas_cercano(Pokemon* pokemon);
+float distancia(int e_x,int e_y,int p_x,int p_y);
+void asignar_movimiento(Entrenador* entrenador,int mov_x,int mov_y,Pokemon* pokemon);
+void agregar_pokemon_cola(Pokemon* nuevo);
 
 // RETORNOS
 char* retornarNombrePosta(Pokemon* p);

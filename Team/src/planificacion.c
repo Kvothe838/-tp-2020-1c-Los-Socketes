@@ -1,5 +1,5 @@
 #include "planificacion.h"
-
+t_log* logPlanificacion;
 void activar_entrenador(Entrenador* persona){
 	CAMBIOS_CONTEXTO += 1;
 	persona->estado = EJECUTANDO;
@@ -12,6 +12,7 @@ void activar_entrenador(Entrenador* persona){
 void ejecucion_entrenadores(){
 	while((queue_size(DISPONIBLES) > 0)||(queue_size(EJECUTADOS) > 0)||(queue_size(PREPARADOS) > 0)||(queue_size(DEADLOCKS) > 0)||(queue_size(ESPERANDO)>0)){
 	//while(1){
+		log_info(logPlanificacion,"====== sem_wait(&s_ejecucion) ======");
 		sem_wait(&s_ejecucion);
 		activar_entrenador(queue_peek(PREPARADOS));
 		sem_wait(&siguiente);
@@ -24,15 +25,17 @@ void ejecucion_entrenadores(){
 			printf("\nejecucion_entrenadores() FINALIZADO\n");
 		}*/
 	}
-	printf("\nCHAU EJECUCION\n");
+	log_info(logPlanificacion,"pthread_exit(EJECUCION)");
 	pthread_exit(NULL);
 }
 
 void match_atrapar(){
-	mostrarColas();
+	//mostrarColas();
 	//intercambios();
 	while((queue_size(DISPONIBLES) > 0)||(queue_size(EJECUTADOS) > 0)||(queue_size(PREPARADOS) > 0)||(queue_size(DEADLOCKS) > 0)||(queue_size(ESPERANDO)>0)){
 	//while(1){
+		//mostrarColas();
+		log_info(logPlanificacion,"====== sem_wait(&hayPreparados) ======");
 		sem_wait(&hayPreparados);
 		sem_post(&s_ejecucion);
 		sem_wait(&esperar_finalizacion);
@@ -41,9 +44,9 @@ void match_atrapar(){
 		if(queue_size(DISPONIBLES)==0 && queue_size(EJECUTADOS)>0){ // EJECUTADOS --> DISPONIBLES // TERMINAN
 			while(queue_size(EJECUTADOS)>0){
 				ingreso_a_colas_entrenador(queue_peek(EJECUTADOS));
-				pthread_mutex_lock(&modificar_cola_ejecutados);
+				pthread_mutex_lock(&modificar_cola_ejecutados); // SACAR
 				queue_pop(EJECUTADOS);
-				pthread_mutex_unlock(&modificar_cola_ejecutados);
+				pthread_mutex_unlock(&modificar_cola_ejecutados); // SACAR
 			}
 			//printf("\nSE ACTUALIZARON LAS LISTAS\n");
 			//mostrarColas();
@@ -54,7 +57,7 @@ void match_atrapar(){
 		//mostrarColas();
 		sem_post(&finalizar_ejecucion);
 	}
-	printf("\nCHAU MATCHEO\n");
+	log_info(logPlanificacion,"pthread_exit(MATCHEAR)");
 	pthread_exit(NULL);
 }
 /*
@@ -65,24 +68,26 @@ void match_atrapar(){
  * ------------------------------------------------------------------------------------------
  */
 
-void planificacion_fifo(t_log* logger,Config* configTeam){
-	printf("\n---------------------------------------------------------------\n");
-	
+void planificacion_fifo(){
+	//printf("\n---------------------------------------------------------------\n");
+	logPlanificacion = iniciar_logger("logPlanificacion.log","Planificacion");
+	log_info(logPlanificacion,"INICIA LA PLANIFICACION");
 	pthread_t atrapar;
 	pthread_t ejecucion;
 	//pthread_t conexiones;
-
-	log_info(logger, "IP %s y PUERTO %s", configTeam->ip, configTeam->puerto);
+	//log_info(logger, "IP %s y PUERTO %s", configTeam->ip, configTeam->puerto);
 	//pthread_create(&conexiones,NULL,(void*)iniciar_servidor,&configTeam);
-	
 	pthread_create(&atrapar,NULL,(void*)match_atrapar,NULL);
+	pthread_detach(atrapar);
+	log_info(logPlanificacion,"ENTRO A match_atrapar");
 	pthread_create(&ejecucion,NULL,(void*)ejecucion_entrenadores,NULL);
+	pthread_detach(ejecucion);
+	log_info(logPlanificacion,"ENTRO A ejecucion_entrenadores");
 
-	pthread_join(atrapar,NULL);
-	pthread_join(ejecucion,NULL);
-	printf("\nSOLO FALTAN CONEXIONES\n");
-	fclose(logTP);
+
+	//pthread_join(ejecucion,NULL);
+	//printf("\nSOLO FALTAN CONEXIONES\n");
+
 	//pthread_detach(conexiones);
 	//pthread_join(conexiones,NULL);
-	printf("\nFINALIZA LA PLANIFICACION");
 }
