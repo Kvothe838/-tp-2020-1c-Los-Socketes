@@ -8,7 +8,7 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include src/subdir.mk
+-include shared/subdir.mk
 -include subdir.mk
 -include objects.mk
 
@@ -23,25 +23,21 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: gameboy
-
-dependents:
-	-cd /home/utnso/wrksp/tp-2020-1c-Los-Socketes/Shared/Debug && $(MAKE) clean all
+all: libShared.so
 
 # Tool invocations
-gameboy: $(OBJS) $(USER_OBJS) /home/utnso/wrksp/tp-2020-1c-Los-Socketes/Shared/Debug/libShared.a
+libShared.so: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc -L"/home/utnso/wrksp/tp-2020-1c-Los-Socketes/Shared/Debug" -o "gameboy" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -shared -o "libShared.so" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(EXECUTABLES)$(OBJS)$(C_DEPS) gameboy
+	-$(RM) $(LIBRARIES)$(OBJS)$(C_DEPS) libShared.so
 	-@echo ' '
 
 .PHONY: all clean dependents
-/home/utnso/wrksp/tp-2020-1c-Los-Socketes/Shared/Debug/libShared.a:
 
 -include ../makefile.targets

@@ -1,6 +1,7 @@
 #include <shared/utils.h>
 #include "brokerColas.h"
 #include "conexionBroker.h"
+#include "cache/genericCache.h"
 #include <commons/process.h>
 
 static void	sig_usr(int);
@@ -24,7 +25,7 @@ int main(void) {
 	argumentos.ip = config_get_string_value(config, "IP_BROKER");
 	argumentos.puerto = config_get_string_value(config, "PUERTO_BROKER");
 
-	inicializarDataBasica(config, loggerObligatorio, loggerInterno);
+	inicializarDataBasica(config);
 	crearDiccionario();
 
 	log_info(loggerObligatorio, "ID del proceso Broker: %d", process_getpid());

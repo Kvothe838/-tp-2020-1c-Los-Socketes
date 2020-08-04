@@ -1,5 +1,36 @@
-Dump: 3/8/2020 - 23:07:51:50
-Partición 1     0x0   - 0x16        	[X]	size 23   b	LRU: 23:07:48:5     	COLA: NEW  	ID: 1415826360
-Partición 2     0x20  - 0x2A        	[X]	size 11   b	LRU: 23:07:50:305   	COLA: GET  	ID: 1203423338
-Partición 3     0x40  - 0x56        	[X]	size 23   b	LRU: 23:07:51:49    	COLA: NEW  	ID: -485512248
-Partición 4     0x60  - 0x7FF       	[L]	size 1952
+Dump: 3/8/2020 - 23:28:03:910
+Partición 1     0x0   - 0x16        	[X]	size 23   b	LRU: 23:27:44:754   	COLA: NEW  	ID: -370824262
+Partición 2     0x20  - 0x36        	[X]	size 23   b	LRU: 23:27:47:827   	COLA: NEW  	ID: -1239099581
+Partición 3     0x40  - 0x56        	[X]	size 23   b	LRU: 23:27:48:847   	COLA: NEW  	ID: -99404096
+Partición 4     0x60  - 0x76        	[X]	size 23   b	LRU: 23:27:49:234   	COLA: NEW  	ID: 990591165
+Partición 5     0x80  - 0x96        	[X]	size 23   b	LRU: 23:27:49:450   	COLA: NEW  	ID: 1007179774
+Partición 6     0xA0  - 0xB6        	[X]	size 23   b	LRU: 23:27:49:614   	COLA: NEW  	ID: 1015834870
+Partición 7     0xC0  - 0xD6        	[X]	size 23   b	LRU: 23:27:49:808   	COLA: NEW  	ID: 1032292283
+Partición 8     0xE0  - 0xF6        	[X]	size 23   b	LRU: 23:27:49:986   	COLA: NEW  	ID: 1048684094
+Partición 9     0x100 - 0x116       	[X]	size 23   b	LRU: 23:27:50:165   	COLA: NEW  	ID: -311610325
+Partición 10    0x120 - 0x136       	[X]	size 23   b	LRU: 23:27:50:358   	COLA: NEW  	ID: -295152910
+Partición 11    0x140 - 0x156       	[X]	size 23   b	LRU: 23:27:50:584   	COLA: NEW  	ID: -278498707
+Partición 12    0x160 - 0x176       	[X]	size 23   b	LRU: 23:27:50:775   	COLA: NEW  	ID: -262041293
+Partición 13    0x180 - 0x196       	[X]	size 23   b	LRU: 23:27:50:970   	COLA: NEW  	ID: -245518280
+Partición 14    0x1A0 - 0x1B6       	[X]	size 23   b	LRU: 23:27:51:164   	COLA: NEW  	ID: 827953970
+Partición 15    0x1C0 - 0x1D6       	[X]	size 23   b	LRU: 23:27:51:370   	COLA: NEW  	ID: 844411381
+Partición 16    0x1E0 - 0x1F6       	[X]	size 23   b	LRU: 23:27:51:584   	COLA: NEW  	ID: 861065585
+Partición 17    0x200 - 0x216       	[X]	size 23   b	LRU: 23:27:51:782   	COLA: NEW  	ID: 877588600
+Partición 18    0x220 - 0x236       	[X]	size 23   b	LRU: 23:27:51:975   	COLA: NEW  	ID: 894111604
+Partición 19    0x240 - 0x256       	[X]	size 23   b	LRU: 23:27:52:173   	COLA: NEW  	ID: 1967518251
+Partición 20    0x260 - 0x276       	[X]	size 23   b	LRU: 23:27:52:346   	COLA: NEW  	ID: 1983910072
+Partición 21    0x280 - 0x296       	[X]	size 23   b	LRU: 23:27:52:539   	COLA: NEW  	ID: 2000301879
+Partición 22    0x2A0 - 0x2B6       	[X]	size 23   b	LRU: 23:27:52:722   	COLA: NEW  	ID: 2016759290
+Partición 23    0x2C0 - 0x2D6       	[X]	size 23   b	LRU: 23:27:53:189   	COLA: NEW  	ID: 2025611189
+Partición 24    0x2E0 - 0x2F6       	[X]	size 23   b	LRU: 23:27:53:223   	COLA: NEW  	ID: -1179951241
+Partición 25    0x300 - 0x316       	[X]	size 23   b	LRU: 23:27:53:269   	COLA: NEW  	ID: -1179557648
+Partición 26    0x320 - 0x336       	[X]	size 23   b	LRU: 23:27:53:488   	COLA: NEW  	ID: -1162969037
+Partición 27    0x340 - 0x356       	[X]	size 23   b	LRU: 23:27:53:705   	COLA: NEW  	ID: -1146314830
+Partición 28    0x360 - 0x376       	[X]	size 23   b	LRU: 23:27:53:925   	COLA: NEW  	ID: -1129791816
+Partición 29    0x380 - 0x396       	[X]	size 23   b	LRU: 23:27:54:116   	COLA: NEW  	ID: -1261665604
+Partición 30    0x3A0 - 0x3B6       	[X]	size 23   b	LRU: 23:27:54:337   	COLA: NEW  	ID: -31994254
+Partición 31    0x3C0 - 0x3D6       	[X]	size 23   b	LRU: 23:28:02:603   	COLA: NEW  	ID: -1418330961
+Partición 32    0x3E0 - 0x3F6       	[X]	size 23   b	LRU: 23:28:03:504   	COLA: NEW  	ID: -287093775
+Partición 33    0x400 - 0x416       	[X]	size 23   b	LRU: 23:28:03:786   	COLA: NEW  	ID: -262374857
+Partición 34    0x420 - 0x436       	[X]	size 23   b	LRU: 23:28:03:908   	COLA: NEW  	ID: -246311036
+Partición 35    0x440 - 0x7FF       	[L]	size 960

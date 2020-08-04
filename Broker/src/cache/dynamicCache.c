@@ -3,10 +3,6 @@
 
 int particionesLiberadas = 0;
 
-int esTiempoMasAntiguo(char* masAntiguo, char* masNuevo){
-	return strcmp(masAntiguo, masNuevo) < 0;
-}
-
 int calcularBestFit(int desiredSize) {
 	int found = -1;
 	int bestposicion, *bestDifference = NULL;
@@ -64,11 +60,9 @@ int calcularLRU(){
 int eliminarVictima(TipoCola cola){
 	long itemAEliminar;
 
-	log_info(loggerObligatorio, "Antes de calcular FIFO");
-
-	if(strcmp(algoritmoEleccionDeVictima, "FIFO") == 0){
+	if(esFIFO){
 		itemAEliminar = calcularFIFO();
-	} else{
+	} else if(esLRU){
 		itemAEliminar = calcularLRU();
 	}
 
@@ -91,14 +85,12 @@ int eliminarVictima(TipoCola cola){
 }
 
 int hayEspacio(int espacioRequerido, int *posicion){
-	//log_info(loggerInterno, "Espacio requerido: %d", espacioRequerido);
-
-	if(strcmp(algoritmoEleccionDeParticionLibre, "FF") == 0){
+	if(esFF){
 		for(*posicion = 0; *posicion < tamanioTabla; (*posicion)++){
 			if(!tablaVacios[*posicion].estaVacio && tablaVacios[*posicion].tamanio >= espacioRequerido)
 				return 1;
 		}
-	} else {
+	} else if(esBF) {
 		int mejorPosicion = calcularBestFit(espacioRequerido);
 
 		if(mejorPosicion >= 0){
@@ -169,24 +161,6 @@ void inicializarTabla(ItemTablaDinamica **tabla, int estaVacio){
 		(*tabla)[i].fechaCreacion = NULL;
 		(*tabla)[i].fechaUltimoUso = NULL;
 	}
-}
-
-void inicializarDataBasica(t_config* config, t_log* loggerObligatorioAsignar, t_log* loggerInternoAsignar) {
-	//semCacheTabla = malloc(sizeof(sem_t));
-	//sem_init(semCacheTabla, 0, 1);
-
-	tamanioCache = (int)config_get_int_value(config, "TAMANO_MEMORIA");
-	tamanioParticionMinima = (int)config_get_int_value(config, "TAMANO_MINIMO_PARTICION");
-	algoritmoEleccionDeParticionLibre = config_get_string_value(config,"ALGORITMO_PARTICION_LIBRE");
-	algoritmoEleccionDeVictima = config_get_string_value(config,"ALGORITMO_REEMPLAZO");
-	frecuenciaCompactacion = (int)config_get_int_value(config, "FRECUENCIA_COMPACTACION");
-	tamanioTabla = tamanioCache / tamanioParticionMinima;
-	loggerObligatorio = loggerObligatorioAsignar;
-	loggerInterno = loggerInternoAsignar;
-
-	inicializarTabla(&tablaElementos, 0);
-	inicializarTabla(&tablaVacios, 1);
-	inicializarCache(tamanioCache);
 }
 
 void agregarElementoValido(int posicionVacioAModificar, int tamanioItem, void* item, long ID, long IDCorrelativo,
@@ -548,7 +522,7 @@ int esSuscriptorEnviado(t_list* suscriptoresEnviados, Suscriptor suscriptor){
 	return 0;
 }
 
-void liberarCache(){
+void liberarParticiones(){
 	for(int i = 0; i < tamanioTabla; i++){
 		if(!tablaElementos[i].estaVacio)
 		{

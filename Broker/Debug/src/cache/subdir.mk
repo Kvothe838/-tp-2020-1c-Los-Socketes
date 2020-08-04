@@ -5,15 +5,21 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
 ../src/cache/basicCache.c \
-../src/cache/dynamicCache.c 
+../src/cache/buddySystem.c \
+../src/cache/dynamicCache.c \
+../src/cache/genericCache.c 
 
 OBJS += \
 ./src/cache/basicCache.o \
-./src/cache/dynamicCache.o 
+./src/cache/buddySystem.o \
+./src/cache/dynamicCache.o \
+./src/cache/genericCache.o 
 
 C_DEPS += \
 ./src/cache/basicCache.d \
-./src/cache/dynamicCache.d 
+./src/cache/buddySystem.d \
+./src/cache/dynamicCache.d \
+./src/cache/genericCache.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

@@ -8,19 +8,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include "basicCache.h"
-#include <semaphore.h>
+#include "genericCache.h"
 #include "shared/messages.h"
 
-char *algoritmoEleccionDeParticionLibre;
-char *algoritmoEleccionDeVictima;
-int frecuenciaCompactacion;
 int tamanioTabla;
-int tamanioCache, tamanioParticionMinima;
-
-t_log* loggerObligatorio;
-t_log* loggerInterno;
-
-//sem_t* semCacheTabla;
 
 typedef struct {
 	int posicion;
@@ -38,7 +29,6 @@ typedef struct {
 ItemTablaDinamica *tablaElementos, *tablaVacios;
 
 void inicializarTabla(ItemTablaDinamica **tabla, int estaVacio);
-void inicializarDataBasica(t_config* config, t_log* loggerObligatorioAsignar, t_log* loggerInternoAsignar);
 void agregarItem(void* item, int tamanioItem, long ID, long IDCorrelativo, TipoCola cola);
 void eliminarItem(long ID);
 void inicializarCache();
@@ -52,6 +42,6 @@ int esSuscriptorEnviado(t_list* suscriptoresRecibidos, Suscriptor suscriptor);
 int* obtenerTamanioItem(long ID);
 long* obtenerIDCorrelativoItem(long ID);
 void obtenerDump();
-void liberarCache();
+void liberarParticiones();
 
 #endif /* CACHE_DYNAMICCACHE_H_ */
