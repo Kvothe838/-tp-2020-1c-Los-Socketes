@@ -1,8 +1,6 @@
 #include "conexionBroker.h"
 #include "cache/dynamicCache.h"
 
-int seguirEjecutando = 1;
-
 t_list* recibirSuscripcion(int socket, int* cantidadColas) {
 	t_list* colas = list_create();
 
@@ -100,35 +98,31 @@ void manejarPublisher(int socketCliente) {
 	Publicacion* publicacion = recibirPublisher(socketCliente);
 
 	//Log obligatorio.
-	log_info(loggerObligatorio, "Llegada de nuevo mensaje con ID %ld a cola %s",
-			*ID, tipoColaToString(publicacion->cola));
+	log_info(loggerObligatorio, "Llegada de nuevo mensaje con ID %ld a cola %s", *ID, tipoColaToString(publicacion->cola));
 
 	//Creo el nuevo MensajeEnCola y lo agrego a la cola correspondiente.
 
 	agregarMensaje(publicacion->cola, ID);
-	agregarItem(publicacion->dato, publicacion->tamanioDato, *ID,
-			publicacion->IDCorrelativo, publicacion->cola);
+	agregarItem(publicacion->dato, publicacion->tamanioDato, *ID, publicacion->IDCorrelativo, publicacion->cola);
 
 	//Log obligatorio.
-	log_info(loggerObligatorio,
-			"Almacenado mensaje con ID %ld y posición de inicio de partición %d.",
-			*ID, obtenerPosicionPorID(*ID));
+	log_info(loggerObligatorio,	"Almacenado mensaje con ID %ld y posición de inicio de partición %d.", *ID, obtenerPosicionPorID(*ID));
 
 	obtenerDump();
 	//Le devuelvo el id del mensaje y el tipo de cola al cliente.
-	stream = serializarStreamIdMensajePublisher(ID, &(publicacion->cola),
-			&tamanio);
+	stream = serializarStreamIdMensajePublisher(ID, &(publicacion->cola), &tamanio);
 	buffer = armarPaqueteYSerializar(ID_MENSAJE, tamanio, stream, &bytes);
 
 	if (send(socketCliente, buffer, bytes, 0) == -1) {
-		log_info(loggerInterno,
-				"Error intentando enviar ID del mensaje al publisher.");
+		log_info(loggerInterno,	"Error intentando enviar ID del mensaje al publisher.");
 	}
 
 	free(publicacion->dato);
 	free(publicacion);
 	free(stream);
 	free(buffer);
+
+	sem_post(semColaMensajes);
 }
 
 void manejarACK(Ack* contenido, Suscriptor* suscriptor) {
@@ -289,16 +283,13 @@ void enviarMensajesPorCola(TipoCola tipoCola) {
 }
 
 void enviarMensajesSuscriptores() {
-	while (seguirEjecutando) {
-		int colas[] = { NEW, GET, CATCH, APPEARED, LOCALIZED, CAUGHT };
-
-		//sem_wait(semColaMensajes);
+	int colas[] = { NEW, GET, CATCH, APPEARED, LOCALIZED, CAUGHT };
+	while (1) {
+		sem_wait(semColaMensajes);
 
 		for (int i = 0; i < 6; i++) {
 			enviarMensajesPorCola(colas[i]);
 		}
-
-		//sem_post(semColaMensajes);
 	}
 }
 
@@ -334,13 +325,9 @@ void iniciarServidor(IniciarServidorArgs* argumentos) {
 
 	freeaddrinfo(servinfo);
 
-	while (seguirEjecutando) {
+	while (1) {
 		esperarCliente(socket_servidor);
 	}
 
 	liberar_conexion_cliente(socket_servidor);
-}
-
-void cortarPrograma() {
-	seguirEjecutando = 0;
 }

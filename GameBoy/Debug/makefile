@@ -26,13 +26,13 @@ endif
 all: gameboy
 
 dependents:
-	-cd /home/utnso/git/tp-2020-1c-Los-Socketes/Shared/Debug && $(MAKE) clean all
+	-cd /home/utnso/wrksp/tp-2020-1c-Los-Socketes/Shared/Debug && $(MAKE) all
 
 # Tool invocations
-gameboy: $(OBJS) $(USER_OBJS) /home/utnso/git/tp-2020-1c-Los-Socketes/Shared/Debug/libShared.a
+gameboy: $(OBJS) $(USER_OBJS) /home/utnso/wrksp/tp-2020-1c-Los-Socketes/Shared/Debug/libShared.a
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc -L"/home/utnso/git/tp-2020-1c-Los-Socketes/Shared/Debug" -o "gameboy" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -L"/home/utnso/wrksp/tp-2020-1c-Los-Socketes/Shared/Debug" -o "gameboy" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -42,6 +42,6 @@ clean:
 	-@echo ' '
 
 .PHONY: all clean dependents
-/home/utnso/git/tp-2020-1c-Los-Socketes/Shared/Debug/libShared.a:
+/home/utnso/wrksp/tp-2020-1c-Los-Socketes/Shared/Debug/libShared.a:
 
 -include ../makefile.targets

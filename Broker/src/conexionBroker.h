@@ -21,9 +21,9 @@
 #include "cache/dynamicCache.h"
 
 pthread_t thread;
+sem_t* semColaMensajes;
 
 void iniciarServidor(IniciarServidorArgs* argumentos);
 void enviarMensajesSuscriptores();
-void cortarPrograma();
 
 #endif

@@ -11,9 +11,10 @@ void err_sys(char * msg) {
   exit(-1);
 }
 
+pthread_t threadIniciarServidor, threadEnviarMensajesSuscriptores;
+
 int main(void) {
 	t_config* config;
-	pthread_t threadIniciarServidor, threadEnviarMensajesSuscriptores;
 	IniciarServidorArgs argumentos;
 
 	loggerObligatorio = iniciar_logger("broker_logger_obligatorio.log", "Broker");
@@ -37,16 +38,8 @@ int main(void) {
 	/*Esta signal SIGUSR2 sirve sólo para terminar el programa de forma correcta, pasando por las liberaciones de
 	 memoria del final del main.*/
 
-	//semColaMensajes = malloc(sizeof(sem_t));
-	//sem_init(semColaMensajes, 0, 1);
-
-    /*for(int i = 0; i < 70; i++)
-    {
-    	double* sarasa = malloc(sizeof(double));
-    	*sarasa = 5.7;
-		agregarItem(sarasa, sizeof(double), i, 2, NEW);
-    }*/
-
+	semColaMensajes = malloc(sizeof(sem_t));
+	sem_init(semColaMensajes, 0, 0);
 
 	pthread_create(&threadIniciarServidor, NULL,(void*)iniciarServidor, (void*)&argumentos);
 	pthread_create(&threadEnviarMensajesSuscriptores, NULL,(void*)enviarMensajesSuscriptores, NULL);
@@ -71,7 +64,8 @@ static void sig_usr(int signo)
 static void sig_usr2(int signo){
 	if(signo == SIGUSR2)
 	{
-		cortarPrograma();
+		pthread_cancel(threadIniciarServidor);
+		pthread_cancel(threadEnviarMensajesSuscriptores);
 	}
 
 }

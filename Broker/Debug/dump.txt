@@ -1,20 +1,5 @@
-Dump: 3/8/2020 - 15:25:05:740
-Partición 1     0x0   - 0xA         	[X]	size 11   b	LRU: 15:12:14:274   	COLA: GET  	ID: 1653410748
-Partición 2     0x20  - 0x2B        	[X]	size 12   b	LRU: 15:12:14:276   	COLA: GET  	ID: 1653476353
-Partición 3     0x40  - 0x4D        	[X]	size 14   b	LRU: 15:12:14:286   	COLA: GET  	ID: 1653476355
-Partición 4     0x60  - 0x6F        	[X]	size 16   b	LRU: 15:12:14:311   	COLA: LOCALIZED	ID: 1661475462
-Partición 5     0x80  - 0x91        	[X]	size 18   b	LRU: 15:12:14:323   	COLA: LOCALIZED	ID: 1661541061
-Partición 6     0xA0  - 0xC6        	[X]	size 39   b	LRU: 15:12:19:346   	COLA: LOCALIZED	ID: -1230375292
-Partición 7     0xC7  - 0xD1        	[X]	size 11   b	LRU: 15:22:47:794   	COLA: GET  	ID: 1164720453
-Partición 8     0xE7  - 0xF2        	[X]	size 12   b	LRU: 15:22:47:905   	COLA: GET  	ID: 1172916352
-Partición 9     0x107 - 0x114       	[X]	size 14   b	LRU: 15:22:47:905   	COLA: GET  	ID: 1172916354
-Partición 10    0x127 - 0x138       	[X]	size 18   b	LRU: 15:22:48:101   	COLA: LOCALIZED	ID: -130452175
-Partición 11    0x147 - 0x156       	[X]	size 16   b	LRU: 15:22:48:115   	COLA: LOCALIZED	ID: -2023990971
-Partición 12    0x167 - 0x18D       	[X]	size 39   b	LRU: 15:22:53:163   	COLA: LOCALIZED	ID: 1240522997
-Partición 13    0x18E - 0x198       	[X]	size 11   b	LRU: 15:25:00:649   	COLA: GET  	ID: -92393035
-Partición 14    0x1AE - 0x1B9       	[X]	size 12   b	LRU: 15:25:00:650   	COLA: GET  	ID: -84590719
-Partición 15    0x1CE - 0x1DB       	[X]	size 14   b	LRU: 15:25:00:651   	COLA: GET  	ID: -84590717
-Partición 16    0x1EE - 0x1FD       	[X]	size 16   b	LRU: 15:25:00:713   	COLA: LOCALIZED	ID: -76460409
-Partición 17    0x20E - 0x21F       	[X]	size 18   b	LRU: 15:25:00:729   	COLA: LOCALIZED	ID: -76329213
-Partición 18    0x22E - 0x254       	[X]	size 39   b	LRU: 15:25:05:739   	COLA: LOCALIZED	ID: 1326590536
-Partición 19    0x255 - 0x7FF       	[L]	size 1451
+Dump: 3/8/2020 - 23:07:51:50
+Partición 1     0x0   - 0x16        	[X]	size 23   b	LRU: 23:07:48:5     	COLA: NEW  	ID: 1415826360
+Partición 2     0x20  - 0x2A        	[X]	size 11   b	LRU: 23:07:50:305   	COLA: GET  	ID: 1203423338
+Partición 3     0x40  - 0x56        	[X]	size 23   b	LRU: 23:07:51:49    	COLA: NEW  	ID: -485512248
+Partición 4     0x60  - 0x7FF       	[L]	size 1952
