@@ -54,14 +54,6 @@ void crearBloque(Bloque* bloqueActual, int nuevoTamanio)
 	bloqueActual->der->suscriptoresRecibidos = NULL;
 }
 
-void formarArbol(Bloque* bloque){
-	crearBloque(bloque, bloque->tamanio/2);
-	if(bloque->izq->tamanio != tamanioParticionMinima){
-		formarArbol(bloque->izq);
-		formarArbol(bloque->der);
-	}
-}
-
 void inicializarBuddySystem(int tamanio)
 {
 	cache = (Cache)malloc(sizeof(Bloque));
@@ -69,8 +61,6 @@ void inicializarBuddySystem(int tamanio)
 	cache->tamanioOcupado = 0;
 	cache->posicion = 0;
 	cache->estaDividido = 0;
-	/*formarArbol(cache);
-	imprimirCache();*/
 }
 
 void liberarInfoBloque(Bloque* bloqueActual)
