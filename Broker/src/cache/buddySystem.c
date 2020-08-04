@@ -1,28 +1,6 @@
 #include "buddySystem.h"
 
 #include <ctype.h>
-//#include <commons/collections/list.h>
-t_list* obtenerFIFO(Bloque* bloqueLlegada){
-	int esTiempoMasAntiguo(Bloque* bloqueA, Bloque* bloqueB){
-		return strcmp(bloqueA->fechaCreacion, bloqueB->fechaCreacion) < 0;
-	}
-	t_list* listaOrdenadaPorFifo = list_create();
-
-	list_add(listaOrdenadaPorFifo, bloqueLlegada);
-
-	if(bloqueLlegada == NULL) return NULL;
-	if(bloqueLlegada->estaDividido)
-	{
-		list_add_all(listaOrdenadaPorFifo, (t_list*)obtenerFIFO(bloqueLlegada->izq));
-		list_add_all(listaOrdenadaPorFifo, (t_list*)obtenerFIFO(bloqueLlegada->der));
-	}
-
-	log_info(loggerAriel, "Despues de derecha e izquierda de %d: %d", bloqueLlegada->ID, list_size(listaOrdenadaPorFifo));
-
-	list_sort(listaOrdenadaPorFifo, esTiempoMasAntiguo);
-	return listaOrdenadaPorFifo;
-}
-
 void imprimirBloque(Bloque* bloque)
 {
 	if(bloque == NULL) return;
@@ -212,7 +190,7 @@ void consolidarBuddySystem(Bloque* bloque, int* reiniciarConsolidacion)
 	}
 }
 
-Bloque* calcularFIFOLRUBuddySystem(Bloque* bloque/*Bloque* bloque, Bloque*** bloqueMasAntiguo*/)
+Bloque* calcularFIFOLRUBuddySystem(Bloque* bloque)
 {
 	if(bloque->estaDividido){
 

@@ -161,14 +161,14 @@ int main(void) {
 
     inicializarMutex();
 
-	pthread_create(&threadIniciarServidor, NULL,(void*)iniciarServidor, (void*)&argumentos);
+	/*pthread_create(&threadIniciarServidor, NULL,(void*)iniciarServidor, (void*)&argumentos);
 	pthread_create(&threadEnviarMensajesSuscriptores, NULL,(void*)enviarMensajesSuscriptores, NULL);
 	pthread_join(threadIniciarServidor, NULL);
 	pthread_join(threadEnviarMensajesSuscriptores, NULL);
 
 	liberarDiccionario();
 	liberarCache();
-	terminar_programa(logger, config);
+	terminar_programa(logger, config);*/
 
 	return 0;
 }
