@@ -42,7 +42,7 @@ int main(void) {
 	semColaMensajes = malloc(sizeof(sem_t));
 	sem_init(semColaMensajes, 0, 0);
 
-	pthread_create(&threadIniciarServidor, NULL,(void*)iniciarServidor, (void*)&argumentos);
+	/*pthread_create(&threadIniciarServidor, NULL,(void*)iniciarServidor, (void*)&argumentos);
 	pthread_create(&threadEnviarMensajesSuscriptores, NULL,(void*)enviarMensajesSuscriptores, NULL);
 	pthread_join(threadIniciarServidor, NULL);
 	pthread_join(threadEnviarMensajesSuscriptores, NULL);

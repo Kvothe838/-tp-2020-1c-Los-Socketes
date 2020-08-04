@@ -1,27 +1,6 @@
 #include "buddySystem.h"
 #include <ctype.h>
 
-t_list* obtenerFIFO(Bloque* bloqueLlegada){
-	/*int esTiempoMasAntiguo(Bloque* bloqueA, Bloque* bloqueB){
-		return strcmp(bloqueA->fechaCreacion, bloqueB->fechaCreacion) < 0;
-	}*/
-	t_list* listaOrdenadaPorFifo = list_create();
-
-	list_add(listaOrdenadaPorFifo, bloqueLlegada);
-
-	if(bloqueLlegada == NULL) return NULL;
-	if(bloqueLlegada->estaDividido)
-	{
-		list_add_all(listaOrdenadaPorFifo, (t_list*)obtenerFIFO(bloqueLlegada->izq));
-		list_add_all(listaOrdenadaPorFifo, (t_list*)obtenerFIFO(bloqueLlegada->der));
-	}
-
-	log_info(loggerAriel, "Despues de derecha e izquierda de %d: %d", bloqueLlegada->ID, list_size(listaOrdenadaPorFifo));
-
-	//list_sort(listaOrdenadaPorFifo, esTiempoMasAntiguo);
-	return listaOrdenadaPorFifo;
-}
-
 void imprimirBloque(Bloque* bloque)
 {
 	if(bloque == NULL) return;
@@ -75,14 +54,6 @@ void crearBloque(Bloque* bloqueActual, int nuevoTamanio)
 	bloqueActual->der->suscriptoresRecibidos = NULL;
 }
 
-void formarArbol(Bloque* bloque){
-	crearBloque(bloque, bloque->tamanio/2);
-	if(bloque->izq->tamanio != tamanioParticionMinima){
-		formarArbol(bloque->izq);
-		formarArbol(bloque->der);
-	}
-}
-
 void inicializarBuddySystem(int tamanio)
 {
 	cache = (Cache)malloc(sizeof(Bloque));
@@ -90,8 +61,6 @@ void inicializarBuddySystem(int tamanio)
 	cache->tamanioOcupado = 0;
 	cache->posicion = 0;
 	cache->estaDividido = 0;
-	/*formarArbol(cache);
-	imprimirCache();*/
 }
 
 void liberarInfoBloque(Bloque* bloqueActual)
@@ -211,7 +180,7 @@ void consolidarBuddySystem(Bloque* bloque, int* reiniciarConsolidacion)
 	}
 }
 
-Bloque* calcularFIFOLRUBuddySystem(Bloque* bloque/*Bloque* bloque, Bloque*** bloqueMasAntiguo*/)
+Bloque* calcularFIFOLRUBuddySystem(Bloque* bloque)
 {
 	if(bloque->estaDividido){
 
