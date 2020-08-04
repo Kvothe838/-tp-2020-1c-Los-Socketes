@@ -1,12 +1,35 @@
 #include "buddySystem.h"
 
+#include <ctype.h>
+//#include <commons/collections/list.h>
+t_list* obtenerFIFO(Bloque* bloqueLlegada){
+	int esTiempoMasAntiguo(Bloque* bloqueA, Bloque* bloqueB){
+		return strcmp(bloqueA->fechaCreacion, bloqueB->fechaCreacion) < 0;
+	}
+	t_list* listaOrdenadaPorFifo = list_create();
+
+	list_add(listaOrdenadaPorFifo, bloqueLlegada);
+
+	if(bloqueLlegada == NULL) return NULL;
+	if(bloqueLlegada->estaDividido)
+	{
+		list_add_all(listaOrdenadaPorFifo, (t_list*)obtenerFIFO(bloqueLlegada->izq));
+		list_add_all(listaOrdenadaPorFifo, (t_list*)obtenerFIFO(bloqueLlegada->der));
+	}
+
+	log_info(loggerAriel, "Despues de derecha e izquierda de %d: %d", bloqueLlegada->ID, list_size(listaOrdenadaPorFifo));
+
+	list_sort(listaOrdenadaPorFifo, esTiempoMasAntiguo);
+	return listaOrdenadaPorFifo;
+}
+
 void imprimirBloque(Bloque* bloque)
 {
 	if(bloque == NULL) return;
 
-	printf("Posición: %d | Tamanio: %d | Tamanio ocupado: %d | Está dividido: %s | LRU: %s\n",
+	printf("Posición: %d | Tamanio: %d | Tamanio ocupado: %d | Está dividido: %s | LRU: %s | Fecha FIFO: %s\n",
 			bloque->posicion, bloque->tamanio, bloque->tamanioOcupado, bloque->estaDividido ? "Si" : "No",
-			bloque->fechaUltimoUso == NULL ? "N" : bloque->fechaUltimoUso);
+			bloque->fechaUltimoUso == NULL ? "N" : bloque->fechaUltimoUso, bloque->fechaCreacion);
 
 	if(bloque->estaDividido)
 	{
@@ -33,10 +56,14 @@ void crearBloque(Bloque* bloqueActual, int nuevoTamanio)
 	bloqueActual->der = (Bloque*)malloc(sizeof(Bloque));
 	bloqueActual->izq->estaDividido = 0;
 	bloqueActual->der->estaDividido = 0;
+	bloqueActual->izq->izq = NULL;
+	bloqueActual->der->izq = NULL;
+	bloqueActual->izq->der = NULL;
+	bloqueActual->der->der = NULL;
 	bloqueActual->izq->tamanio = nuevoTamanio;
 	bloqueActual->der->tamanio = nuevoTamanio;
 	bloqueActual->izq->posicion = bloqueActual->posicion;
-	bloqueActual->der->posicion = nuevoTamanio;
+	bloqueActual->der->posicion = bloqueActual->posicion + nuevoTamanio;
 	bloqueActual->izq->tamanioOcupado = 0;
 	bloqueActual->der->tamanioOcupado = 0;
 	bloqueActual->izq->fechaCreacion = NULL;
@@ -49,6 +76,14 @@ void crearBloque(Bloque* bloqueActual, int nuevoTamanio)
 	bloqueActual->der->suscriptoresRecibidos = NULL;
 }
 
+void formarArbol(Bloque* bloque){
+	crearBloque(bloque, bloque->tamanio/2);
+	if(bloque->izq->tamanio != tamanioParticionMinima){
+		formarArbol(bloque->izq);
+		formarArbol(bloque->der);
+	}
+}
+
 void inicializarBuddySystem(int tamanio)
 {
 	cache = (Cache)malloc(sizeof(Bloque));
@@ -56,6 +91,8 @@ void inicializarBuddySystem(int tamanio)
 	cache->tamanioOcupado = 0;
 	cache->posicion = 0;
 	cache->estaDividido = 0;
+	/*formarArbol(cache);
+	imprimirCache();*/
 }
 
 void liberarInfoBloque(Bloque* bloqueActual)
@@ -67,7 +104,7 @@ void liberarInfoBloque(Bloque* bloqueActual)
 
 	if(bloqueActual->fechaUltimoUso != NULL){
 		free(bloqueActual->fechaUltimoUso);
-		bloqueActual->fechaCreacion = NULL;
+		bloqueActual->fechaUltimoUso = NULL;
 	}
 
 	if(bloqueActual->suscriptoresEnviados != NULL){
@@ -144,11 +181,12 @@ int hayEspacioBuddySystem(int espacioRequerido, Bloque** bloqueAModificar)
 	return calcularEspacio(cache, espacioRequerido, bloqueAModificar);
 }
 
-void eliminarItemBuddySystem(Bloque** bloque)
+void eliminarItemBuddySystem(Bloque* bloque)
 {
-	liberarInfoBloque(*bloque);
-	(*bloque)->tamanioOcupado = 0;
-	(*bloque)->estaDividido = 0;
+	liberarInfoBloque(bloque);
+	bloque->tamanioOcupado = 0;
+	bloque->estaDividido = 0;
+	bloque->cola = 0;
 }
 
 void consolidarBuddySystem(Bloque* bloque, int* reiniciarConsolidacion)
@@ -174,38 +212,38 @@ void consolidarBuddySystem(Bloque* bloque, int* reiniciarConsolidacion)
 	}
 }
 
-void calcularFIFOLRUBuddySystem(Bloque** bloque, Bloque*** bloqueMasAntiguo)
+Bloque* calcularFIFOLRUBuddySystem(Bloque* bloque/*Bloque* bloque, Bloque*** bloqueMasAntiguo*/)
 {
-	if((*bloque)->tamanioOcupado > 0)
-	{
-		if(esTiempoMasAntiguo(esFIFO ? (*bloque)->fechaCreacion : (*bloque)->fechaUltimoUso,
-			esFIFO ? (*(*bloqueMasAntiguo))->fechaCreacion : (*(*bloqueMasAntiguo))->fechaUltimoUso))
-		{
-			*bloqueMasAntiguo = bloque;
-		}
+	if(bloque->estaDividido){
+
+		Bloque* bloqueDeIzquierda = bloque->izq != NULL ? calcularFIFOLRUBuddySystem(bloque->izq) : NULL;
+		Bloque* bloqueDeDerecha = bloque->der != NULL ? calcularFIFOLRUBuddySystem(bloque->der) : NULL;
+		char* fechaIzquierda = esFIFO ? bloqueDeIzquierda->fechaCreacion : bloqueDeIzquierda->fechaUltimoUso;
+		char* fechaDerecha = esFIFO ? bloqueDeDerecha->fechaCreacion : bloqueDeDerecha->fechaUltimoUso;
+		if(fechaIzquierda == NULL && fechaDerecha != NULL) //Si la izquierda da NULL, retorna derecha
+			return bloqueDeDerecha;
+		else if(fechaDerecha == NULL && fechaIzquierda != NULL) //Si la derecha da NULL, retorna izquierda
+			return bloqueDeIzquierda;
+		else if(esTiempoMasAntiguo(fechaIzquierda,fechaDerecha)) //Si ambos valores no son NULL, se analiza
+			return bloqueDeIzquierda;
+		else
+			return bloqueDeDerecha;
 	}
-	else
-	{
-		if((*bloque)->estaDividido)
-		{
-			calcularFIFOLRUBuddySystem(&((*bloque)->izq), bloqueMasAntiguo);
-			calcularFIFOLRUBuddySystem(&((*bloque)->der), bloqueMasAntiguo);
-		}
-	}
+	return bloque; //llega acá cuando llega a una hoja
 }
 
-void eliminarVictimaBuddySystem()
-{
-	Bloque** item = &cache;
+void eliminarVictimaBuddySystem(){
+
+	Bloque* item;
 
 	if(esFIFO || esLRU){
-		calcularFIFOLRUBuddySystem(&cache, &item);
+		item = calcularFIFOLRUBuddySystem(cache);
 	}
 	else
 	{
 		return;
 	}
-
+	log_info(loggerAriel, "Nodo elegido: %s", item->fechaCreacion);
 	eliminarItemBuddySystem(item);
 
 	log_info(logger, "CAMBIO");
@@ -230,6 +268,8 @@ void agregarElementoValidoBuddySystem(Bloque** bloqueAModificar, void* item, int
 	(*bloqueAModificar)->suscriptoresRecibidos = list_create();
 	(*bloqueAModificar)->suscriptoresEnviados = list_create();
 	(*bloqueAModificar)->tamanioOcupado = tamanioItem;
+	//(*bloqueAModificar)->izq = NULL;
+	//(*bloqueAModificar)->der = NULL;
 
 	guardarValor(item, tamanioItem, (*bloqueAModificar)->posicion);
 }

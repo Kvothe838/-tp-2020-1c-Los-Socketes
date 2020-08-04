@@ -44,11 +44,19 @@ int main(void) {
 	char* mensaje = "HOLA. TENGO MÁS DE 64 CARACTERES PORQUE SOY RE CAPO Y LA TENGO ENORME.";
 	log_info(logger, "Tamaño string: %d", strlen(mensaje));
 
+	agregarItemBuddySystem(mensaje, string_length(mensaje) * 3 + 1, 111, 222, CATCH); //Hardocdeo para simular un dato enorme
+	agregarItemBuddySystem(mensaje, string_length(mensaje) * 3 + 1, 111, 222, CATCH); //Hardocdeo para simular un dato enorme
+	agregarItemBuddySystem(mensaje, string_length(mensaje) * 3 + 1, 111, 222, CATCH); //Hardocdeo para simular un dato enorme
+	agregarItemBuddySystem(mensaje, string_length(mensaje) * 3 + 1, 111, 222, CATCH); //Hardocdeo para simular un dato enorme
 	agregarItemBuddySystem(&a, sizeof(int), 0, 0, NEW);
 	agregarItemBuddySystem(&b, sizeof(double), 5, 3, GET);
-	agregarItemBuddySystem(mensaje, strlen(mensaje) + 1, 111, 222, CATCH);
-	agregarItemBuddySystem(&a, sizeof(int), 0, 0, GET);
+	agregarItemBuddySystem(&a, 7, 0, 0, GET);
 
+	imprimirCache();
+	loggerAriel = iniciar_logger("ARIEL.log", "BuddySystem");
+	eliminarVictimaBuddySystem();
+	eliminarVictimaBuddySystem();
+	eliminarVictimaBuddySystem();
 	imprimirCache();
 
 	/*eliminarVictimaBuddySystem();

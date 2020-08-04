@@ -45,6 +45,10 @@ void liberarCache()
 }
 
 int esTiempoMasAntiguo(char* masAntiguo, char* masNuevo){
+	/*printf(masAntiguo);
+	fflush(stdout);
+	printf(masNuevo);
+	fflush(stdout);*/
 	return strcmp(masAntiguo, masNuevo) < 0;
 }
 
