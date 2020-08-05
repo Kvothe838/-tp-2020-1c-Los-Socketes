@@ -20,6 +20,8 @@ void inicializarDataBasica(t_config* config){
 
 	if(esParticiones)
 	{
+		pthread_mutex_init(&mutexDynamic, NULL);
+
 		inicializarTabla(&tablaElementos, 0);
 		inicializarTabla(&tablaVacios, 1);
 	}
@@ -42,11 +44,75 @@ void liberarCache()
 }
 
 int esTiempoMasAntiguo(char* masAntiguo, char* masNuevo){
-	/*printf(masAntiguo);
-	fflush(stdout);
-	printf(masNuevo);
-	fflush(stdout);*/
 	return strcmp(masAntiguo, masNuevo) < 0;
 }
 
+void agregarItemGeneric(void* item, int tamanioItem, long ID, long IDCorrelativo, TipoCola cola)
+{
+	if(esParticiones)
+	{
+		agregarItem(item, tamanioItem, ID, IDCorrelativo, cola);
+	} else if(esBS)
+	{
+		agregarItemBuddySystem(item, tamanioItem, ID, IDCorrelativo, cola);
+	}
+}
+
+int obtenerPosicionPorIDGeneric(long ID)
+{
+	int posicion = -1;
+
+	if(esParticiones)
+	{
+		pthread_mutex_lock(&mutexDynamic);
+		posicion = obtenerPosicionPorID(ID);
+		pthread_mutex_unlock(&mutexDynamic);
+	} else if(esBS) {
+		posicion = obtenerPosicionPorIDBuddySystem(ID, cache);
+	}
+
+	return posicion;
+}
+
+void* obtenerItemGeneric(long ID)
+{
+	if(esParticiones)
+	{
+		return obtenerItem(ID);
+	}
+	else if(esBS)
+	{
+		return obtenerItemBuddySystem(ID);
+	}
+
+	return NULL;
+}
+
+int* obtenerTamanioItemGeneric(long ID)
+{
+	if(esParticiones)
+	{
+		return obtenerTamanioItem(ID);
+	}
+	else if(esBS)
+	{
+		return obtenerTamanioItemBuddySystem(ID);
+	}
+
+	return NULL;
+}
+
+long* obtenerIDCorrelativoItemGeneric(long ID)
+{
+	if(esParticiones)
+	{
+		return obtenerIDCorrelativoItem(ID);
+	}
+	else if(esBS)
+	{
+		return obtenerIDCorrelativoItemBuddySystem(ID);
+	}
+
+	return NULL;
+}
 

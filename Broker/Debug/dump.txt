@@ -1,7 +1,0 @@
-Dump: 4/8/2020 - 18:53:09:231
-Partición 1     0x0   - 0x3         	[X]	size 4    b	LRU: 18:53:09:187   	COLA: CAUGHT	ID: -1027044984
-Partición 2     0x4   - 0x7         	[X]	size 4    b	LRU: 18:53:09:204   	COLA: CAUGHT	ID: -1019308274
-Partición 3     0x8   - 0x1A        	[X]	size 19   b	LRU: 18:53:09:221   	COLA: CATCH	ID: -1019242673
-Partición 4     0x1B  - 0x2E        	[X]	size 20   b	LRU: 18:53:09:228   	COLA: CATCH	ID: -1019177073
-Partición 5     0x2F  - 0x3E        	[X]	size 16   b	LRU: 18:53:09:230   	COLA: CATCH	ID: -1019111481
-Partición 6     0x3F  - 0x3F        	[L]	size 1

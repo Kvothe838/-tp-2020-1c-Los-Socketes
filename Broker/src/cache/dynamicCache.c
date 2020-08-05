@@ -72,8 +72,6 @@ int eliminarVictima(TipoCola cola){
 
 	//eliminarMensajeDeLista(itemAEliminar, cola);
 
-	obtenerDump();
-
 	return 1;
 }
 
@@ -174,6 +172,8 @@ void agregarElementoValido(int posicionVacioAModificar, int tamanioItem, void* i
 }
 
 void agregarItem(void* item, int tamanioItem, long ID, long IDCorrelativo, TipoCola cola){
+	pthread_mutex_lock(&mutexDynamic);
+
 	int posicionVacioAModificar;
 	int hayEspacioParaItem = hayEspacio(tamanioItem, &posicionVacioAModificar);
 	int logrado = 1;
@@ -189,8 +189,9 @@ void agregarItem(void* item, int tamanioItem, long ID, long IDCorrelativo, TipoC
 	if(logrado)
 	{
 		agregarElementoValido(posicionVacioAModificar, tamanioItem, item, ID, IDCorrelativo, cola);
-		obtenerDump();
 	}
+
+	pthread_mutex_unlock(&mutexDynamic);
 }
 
 ItemTablaDinamica* obtenerItemTablaDinamica(long ID){
@@ -204,7 +205,11 @@ ItemTablaDinamica* obtenerItemTablaDinamica(long ID){
 }
 
 int* obtenerTamanioItem(long ID){
+	pthread_mutex_lock(&mutexDynamic);
+
 	ItemTablaDinamica* item = obtenerItemTablaDinamica(ID);
+
+	pthread_mutex_unlock(&mutexDynamic);
 
 	if(item == NULL) return NULL;
 
@@ -213,7 +218,11 @@ int* obtenerTamanioItem(long ID){
 
 long* obtenerIDCorrelativoItem(long ID)
 {
+	pthread_mutex_lock(&mutexDynamic);
+
 	ItemTablaDinamica* item = obtenerItemTablaDinamica(ID);
+
+	pthread_mutex_unlock(&mutexDynamic);
 
 	if(item == NULL) return NULL;
 
@@ -222,17 +231,23 @@ long* obtenerIDCorrelativoItem(long ID)
 
 void* obtenerItem(long ID)
 {
+	pthread_mutex_lock(&mutexDynamic);
+
 	ItemTablaDinamica* item = obtenerItemTablaDinamica(ID);
 
 	if(item == NULL) return NULL;
 
 	void* valor = obtenerValor(item->tamanio, item->posicion);
 
+	pthread_mutex_unlock(&mutexDynamic);
+
 	return valor;
 }
 
 void cambiarLRU(long ID)
 {
+	pthread_mutex_lock(&mutexDynamic);
+
 	ItemTablaDinamica* item = obtenerItemTablaDinamica(ID);
 
 	if(item != NULL){
@@ -240,7 +255,7 @@ void cambiarLRU(long ID)
 		item->fechaUltimoUso = temporal_get_string_time();
 	}
 
-	log_info(loggerObligatorio, "Fecha: %s para ID: %ld", item->fechaUltimoUso, item->ID);
+	pthread_mutex_unlock(&mutexDynamic);
 }
 
 void consolidarCache(int posicionElementoVacio, int posicionElemento){
@@ -249,9 +264,7 @@ void consolidarCache(int posicionElementoVacio, int posicionElemento){
 	int i = 0;
 
 	while(i < tamanioTabla){
-		//log_info(loggerObligatorio, "HOLA");
 		for(i = 0; i < tamanioTabla; i++){
-			//log_info(loggerObligatorio, "KOMO ESTAS");
 			if(i == posicionElementoVacio) continue;
 
 			ItemTablaDinamica elementoActual = tablaVacios[i];
@@ -265,7 +278,7 @@ void consolidarCache(int posicionElementoVacio, int posicionElemento){
 				consolidar = 0;
 			}
 
-			if(!consolidar) continue; //FORROOOOOOOOOOOOOOOOOOOO
+			if(!consolidar) continue;
 
 			posicionAEliminar = i > posicionElementoVacio ? i : posicionElementoVacio;
 			posicionAModificar = i < posicionElementoVacio ? i : posicionElementoVacio;
@@ -357,20 +370,17 @@ void eliminarItem(long ID){
 
 	//log_info(loggerObligatorio, "UNO");
 
-	obtenerDump();
-
 	consolidarCache(posNuevoVacio, posDatoAEliminar);
 
 	if(frecuenciaCompactacion <= 1 || particionesLiberadas == frecuenciaCompactacion){
 		compactarCache();
-		obtenerDump();
 	}
 }
 
 //DUMP DE CACHE (COMIENZO)
 void imprimirDatos(t_list* listaDeParticiones){
 	uint32_t posicion = 0;
-	char stringFinal[1000];
+	char stringFinal[10000];
 	FILE* archivoDump = fopen("dump.txt", "w+");
 
 	time_t t = time(NULL);
@@ -382,7 +392,8 @@ void imprimirDatos(t_list* listaDeParticiones){
 	while(posicion < list_size(listaDeParticiones)){
 		ItemTablaDinamica *dato = list_get(listaDeParticiones, posicion);
 
-		if(dato->fechaUltimoUso != NULL){
+		if(dato->fechaUltimoUso != NULL)
+		{
 			sprintf(stringFinal,
 				"Partición %-5d 0x%-3X - 0x%-10X\t[X]\tsize %-5db\tLRU: %-15s\tCOLA: %-5s\tID: %ld\n",
 				(posicion+1),
@@ -393,7 +404,8 @@ void imprimirDatos(t_list* listaDeParticiones){
 				(char*)tipoColaToString(dato->cola),
 				dato->ID);
 		}
-		else{
+		else
+		{
 			sprintf(stringFinal,
 				"Partición %-5d 0x%-3X - 0x%-10X\t[L]\tsize %d\n",
 				(posicion+1),
@@ -406,8 +418,8 @@ void imprimirDatos(t_list* listaDeParticiones){
 		fwrite(stringFinal, string_length(stringFinal), 1, archivoDump);
 		posicion++;
 	}
-	fclose(archivoDump);
 
+	fclose(archivoDump);
 }
 
 bool ordenamientoDump(void* primerDatoVoid, void* segundoDatoVoid){
@@ -418,6 +430,8 @@ bool ordenamientoDump(void* primerDatoVoid, void* segundoDatoVoid){
 }
 
 void obtenerDump(){
+	pthread_mutex_lock(&mutexDynamic);
+
 	t_list* lista = list_create();
 	for(int i = 0; i < tamanioTabla; i++){
 		if(!tablaElementos[i].estaVacio){
@@ -431,6 +445,8 @@ void obtenerDump(){
 	list_sort(lista, ordenamientoDump);
 	imprimirDatos(lista);
 	list_destroy(lista);
+
+	pthread_mutex_unlock(&mutexDynamic);
 }
 //DUMP DE CACHE (FIN)
 
@@ -443,6 +459,8 @@ void* mapearSuscriptorAModulo(void* suscriptor){
 }
 
 void agregarSuscriptorEnviado(long IDMensaje, Suscriptor** suscriptor){
+	pthread_mutex_lock(&mutexDynamic);
+
 	for(int i = 0; i < tamanioTabla; i++){
 		if(tablaElementos[i].ID == IDMensaje){
 			int yaEnviado = list_contains_int(tablaElementos[i].suscriptoresEnviados, (*suscriptor)->modulo);
@@ -452,17 +470,25 @@ void agregarSuscriptorEnviado(long IDMensaje, Suscriptor** suscriptor){
 			}
 		}
 	}
+
+	pthread_mutex_unlock(&mutexDynamic);
 }
 
 void agregarSuscriptorRecibido(long IDMensaje, Suscriptor* suscriptor){
+	pthread_mutex_lock(&mutexDynamic);
+
 	for(int i = 0; i < tamanioTabla; i++){
 		if(tablaElementos[i].ID == IDMensaje){
 			list_add(tablaElementos[i].suscriptoresRecibidos, &(suscriptor->modulo));
 		}
 	}
+
+	pthread_mutex_unlock(&mutexDynamic);
 }
 
 t_list* obtenerSuscriptoresEnviados(long IDMensaje){
+	pthread_mutex_lock(&mutexDynamic);
+
 	t_list* suscriptoresEnviados = NULL;
 
 	for(int i = 0; i < tamanioTabla; i++){
@@ -471,10 +497,13 @@ t_list* obtenerSuscriptoresEnviados(long IDMensaje){
 		}
 	}
 
+	pthread_mutex_unlock(&mutexDynamic);
+
 	return suscriptoresEnviados;
 }
 
 int esSuscriptorEnviado(t_list* suscriptoresEnviados, Suscriptor suscriptor){
+	pthread_mutex_lock(&mutexDynamic);
 
 	for(int i = 0; i < list_size(suscriptoresEnviados); i++){
 		TipoModulo* suscriptorRecibido = list_get(suscriptoresEnviados, i);
@@ -483,6 +512,8 @@ int esSuscriptorEnviado(t_list* suscriptoresEnviados, Suscriptor suscriptor){
 			return 1;
 		}
 	}
+
+	pthread_mutex_unlock(&mutexDynamic);
 
 	return 0;
 }

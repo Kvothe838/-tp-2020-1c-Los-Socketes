@@ -258,3 +258,58 @@ void agregarItemBuddySystem(void* item, int tamanioItem, long ID, long IDCorrela
 	agregarElementoValidoBuddySystem(&bloqueAModificar, item, tamanioItem, ID, IDCorrelativo, cola);
 }
 
+Bloque* obtenerBloquePorID(long ID, Bloque* bloque)
+{
+	if(bloque == NULL) return NULL;
+
+	if(bloque->ID == ID) return bloque;
+
+	Bloque* bloqueEncontradoIzq = obtenerBloquePorID(ID, bloque->izq);
+
+	if(bloqueEncontradoIzq != NULL) return bloqueEncontradoIzq;
+
+	Bloque* bloqueEncontradoDer = obtenerBloquePorID(ID, bloque->der);
+
+	return bloqueEncontradoDer;
+}
+
+int obtenerPosicionPorIDBuddySystem(long ID, Bloque* bloque)
+{
+	Bloque* bloqueEncontrado = obtenerBloquePorID(ID, bloque);
+
+	if(bloqueEncontrado == NULL) return -1;
+
+	return bloqueEncontrado->posicion;
+}
+
+void* obtenerItemBuddySystem(long ID)
+{
+	Bloque* bloqueEncontrado = obtenerBloquePorID(ID, cache);
+
+	if(bloqueEncontrado == NULL) return NULL;
+
+	void* valor = obtenerValor(bloqueEncontrado->tamanioOcupado, bloqueEncontrado->posicion);
+
+	return valor;
+}
+
+int* obtenerTamanioItemBuddySystem(long ID)
+{
+	Bloque* bloqueEncontrado = obtenerBloquePorID(ID, cache);
+
+	if(bloqueEncontrado == NULL) return NULL;
+
+	return &(bloqueEncontrado->tamanioOcupado);
+}
+
+long* obtenerIDCorrelativoItemBuddySystem(long ID)
+{
+	Bloque* bloqueEncontrado = obtenerBloquePorID(ID, cache);
+
+	if(bloqueEncontrado == NULL) return NULL;
+
+	return &(bloqueEncontrado->IDCorrelativo);
+}
+
+
+

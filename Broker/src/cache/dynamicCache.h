@@ -12,6 +12,7 @@
 #include "shared/messages.h"
 
 int tamanioTabla;
+pthread_mutex_t mutexDynamic;
 
 typedef struct {
 	int posicion;

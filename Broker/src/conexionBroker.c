@@ -103,12 +103,13 @@ void manejarPublisher(int socketCliente) {
 	//Creo el nuevo MensajeEnCola y lo agrego a la cola correspondiente.
 
 	agregarMensaje(publicacion->cola, ID);
-	agregarItem(publicacion->dato, publicacion->tamanioDato, *ID, publicacion->IDCorrelativo, publicacion->cola);
+	agregarItemGeneric(publicacion->dato, publicacion->tamanioDato, *ID, publicacion->IDCorrelativo, publicacion->cola);
+
+	int posicion = obtenerPosicionPorIDGeneric(*ID);
 
 	//Log obligatorio.
-	log_info(loggerObligatorio,	"Almacenado mensaje con ID %ld y posición de inicio de partición %d.", *ID, obtenerPosicionPorID(*ID));
+	log_info(loggerObligatorio,	"Almacenado mensaje con ID %ld y posición de inicio de partición %d.", *ID, posicion);
 
-	obtenerDump();
 	//Le devuelvo el id del mensaje y el tipo de cola al cliente.
 	stream = serializarStreamIdMensajePublisher(ID, &(publicacion->cola), &tamanio);
 	buffer = armarPaqueteYSerializar(ID_MENSAJE, tamanio, stream, &bytes);
@@ -121,8 +122,6 @@ void manejarPublisher(int socketCliente) {
 	free(publicacion);
 	free(stream);
 	free(buffer);
-
-	log_info(loggerObligatorio, "Me fui de función.");
 }
 
 void manejarACK(Ack* contenido, Suscriptor* suscriptor) {
@@ -207,18 +206,13 @@ void manejarSuscriptorCaido(Suscriptor** suscriptor) {
 }
 
 void enviarMensajesPorCola(TipoCola tipoCola) {
-	log_info(loggerObligatorio, "0.1");
 	ColaConSuscriptores* cola = obtenerCola(tipoCola);
-	log_info(loggerObligatorio, "0.2");
 
 	for (int i = 0; i < list_size(cola->IDMensajes); i++) {
-		log_info(loggerObligatorio, "0.3");
 		long* IDMensaje = list_get(cola->IDMensajes, i);
-		log_info(loggerObligatorio, "1");
-		void* mensaje = obtenerItem(*IDMensaje);
-		int* tamanioItem = obtenerTamanioItem(*IDMensaje);
-		long* IDCorrelativo = obtenerIDCorrelativoItem(*IDMensaje);
-		log_info(loggerObligatorio, "2");
+		void* mensaje = obtenerItemGeneric(*IDMensaje);
+		int* tamanioItem = obtenerTamanioItemGeneric(*IDMensaje);
+		long* IDCorrelativo = obtenerIDCorrelativoItemGeneric(*IDMensaje);
 
 		if (mensaje == NULL || tamanioItem == NULL || IDCorrelativo == NULL) {
 			log_info(loggerInterno, "No se obtuvieron datos para IDMensaje %ld",
@@ -226,26 +220,16 @@ void enviarMensajesPorCola(TipoCola tipoCola) {
 			continue;
 		}
 
-		log_info(loggerObligatorio, "3");
-
 		for (int j = 0; j < list_size(cola->suscriptores); j++) {
-			log_info(loggerObligatorio, "4");
 			Suscriptor* suscriptor = (Suscriptor*) list_get(cola->suscriptores,j);
-			log_info(loggerObligatorio, "5");
 			if (suscriptor->estaCaido)
 				continue;
 
-			log_info(loggerObligatorio, "6");
-
 			t_list* suscriptoresEnviados = obtenerSuscriptoresEnviados(*IDMensaje);
-
-			log_info(loggerObligatorio, "7");
 
 			if (suscriptoresEnviados != NULL
 					&& esSuscriptorEnviado(suscriptoresEnviados, *suscriptor))
 				continue;
-
-			log_info(loggerObligatorio, "8");
 
 			int bytes, bytesMensajeSuscriptor;
 			void* stream = serializarMensajeSuscriptor(*IDMensaje,
@@ -256,26 +240,18 @@ void enviarMensajesPorCola(TipoCola tipoCola) {
 					&bytes);
 			free(stream);
 
-			log_info(loggerObligatorio, "9");
-
 			if ((send(suscriptor->socket, paqueteSerializado, bytes,
 					MSG_NOSIGNAL)) <= 0)
 				continue;
-
-			log_info(loggerObligatorio, "10");
 
 			Ack* respuesta;
 
 			int recibidoExitoso = recibirAck(suscriptor->socket, &respuesta);
 
-			log_info(loggerObligatorio, "11");
-
 			if (!recibidoExitoso || respuesta->IDMensaje != *IDMensaje) {
 				manejarSuscriptorCaido(&suscriptor);
 				continue;
 			}
-
-			log_info(loggerObligatorio, "12");
 
 			agregarSuscriptorEnviado(*IDMensaje, &suscriptor);
 
@@ -302,7 +278,6 @@ void enviarMensajesSuscriptores() {
 		sem_wait(semColaMensajes);
 
 		for(int i = 0; i < 6; i++) {
-			log_info(loggerObligatorio, "Cola: %s", tipoColaToString(colas[i]));
 			enviarMensajesPorCola(colas[i]);
 		}
 	}

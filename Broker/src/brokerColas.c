@@ -44,6 +44,7 @@ ColaConSuscriptores* obtenerCola(TipoCola colaClave){
 }
 
 int agregarSuscriptor(TipoCola colaClave, Suscriptor* nuevoSuscriptor){
+	int resultado;
 	pthread_mutex_lock(&mutexSemaforo);
 
 	ColaConSuscriptores* colaEspecifica = obtenerCola(colaClave);
@@ -60,16 +61,18 @@ int agregarSuscriptor(TipoCola colaClave, Suscriptor* nuevoSuscriptor){
 	{
 		list_add(colaEspecifica->suscriptores, nuevoSuscriptor);
 
-		return 1;
+		resultado = 1;
 	} else {
 		Suscriptor* suscriptorAModificar = (Suscriptor*)suscriptorEncontrado;
 		suscriptorAModificar->socket = nuevoSuscriptor->socket;
 		suscriptorAModificar->estaCaido = 0;
 
-		return 0;
+		resultado = 0;
 	}
 
 	pthread_mutex_unlock(&mutexSemaforo);
+
+	return resultado;
 }
 
 void agregarMensaje(TipoCola colaClave, long* IDMensaje){

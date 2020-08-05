@@ -30,5 +30,9 @@ void imprimirCache();
 void agregarItemBuddySystem(void* item, int tamanioItem, long ID, long IDCorrelativo, TipoCola cola);
 void eliminarItemBuddySystem(Bloque* bloque);
 void eliminarVictimaBuddySystem();
+int obtenerPosicionPorIDBuddySystem(long ID, Bloque* bloque);
+void* obtenerItemBuddySystem(long id);
+int* obtenerTamanioItemBuddySystem(long ID);
+long* obtenerIDCorrelativoItemBuddySystem(long ID);
 
 #endif
