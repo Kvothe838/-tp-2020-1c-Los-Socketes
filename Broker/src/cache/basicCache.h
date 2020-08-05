@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <commons/log.h>
+#include <pthread.h>
 
 typedef void* CacheBasica;
 CacheBasica* cachePrincipal;
@@ -16,5 +17,6 @@ void guardarValor(void* valor, int tamanio, int posicion);
 void* obtenerValor(int tamanio, int posicion);
 void moverBloque(int tamanio, int posicionVieja, int posicionNueva);
 void liberarBasicCache();
+void reemplazarCache(int tamanioCache);
 
 #endif

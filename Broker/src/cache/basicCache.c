@@ -1,5 +1,4 @@
 #include "basicCache.h"
-#include "../conexionBroker.h"
 
 void inicializarCache(int tamanio){
 	pthread_mutex_init(&mutexBasic, NULL);
@@ -10,7 +9,10 @@ void inicializarCache(int tamanio){
 
 void guardarValor(void* valor, int tamanio, int posicion){
 	pthread_mutex_lock(&mutexBasic);
-
+	printf("Puntero a cache: %p\n", cachePrincipal);
+	printf("Posición a guardar: %d\n", posicion);
+	printf("Tamanio: %d\n", tamanio);
+	fflush(stdout);
 	memcpy(cachePrincipal + posicion, valor, tamanio);
 
 	pthread_mutex_unlock(&mutexBasic);
@@ -28,7 +30,11 @@ void* obtenerValor(int tamanio, int posicion){
 }
 
 void moverBloque(int tamanio, int posicionVieja, int posicionNueva){
+	printf("ANTES ADUGHIAUGHIAU: TAMANIO: %d, POSICION VIEJA: %d, POSICION NUEVA: %d\n", tamanio, posicionVieja, posicionNueva);
+	fflush(stdout);
 	void* item = obtenerValor(tamanio, posicionVieja);
+	printf("DESPUÉS ADGAGAG");
+	fflush(stdout);
 
 	pthread_mutex_lock(&mutexBasic);
 

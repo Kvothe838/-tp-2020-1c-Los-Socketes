@@ -121,6 +121,8 @@ void modificarTablaVacio(ItemTablaDinamica *tabla, int espacioRequerido, int pos
 	} else {
 		tabla[posicionVector].posicion += desplazamiento;
 	}
+
+	ItemTablaDinamica lala20 = tablaElementos[0];
 }
 
 int obtenerPosicionPorID(long ID){
@@ -133,7 +135,7 @@ int obtenerPosicionPorID(long ID){
 }
 
 void inicializarTabla(ItemTablaDinamica **tabla, int estaVacio){
-	*tabla = (ItemTablaDinamica*)malloc(tamanioTabla * sizeof(ItemTablaDinamica));
+	*tabla = (ItemTablaDinamica*)calloc(tamanioTabla, sizeof(ItemTablaDinamica));
 
 	if(estaVacio){
 		(*tabla)[0].ID = 0;
@@ -142,6 +144,8 @@ void inicializarTabla(ItemTablaDinamica **tabla, int estaVacio){
 		(*tabla)[0].estaVacio = 0;
 		(*tabla)[0].fechaCreacion = NULL;
 		(*tabla)[0].fechaUltimoUso = NULL;
+		(*tabla)[0].suscriptoresEnviados = NULL;
+		(*tabla)[0].suscriptoresRecibidos = NULL;
 	}
 
 	for(int i = estaVacio; i < tamanioTabla; i++){
@@ -151,6 +155,8 @@ void inicializarTabla(ItemTablaDinamica **tabla, int estaVacio){
 		(*tabla)[i].estaVacio = 1;
 		(*tabla)[i].fechaCreacion = NULL;
 		(*tabla)[i].fechaUltimoUso = NULL;
+		(*tabla)[i].suscriptoresEnviados = NULL;
+		(*tabla)[i].suscriptoresRecibidos = NULL;
 	}
 }
 
@@ -299,15 +305,16 @@ void consolidarCache(int posicionElementoVacio, int posicionElemento){
 }
 
 void compactarCache(){
-	ItemTablaDinamica *tablaCompactada = NULL;
+	ItemTablaDinamica *tablaCompactada = NULL, *tablaNuevoVacio = NULL;
 	int posicionNueva = 0, posicionVieja, posicionTablaNueva = 0;
 
 	inicializarTabla(&tablaCompactada, 0);
-	inicializarTabla(&tablaVacios, 1);
+	inicializarTabla(&tablaNuevoVacio, 1);
 
 	for(int i = 0; i < tamanioTabla; i++)
 	{
 		ItemTablaDinamica elementoActual = tablaElementos[i];
+		log_info(loggerObligatorio, "I: %d", i);
 
 		if(!elementoActual.estaVacio)
 		{
@@ -322,14 +329,18 @@ void compactarCache(){
 			posicionVieja = elementoActual.posicion;
 			tablaCompactada[posicionTablaNueva].posicion = posicionNueva;
 			tablaCompactada[posicionTablaNueva].estaVacio = 0;
+			log_info(loggerObligatorio, "ANTES DE MOVER BLOQUE: %d",  tablaElementos[13].posicion);
 			moverBloque(elementoActual.tamanio, posicionVieja, posicionNueva);
+			log_info(loggerObligatorio, "DESPUÉS DE MOVER BLOQUE: %d",  tablaElementos[13].posicion);
 			posicionNueva += obtenerDesplazamientoMinimo(elementoActual.tamanio);
 			posicionTablaNueva++;
 		}
 	}
 
-	modificarTablaVacio(tablaVacios, posicionNueva, 0);
+	modificarTablaVacio(tablaNuevoVacio, posicionNueva, 0);
 	memcpy(tablaElementos, tablaCompactada, sizeof(ItemTablaDinamica) * tamanioTabla);
+	memcpy(tablaVacios, tablaNuevoVacio, sizeof(ItemTablaDinamica) * tamanioTabla);
+	reemplazarCache(tamanioCache);
 
 	//Log obligatorio.
 	log_info(loggerObligatorio, "Ejecución de compactación.");
@@ -368,9 +379,13 @@ void eliminarItem(long ID){
 	//Log obligatorio.
 	log_info(loggerObligatorio, "Eliminada partición con posición de inicio %d.", posDatoAEliminar);
 
+	log_info(loggerObligatorio, "POSI CION: %d", tablaElementos[13].posicion);
+
 	//log_info(loggerObligatorio, "UNO");
 
 	consolidarCache(posNuevoVacio, posDatoAEliminar);
+
+	log_info(loggerObligatorio, "POSI CION  2: %d", tablaElementos[13].posicion);
 
 	if(frecuenciaCompactacion <= 1 || particionesLiberadas == frecuenciaCompactacion){
 		compactarCache();
