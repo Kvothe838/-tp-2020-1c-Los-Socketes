@@ -1145,7 +1145,7 @@ void getObjetivosGlobales(Team team){/*
 }
 
 Team inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeObjetivos){
-	Entrenador** team = (Entrenador**)(malloc(sizeof(Entrenador)));
+	Entrenador** team = (Entrenador**)(malloc(CANT_ENTRENADORES*sizeof(Entrenador)));
 
 	logInit = iniciar_logger("teamInit.log","Init");
 	sem_init(&esperar_pokemons,0,0);

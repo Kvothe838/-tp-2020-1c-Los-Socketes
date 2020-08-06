@@ -366,7 +366,7 @@ void iniciarServidorTeam(){
 
 
 
-void conexiones(t_log* logger, Entrenador** team){
+void conexiones(Entrenador** team){
 	getObjetivosGlobales(team);
 	printf("\n-----------------------------");
 	for(int i=0;i<list_size(OBJETIVO_GLOBAL);i++){
@@ -383,8 +383,8 @@ void conexiones(t_log* logger, Entrenador** team){
 	//pthread_create(&c_gameboy, NULL,(void*)iniciarServidorTeam,(void*)&argumentos);
 
 	//pthread_create(&c_gameboy,NULL,(void*)conectarse_broker,NULL);
-	pthread_join(c_broker,NULL);
-	pthread_join(c_gameboy,NULL);
+	pthread_detach(c_broker);
+	pthread_detach(c_gameboy);
 }
 
 

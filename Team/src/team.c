@@ -44,13 +44,14 @@ int main(void) {
 	puertoBroker = configTeam.puerto;
 	Team team = inicializarTeam(configTeam.posiciones,configTeam.pertenecientes,configTeam.objetivos);
 	//log_info(logger,"VOY A INGRESAR A PLANIFICAR");
-	pthread_t planificacion;
-	pthread_create(&planificacion, NULL,(void*)planificacion_fifo,NULL);
-	pthread_join(planificacion,NULL);
-
+	//pthread_t h_conexiones;
+	//pthread_create(&h_conexiones, NULL,(void*)conexiones,&team);
+	//pthread_join(h_conexiones,NULL);
+	conexiones(team);
 	//fclose(logTP);
 	//log_info(logger,"VOY A INGRESAR A CONEXIONES");
-	conexiones(logger, team);
+	//conexiones(team);
+	planificacion_fifo();
 	//log_info(logger,"YA INICIALICE A TEAM");
 	//pthread_create(&threadIniciarServidor, NULL,(void*)iniciarServidorTeam, (void*)&argumentos);
 
@@ -65,6 +66,11 @@ int main(void) {
 
 	//free(configTeam);
 	//liberarTeam(team);
+/*
+	for(int i=0;i<CANT_ENTRENADORES;i++){
+		free(team[i]);
+	}
+*/
 	printf(" \nprograma finalizado\n");
 	return 0;
 }
