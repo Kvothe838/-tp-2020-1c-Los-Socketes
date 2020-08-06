@@ -2,13 +2,13 @@
 
 t_log* logConexiones;
 
-int enviarGet(char* nombre, Config* configTeam){
+int enviarGet(char* nombre){
 	int exito = 1;
 	GetPokemon* pokemon = getGetPokemon(nombre);
-	int conexionBroker2 = crear_conexion_cliente((configTeam)->ip, (configTeam)->puerto);
+	int conexionBroker2 = crear_conexion_cliente(configTeam.ip, configTeam.puerto);
 	IDMensajePublisher* respuesta;
 
-	if(!enviarPublisherSinIDCorrelativo(logConexiones,conexionBroker2, configTeam->ID, pokemon, GET, &respuesta)){
+	if(!enviarPublisherSinIDCorrelativo(logConexiones,conexionBroker2, configTeam.ID, pokemon, GET, &respuesta)){
 		log_info(logConexiones, "NO SE PUDO MANDAR EL GET(%s)",nombre);
 		exito = 0;
 	} else{
@@ -21,39 +21,43 @@ int enviarGet(char* nombre, Config* configTeam){
 	return exito;
 }
 
+int loNecesitoGlobalmenteAppeared(char* nombrePokemon){ // 1 -> LO METO EN EL MAPA, 0 -> LO METO EN COLA RESERVA, (-1) -> ES RECHAZADO
+	int loNecesito=(-1);
+	pthread_mutex_lock(&acceder_objetivos_globales);
+	for(int i=0;i<list_size(OBJETIVO_GLOBAL);i++){
+		if(strcmp(getObj(list_get(OBJETIVO_GLOBAL,i))->especie,nombrePokemon)==0){ // ES ACEPTADO PARA EL MAPA O PARA LA RESERVA
+			if(getObj(list_get(OBJETIVO_GLOBAL,i))->cantidad > 0){ // LO METO EN EL MAPA
+				getObj(list_get(OBJETIVO_GLOBAL,i))->aceptarMas = 0;
+				loNecesito=1;
+			}else{ // LO METO EN COLA RESERVA
+				loNecesito=0;
+			}
+		}
+	}
+	pthread_mutex_unlock(&acceder_objetivos_globales);
+	log_info(logConexiones,"SALGO DE loNecesitoGlobalmenteAppeared");
+	return loNecesito;
+}
+
 int loNecesitoGlobalmente(char* nombrePokemon){
 	int necesidadGlobal = 0;
-
+	pthread_mutex_lock(&acceder_objetivos_globales);
 	for(int i=0;i<list_size(OBJETIVO_GLOBAL);i++){
 		if((strcmp(getObj(list_get(OBJETIVO_GLOBAL,i))->especie,nombrePokemon)==0)&&(getObj(list_get(OBJETIVO_GLOBAL,i))->aceptarMas)){
 			necesidadGlobal=getObj(list_get(OBJETIVO_GLOBAL,i))->cantidad;
 			getObj(list_get(OBJETIVO_GLOBAL,i))->aceptarMas = 0;
 		}
 	}
-
+	pthread_mutex_unlock(&acceder_objetivos_globales);
 	return necesidadGlobal;
-}
-
-void planificarPokemonsLocalized(t_list* pokemonesAAgregar){
-	for(int i=0;i < list_size(pokemonesAAgregar);i++){
-		log_info(logConexiones,"EL POKEMON %s EN LA POSICION (%d,%d) SE AGREGA AL MAPA",
-			retornarNombrePosta(list_get(pokemonesAAgregar,i)),
-			retornarPosicion(list_get(pokemonesAAgregar,i),0),
-			retornarPosicion(list_get(pokemonesAAgregar,i),1));
-
-		agregar_pokemon_cola(list_get(pokemonesAAgregar,i));
-		entrenador_mas_cercano(queue_peek(POKEMONS));
-	}
 }
 
 float distanciaMinimaHaciaAlgunEntrenador(Pokemon* pokemon){
 	pthread_mutex_lock(&modificar_cola_disponibles);
-	int indice_menor=0;
 	float masCerca = distancia(get_posicion((list_get(DISPONIBLES->elements,0)),0),get_posicion((list_get(DISPONIBLES->elements,0)),1),pokemon->x,pokemon->y);
 	for(int i=0;i<queue_size(DISPONIBLES);i++){
 		if((masCerca) > distancia(get_posicion((list_get(DISPONIBLES->elements,i)),0),get_posicion((list_get(DISPONIBLES->elements,i)),1),pokemon->x,pokemon->y)){
 			(masCerca) = distancia(get_posicion((list_get(DISPONIBLES->elements,i)),0),get_posicion((list_get(DISPONIBLES->elements,i)),1),pokemon->x,pokemon->y);
-			indice_menor=i;
 		}
 	}
 	pthread_mutex_unlock(&modificar_cola_disponibles);
@@ -61,17 +65,22 @@ float distanciaMinimaHaciaAlgunEntrenador(Pokemon* pokemon){
 	return masCerca;
 }
 
+void reservarPokemon(Pokemon* pokemon){
+	pthread_mutex_lock(&modificar_cola_reservas);
+	queue_push(POKEMONS_RESERVA,pokemon);
+	pthread_mutex_unlock(&modificar_cola_reservas);
+	log_info(logConexiones,"POKEMON (%s,%d,%d) RESERVADO EN MEMORIA",pokemon->nombre,pokemon->x,pokemon->y);
+}
+
 void filtrarPokemonsLocalized(t_list* pokemonsLocalized, int cantidadNecesidadGlobal){// RECIBO MAS DE LOS QUE NECESITO GLOBALMENTE
-	//t_list* distanciasMinimasDePokemons = list_map(pokemonsLocalized,(void*) distanciaMinimaHaciaAlgunEntrenador);
-	//LISTA (38 , 16)
 	float distanciasMinimasDePokemons[list_size(pokemonsLocalized)];
 
 	for(int i=0;i<list_size(pokemonsLocalized);i++){
 		//distanciasMinimasDePokemons[i] = 0;
 		distanciasMinimasDePokemons[i] = distanciaMinimaHaciaAlgunEntrenador(list_get(pokemonsLocalized,i));
-		log_trace(logConexiones,"%f",distanciasMinimasDePokemons[i]);
+		log_info(logConexiones,"%f",distanciasMinimasDePokemons[i]);
 	}
-	t_list* pokemonesParaAgregar = list_create();
+	//t_list* pokemonesParaAgregar = list_create();
 	int iteraciones=0;
 	int indiceVariable;int soyMenorATodos;
 	int i=0;
@@ -92,13 +101,22 @@ void filtrarPokemonsLocalized(t_list* pokemonsLocalized, int cantidadNecesidadGl
 				log_info(logConexiones,"VOY A AGREGAR A %f AL MAPA PROXIMAMENTE",distanciasMinimasDePokemons[i]);
 				iteraciones++;
 				distanciasMinimasDePokemons[i] = (-1);
-				list_add(pokemonesParaAgregar,list_get(pokemonsLocalized,i));
+				//list_add(pokemonesParaAgregar,list_get(pokemonsLocalized,i));
 				i=(-1);
 			}
 		}
 		i++;
 	}
-	planificarPokemonsLocalized(pokemonesParaAgregar);
+	// RESERVAR POKEMONS
+	for(int i=0;i<list_size(pokemonsLocalized);i++){
+		if(distanciasMinimasDePokemons[i]!=(-1)){
+			reservarPokemon(list_get(pokemonsLocalized,i));
+		}else{
+			agregar_pokemon_cola(list_get(pokemonsLocalized,i));
+			entrenador_mas_cercano(queue_peek(POKEMONS));
+		}
+	}
+	//planificarPokemonsLocalized(pokemonesParaAgregar);
 }
 
 void manejarNuevoMensajeSuscriptor(MensajeParaSuscriptor* mensaje)
@@ -136,7 +154,13 @@ void manejarNuevoMensajeSuscriptor(MensajeParaSuscriptor* mensaje)
 			free(localized);
 
 			if(list_size(pokemonsLocalized) <= cantidadNecesidadGlobal){ // AGREGO TODOS LOS RECIBIDOS AL MAPA
-				planificarPokemonsLocalized(pokemonsLocalized);
+				for(int i=0;i<list_size(pokemonsLocalized);i++){
+					agregar_pokemon_cola(list_get(pokemonsLocalized,i));
+					entrenador_mas_cercano(queue_peek(POKEMONS));
+				}
+
+
+				//planificarPokemonsLocalized(pokemonsLocalized);
 			}else{ // RECIBO MAS DE LOS QUE NECESITO, VOY A TENER POKEMONS DE RESERVA
 				filtrarPokemonsLocalized(pokemonsLocalized,cantidadNecesidadGlobal);
 			}
@@ -145,13 +169,36 @@ void manejarNuevoMensajeSuscriptor(MensajeParaSuscriptor* mensaje)
 
 		case APPEARED:;
 			AppearedPokemon* appeared = deserializarAppeared(mensaje->contenido);
-			log_info(logConexiones,"LLEGO UN APPEARED(%s) en (%d,%d)", appeared->nombre, appeared->posX, appeared->posY);
+			log_info(logConexiones,"LLEGO UN APPEARED(%s) EN (%d,%d)", appeared->nombre, appeared->posX, appeared->posY);
+			int necesidad = loNecesitoGlobalmenteAppeared(appeared->nombre);
+			if(necesidad != (-1)){
+				Pokemon* nuevo;
+				//nuevo = crearPokemon(appeared->nombre,*(uint32_t*)(appeared->posX),*(uint32_t*)(appeared->posY));
+				nuevo = crearPokemon(appeared->nombre,(appeared->posX),(appeared->posY));
+				if(necesidad==1){
+					agregar_pokemon_cola(nuevo);
+					entrenador_mas_cercano(queue_peek(POKEMONS));
+				}else{
+					reservarPokemon(nuevo);
+				}
+			}else{
+				log_info(logConexiones,"APPEARED(%s) EN (%d,%d) RECHAZADO", appeared->nombre, appeared->posX, appeared->posY);
+			}
+
 			free(appeared);
 
 			break;
 
 		case CAUGHT:;
 			CaughtPokemon* caught = deserializarCaught(mensaje->contenido);
+			log_info(logConexiones,"LLEGO UN CAUGHT(%d) PARA EL ID CORRELATIVO %ld", caught->loAtrapo, mensaje->IDMensajeCorrelativo);
+
+			if(consultaGlobal.id_correlativo == mensaje->IDMensajeCorrelativo){
+				consultaGlobal.respuesta = caught->loAtrapo;
+				consultaGlobal.id_correlativo = 0;
+				sem_post(&consultaCatch);
+			}
+
 			free(caught);
 			break;
 
@@ -160,91 +207,86 @@ void manejarNuevoMensajeSuscriptor(MensajeParaSuscriptor* mensaje)
 	}
 }
 
-void funcionDeMierda(Config* configTeam){
+void funcionDeMierda(){
 	int sigo;int indice;
-	logger = iniciar_logger("PRUEBA2", "TEAM");
-		log_info(logConexiones,"VOY A MANDAR LOS GETS");
-			sigo = 1;
-			indice = 0;
-
-			while(indice < list_size(OBJETIVO_GLOBAL) && sigo){
-				log_info(logConexiones,"VOY A MANDAR UN GET DENTRO DEL WHILE");
-				if(!enviarGet(getObj(list_get(OBJETIVO_GLOBAL,indice))->especie, configTeam)){
-					sigo = 0;
-				}
-				indice++;
-			}
+	//logger = iniciar_logger("PRUEBA2", "TEAM");
+	log_info(logConexiones,"VOY A MANDAR LOS GETS");
+	sigo = 1;
+	indice = 0;
+	pthread_mutex_lock(&acceder_objetivos_globales);
+	while(indice < list_size(OBJETIVO_GLOBAL) && sigo){
+		log_info(logConexiones,"VOY A MANDAR UN GET DENTRO DEL WHILE");
+		if(!enviarGet(getObj(list_get(OBJETIVO_GLOBAL,indice))->especie)){
+			sigo = 0;
+		}
+		indice++;
+	}
+	pthread_mutex_unlock(&acceder_objetivos_globales);
 	log_info(logConexiones,"YA MANDE LOS GETS");
 }
 
-void escucharABroker(Config* configTeam){
-	int conexionBroker;int suscripcionEnviada;
-	conexionBroker = crear_conexion_cliente((configTeam)->ip, (configTeam)->puerto);
-	suscripcionEnviada = enviarSuscripcion(conexionBroker, (configTeam)->ID, 3, APPEARED, LOCALIZED, CAUGHT);
-	int resultado;
-	while(1){
+void escucharABroker(){
+	int conexionBroker;//int suscripcionEnviada;
+	conexionBroker = crear_conexion_cliente(configTeam.ip, configTeam.puerto);
+	//suscripcionEnviada =
+			enviarSuscripcion(conexionBroker, configTeam.ID, 3, APPEARED, LOCALIZED, CAUGHT);
+	//int resultado; ----------------
+	while(seguir_abierto_servidor==1){ // EL HILO SERVIDOR DE BROKER SE TERMINA SI SE TERMINA EL HILO PLANIFICACION Y SE PIERDE LA CONEXION CON BROKER
 		log_info(logConexiones,"===== VOY A ESCUCHAR AL BROKER =====");
 		OpCode codigo;
-		resultado = recv(conexionBroker, &codigo, sizeof(OpCode), MSG_WAITALL);
-		if(resultado != 0 && resultado != -1 && conexionBroker != 0){
-			if(codigo == NUEVO_MENSAJE_SUSCRIBER){
-				//t_log* logger = log_create("respuesta.log", "RESPUESTA", true, LOG_LEVEL_TRACE);
-				log_info(logConexiones, "LLEGO ALGO");
-				MensajeParaSuscriptor* mensaje = NULL;
-				int recepcionExitosa = recibirMensajeSuscriber(conexionBroker, logConexiones, TEAM, &mensaje, ipBroker, puertoBroker);
-
-				if(!recepcionExitosa) continue;
-				//log_trace(logger, "Llegó algo de la cola %s", tipoColaToString(mensaje->cola));
-				pthread_create(&thread,NULL,(void*)manejarNuevoMensajeSuscriptor,(mensaje));
-				pthread_detach(thread);
-				//process_request(codigo, socketBroker);
+		//resultado = recv(conexionBroker, &codigo, sizeof(OpCode), MSG_WAITALL); ----------------
+		//if(resultado != 0 && resultado != -1 && conexionBroker != 0){ ----------------
+		if(conexionBroker != (-1)){
+			if( (seguir_abierto_servidor==1) && (recv(conexionBroker, &codigo, sizeof(OpCode), MSG_WAITALL) != 0) ){
+				if(codigo == NUEVO_MENSAJE_SUSCRIBER){
+					log_info(logConexiones, "LLEGO UN MENSAJE DEL TIPO SUSCRIBER");
+					MensajeParaSuscriptor* mensaje = NULL;
+					int recepcionExitosa = recibirMensajeSuscriber(conexionBroker, logConexiones, TEAM, &mensaje, ipBroker, puertoBroker);
+					if(!recepcionExitosa) continue;
+					pthread_create(&thread,NULL,(void*)manejarNuevoMensajeSuscriptor,(mensaje));
+					pthread_detach(thread);
+				}else{log_info(logConexiones, "LLEGO UN MENSAJE PERO NO DEL TIPO SUSCRIBER");}
+			}else{
+				//log_info(logConexiones,"conexionBroker: %d",conexionBroker);
+				//log_info(logConexiones, "RESULTADO %d, NO HAY CONEXION CON BROKER", resultado);
+				liberar_conexion_cliente(conexionBroker);
+				log_info(logConexiones,"VOY A ESPERAR UNOS SEGUNDOS PARA VOLVER A RECONECTARME");
+				sleep(2);
+				conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
+				//suscripcionEnviada =
+					enviarSuscripcion(conexionBroker, configTeam.ID, 3, APPEARED, LOCALIZED, CAUGHT);
 			}
 		}else{
-			log_info(logConexiones, "RESULTADO %d, NO HAY CONEXION CON BROKER", resultado);
+			//log_info(logConexiones,"conexionBroker: %d",conexionBroker);
+			//log_info(logConexiones, "RESULTADO %d, NO HAY CONEXION CON BROKER", resultado);
 			liberar_conexion_cliente(conexionBroker);
 			log_info(logConexiones,"VOY A ESPERAR UNOS SEGUNDOS PARA VOLVER A RECONECTARME");
 			sleep(2);
 			conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
-			suscripcionEnviada = enviarSuscripcion(conexionBroker, (configTeam)->ID, 3, APPEARED, LOCALIZED, CAUGHT);
+			//suscripcionEnviada =
+				enviarSuscripcion(conexionBroker, configTeam.ID, 3, APPEARED, LOCALIZED, CAUGHT);
 		}
 	}
 }
 
-void conectarse_broker(Config** configTeam){// FUNCION PARA ESCUCHAR A BROKER CONSTANTEMENTE
-	funcionDeMierda((*configTeam));
-	escucharABroker((*configTeam));
+void conectarse_broker(){// FUNCION PARA ESCUCHAR A BROKER CONSTANTEMENTE
+	funcionDeMierda();
+	escucharABroker();
+	log_info(logConexiones,"pthread_exit(conectarse_broker)");
+	//pthread_exit(NULL);
 }
 
-void conexiones(Config* configTeam, t_log* logger, Entrenador** team, IniciarServidorArgs argumentos){
-	getObjetivosGlobales(team);
-	printf("\n-----------------------------");
-	for(int i=0;i<list_size(OBJETIVO_GLOBAL);i++){
-		printf("\n%s -> %d",getObj(list_get(OBJETIVO_GLOBAL,i))->especie,getObj(list_get(OBJETIVO_GLOBAL,i))->cantidad);
-	}
-	printf("\n-----------------------------\n\n\n");
 
-	logConexiones = iniciar_logger("pruebasConexiones.log", "Conexion");
-	pthread_t c_broker;
-	//pthread_t c_gameboy;
 
-	pthread_create(&c_broker,NULL,(void*)conectarse_broker,&configTeam);
-	//pthread_create(&c_gameboy, NULL,(void*)iniciarServidorTeam, (void*)&argumentos);
 
-	//pthread_create(&c_gameboy,NULL,(void*)conectarse_broker,NULL);
-	pthread_join(c_broker,NULL);
-	//pthread_detach(c_gameboy);
-	//pthread_detach(c_gameboy);
-}
 
-void atenderMensaje(int* socket)
-{
+
+
+void atenderMensaje(int* socket){
 	OpCode codigo;
-
 	if(recv(*socket, &codigo, sizeof(OpCode), MSG_WAITALL) == -1)
 		codigo = -1;
-
-	if(codigo == NUEVO_MENSAJE_SUSCRIBER)
-	{
+	if(codigo == NUEVO_MENSAJE_SUSCRIBER){
 		t_log* logger = log_create("nuevoMensajeSuscriber.log", "Nuevo mensaje suscriber", true, LOG_LEVEL_INFO);
 		MensajeParaSuscriptor* mensaje = NULL;
 		int recepcionExitosa = recibirMensajeSuscriber(*socket, logger, TEAM, &mensaje, ipBroker, puertoBroker);
@@ -256,13 +298,13 @@ void atenderMensaje(int* socket)
 	}
 }
 
-void esperarConexionGameBoy(int socket)
-{
+void esperarConexionGameBoy(int socket){
 	struct sockaddr_in dir_cliente;
 	socklen_t tam_direccion;
 	int socketCliente;
 
 	tam_direccion = sizeof(struct sockaddr_in);
+
 	socketCliente = accept(socket, (void*)&dir_cliente, &tam_direccion);
 
 	if(socketCliente == -1) return;
@@ -271,8 +313,7 @@ void esperarConexionGameBoy(int socket)
 	pthread_join(thread, NULL);
 }
 
-void iniciarServidorTeam(IniciarServidorArgs* argumentos)
-{
+void iniciarServidorTeam(){
 	int socket_servidor;
 
 	struct addrinfo hints, *servinfo, *p;
@@ -282,10 +323,10 @@ void iniciarServidorTeam(IniciarServidorArgs* argumentos)
 	hints.ai_socktype = SOCK_STREAM;
 	hints.ai_flags = AI_PASSIVE;
 
-	getaddrinfo(argumentos->ip, argumentos->puerto, &hints, &servinfo);
+	getaddrinfo(argumentos.ip, argumentos.puerto, &hints, &servinfo);
 
-	for (p=servinfo; p != NULL; p = p->ai_next)
-	{
+	for (p=servinfo; p != NULL; p = p->ai_next){
+
 		if ((socket_servidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
 			continue;
 
@@ -303,10 +344,47 @@ void iniciarServidorTeam(IniciarServidorArgs* argumentos)
 
 	freeaddrinfo(servinfo);
 
-	while(1){
+	while(seguir_abierto_servidor==1){
 		esperarConexionGameBoy(socket_servidor);
 	}
-
+	log_info(logConexiones,"pthread_exit(iniciarServidorTeam)");
 	liberar_conexion_cliente(socket_servidor);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+void conexiones(t_log* logger, Entrenador** team){
+	getObjetivosGlobales(team);
+	printf("\n-----------------------------");
+	for(int i=0;i<list_size(OBJETIVO_GLOBAL);i++){
+		printf("\n%s -> %d",getObj(list_get(OBJETIVO_GLOBAL,i))->especie,getObj(list_get(OBJETIVO_GLOBAL,i))->cantidad);
+	}
+	printf("\n-----------------------------\n\n\n");
+
+	logConexiones = iniciar_logger("pruebasConexiones.log", "Conexion");
+	pthread_t c_broker;
+	pthread_t c_gameboy;
+
+	pthread_create(&c_broker,NULL,(void*)conectarse_broker,NULL);
+	pthread_create(&c_gameboy, NULL,(void*)iniciarServidorTeam,NULL);
+	//pthread_create(&c_gameboy, NULL,(void*)iniciarServidorTeam,(void*)&argumentos);
+
+	//pthread_create(&c_gameboy,NULL,(void*)conectarse_broker,NULL);
+	pthread_join(c_broker,NULL);
+	pthread_join(c_gameboy,NULL);
+}
+
 

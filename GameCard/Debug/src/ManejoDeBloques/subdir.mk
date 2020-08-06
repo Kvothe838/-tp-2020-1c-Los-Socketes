@@ -17,7 +17,7 @@ C_DEPS += \
 src/ManejoDeBloques/%.o: ../src/ManejoDeBloques/%.c
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C Compiler'
-	gcc -I"/home/utnso/tp-2020-1c-Los-Socketes/Shared" -I"/home/utnso/tp-2020-1c-Los-Socketes/Shared/Debug" -O0 -g3 -Wall -c -fmessage-length=0 -pthread -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
+	gcc -I"/home/utnso/git/tp-2020-1c-Los-Socketes/Shared" -I"/home/utnso/git/tp-2020-1c-Los-Socketes/Shared/Debug" -O0 -g3 -Wall -c -fmessage-length=0 -pthread -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

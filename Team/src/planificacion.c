@@ -26,6 +26,7 @@ void ejecucion_entrenadores(){
 		}*/
 	}
 	log_info(logPlanificacion,"pthread_exit(EJECUCION)");
+	seguir_abierto_servidor=0;
 	pthread_exit(NULL);
 }
 
@@ -41,7 +42,8 @@ void match_atrapar(){
 		sem_wait(&esperar_finalizacion);
 		//mostrarColas();
 		//intercambios();
-		if(queue_size(DISPONIBLES)==0 && queue_size(EJECUTADOS)>0){ // EJECUTADOS --> DISPONIBLES // TERMINAN
+		//if(queue_size(DISPONIBLES)==0 && queue_size(EJECUTADOS)>0){ // EJECUTADOS --> DISPONIBLES // TERMINAN
+		if(queue_size(EJECUTADOS)>0){ // EJECUTADOS --> DISPONIBLES // TERMINAN
 			while(queue_size(EJECUTADOS)>0){
 				ingreso_a_colas_entrenador(queue_peek(EJECUTADOS));
 				pthread_mutex_lock(&modificar_cola_ejecutados); // SACAR

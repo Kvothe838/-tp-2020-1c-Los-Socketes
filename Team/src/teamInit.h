@@ -10,13 +10,14 @@
 #include <shared/utils.h>
 #include <semaphore.h>
 #include <commons/collections/queue.h>
-
+IniciarServidorArgs argumentos;
 t_log* logger;
 FILE* logTP;
 FILE* metricasTP;
 int CANT_ENTRENADORES;
 int CAMBIOS_CONTEXTO;
 int DEADLOCKS_RESUELTOS;
+int seguir_abierto_servidor;
 //int MENSAJES_BROKER;
 
 t_list* OBJETIVO_GLOBAL;
@@ -29,6 +30,7 @@ t_queue* POKEMONS;
 t_queue* DEADLOCKS;
 t_queue* EJECUTADOS;
 t_queue* ESPERANDO;
+t_queue* POKEMONS_RESERVA;
 
 sem_t s_match;
 sem_t s_ejecucion;
@@ -44,6 +46,7 @@ sem_t esperar_finalizacion;
 sem_t finalizar_ejecucion;
 sem_t intercambio_hecho;
 sem_t hayPreparados;
+sem_t consultaCatch;
 
 pthread_mutex_t modificar_cola_preparados;
 pthread_mutex_t modificar_cola_disponibles;
@@ -51,6 +54,8 @@ pthread_mutex_t modificar_cola_pokemons;
 pthread_mutex_t modificar_cola_deadlocks;
 pthread_mutex_t modificar_cola_ejecutados;
 pthread_mutex_t modificar_cola_esperando;
+pthread_mutex_t modificar_cola_reservas;
+pthread_mutex_t acceder_objetivos_globales;
 
 typedef enum {
 	ATRAPAR,
@@ -83,6 +88,7 @@ typedef struct {
 	t_list* objetivosActuales;
 	t_list* pertenecientesIntercambiables;
 	sem_t activador;
+	sem_t activadorCaught;
 	Pokemon* intentar_atrapar;
 	TipoAccion tipoAccion;
 	int indiceDar;
@@ -104,7 +110,7 @@ typedef struct{
 	char* path;
 	int ID;
 }Config;
-Config* configTeam;
+Config configTeam;
 
 typedef struct{
 	int idEntrenador;
@@ -117,6 +123,13 @@ typedef struct{
 	int aceptarMas;
 }Objetivo;
 
+typedef struct{
+	long id_correlativo;
+	int respuesta; // 1 si, 0 no
+}ConsultaCatch;
+
+ConsultaCatch consultaGlobal;
+
 typedef Entrenador** Team;
 //Team team;
 
@@ -125,6 +138,8 @@ void entrenador_mas_cercano(Pokemon* pokemon);
 float distancia(int e_x,int e_y,int p_x,int p_y);
 void asignar_movimiento(Entrenador* entrenador,int mov_x,int mov_y,Pokemon* pokemon);
 void agregar_pokemon_cola(Pokemon* nuevo);
+void incrementarObjetivoGlobal(char* nombreObjetivo);
+void decrementarObjetivoGlobal(char* nombreObjetivo);
 
 // RETORNOS
 char* retornarNombrePosta(Pokemon* p);
@@ -144,7 +159,7 @@ int retornarPosicion(Pokemon* p,int eje);
 
 
 // INICIALIZAR Y CONFIGURAR
-void cargarConfig(Config* conexionConfig, t_log* logger);
+void cargarConfig(t_log* logger);
 void iniciar_entrenador(Entrenador** entrenador);
 Entrenador* inicializarEntrenador(int id,char*posicion ,char* pokePertenecientes, char* pokeObjetivos);
 Entrenador** inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeObjetivos);

@@ -2,10 +2,13 @@
 t_log* logInit;
 int tiempoRetardo;
 char* algoritmo;
+int quantumGlobal;
 void agregar_pokemon_cola(Pokemon* nuevo){
 	pthread_mutex_lock(&modificar_cola_pokemons);
 	queue_push(POKEMONS,nuevo);
 	pthread_mutex_unlock(&modificar_cola_pokemons);
+	decrementarObjetivoGlobal(nuevo->nombre);
+	log_info(logInit,"POKEMON (%s,%d,%d) AGREGADO AL MAPA",nuevo->nombre,nuevo->x,nuevo->y);
 }
 
 void asignar_movimiento(Entrenador* entrenador,int mov_x,int mov_y,Pokemon* pokemon){
@@ -45,7 +48,7 @@ float distancia(int e_x,int e_y,int p_x,int p_y){ // se calcula la distancia ent
 
 void entrenador_mas_cercano(Pokemon* pokemon){
 	pthread_mutex_lock(&modificar_cola_disponibles);
-	if(queue_size(DISPONIBLES) > 0){
+	if((queue_size(DISPONIBLES) > 0)&&(queue_size(POKEMONS) > 0)){
 		int indice_menor=0;int mov_x;int mov_y;
 		float masCerca = distancia(get_posicion((list_get(DISPONIBLES->elements,0)),0),get_posicion((list_get(DISPONIBLES->elements,0)),1),pokemon->x,pokemon->y);
 		mov_x = pokemon->x - get_posicion((list_get(DISPONIBLES->elements,0)),0);
@@ -179,7 +182,7 @@ void intercambio_forzoso(Entrenador* mover, Entrenador* quieto){
 	//queue_push(PREPARADOS,mover);
 	pthread_mutex_unlock(&modificar_cola_preparados);
 	log_info(logInit," = %d = PASA A LA COLA PREPARADOS",mover->idEntrenador);
-	
+
 	pthread_mutex_lock(&modificar_cola_esperando);
 	queue_push(ESPERANDO,list_get(DEADLOCKS->elements,getIndice(quieto->idEntrenador)));
 	//queue_push(PREPARADOS,quieto);
@@ -495,8 +498,8 @@ void atrapar(Entrenador* persona){
 	}
 	if(encontrado==0){
 		list_add(persona->pertenecientesIntercambiables,persona->intentar_atrapar);
-		log_info(logInit,"= %d = ATRAPE A %s",persona->idEntrenador,(persona->intentar_atrapar)->nombre);
 	}
+	log_info(logInit,"= %d = ATRAPE A %s",persona->idEntrenador,(persona->intentar_atrapar)->nombre);
 	persona->intentar_atrapar = NULL;
 }
 
@@ -533,39 +536,38 @@ void moverse(Entrenador* persona){
 		}
 	}else{ // RR
 		while((persona->movimiento[0]!=0 || persona->movimiento[1]!=0)&&(persona->quantum_restante>0)){
-					if(persona->movimiento[0]==0){}else{
-						if(persona->movimiento[0] < 0){
-							persona->movimiento[0] += 1;
-							persona->posicion[0] -= 1;
-							persona->quantum_restante--;
-							sumarQuantum(persona->idEntrenador,1);
-							sleep(tiempoRetardo);
-						}else{
-							persona->movimiento[0] -= 1;
-							persona->posicion[0] += 1;
-							persona->quantum_restante--;
-							sumarQuantum(persona->idEntrenador,1);
-							sleep(tiempoRetardo);
-						}
+			if(persona->movimiento[0]==0){}else{
+				if(persona->movimiento[0] < 0){
+					persona->movimiento[0] += 1;
+					persona->posicion[0] -= 1;
+					persona->quantum_restante--;
+					sumarQuantum(persona->idEntrenador,1);
+					sleep(tiempoRetardo);
+				}else{
+					persona->movimiento[0] -= 1;
+					persona->posicion[0] += 1;
+					persona->quantum_restante--;
+					sumarQuantum(persona->idEntrenador,1);
+					sleep(tiempoRetardo);
+				}
+			}
+			if(persona->quantum_restante>0){
+				if(persona->movimiento[1]==0){}else{
+					if(persona->movimiento[1] < 0){
+						persona->movimiento[1] += 1;
+						persona->posicion[1] -= 1;
+						persona->quantum_restante--;
+						sumarQuantum(persona->idEntrenador,1);
+						sleep(tiempoRetardo);
+					}else{
+						persona->movimiento[1] -= 1;
+						persona->posicion[1] += 1;
+						persona->quantum_restante--;
+						sumarQuantum(persona->idEntrenador,1);
+						sleep(tiempoRetardo);
 					}
-					
-					if(persona->quantum_restante>0){
-						if(persona->movimiento[1]==0){}else{
-							if(persona->movimiento[1] < 0){
-								persona->movimiento[1] += 1;
-								persona->posicion[1] -= 1;
-								persona->quantum_restante--;
-								sumarQuantum(persona->idEntrenador,1);
-								sleep(tiempoRetardo);
-							}else{
-								persona->movimiento[1] -= 1;
-								persona->posicion[1] += 1;
-								persona->quantum_restante--;
-								sumarQuantum(persona->idEntrenador,1);
-								sleep(tiempoRetardo);
-							}
-						}
-					}
+				}
+			}
 		}
 	}
 	//fprintf(logTP,"Entrenador %d se movio a (%d,%d)\n",persona->idEntrenador,persona->posicion[0],persona->posicion[1]);
@@ -580,9 +582,7 @@ void ingreso_a_colas_entrenador(Entrenador* persona){
 			queue_push(DISPONIBLES,persona);
 			pthread_mutex_unlock(&modificar_cola_disponibles);
 			log_info(logInit," = %d = PASA A LA COLA DISPONIBLES",persona->idEntrenador);
-			if(queue_size(POKEMONS)>0){
-				entrenador_mas_cercano(queue_peek(POKEMONS));
-			}
+			entrenador_mas_cercano(queue_peek(POKEMONS));
 			break;
 		case BLOQUEADO:
 			if(verificar_deadlock(persona) == 0){
@@ -590,9 +590,7 @@ void ingreso_a_colas_entrenador(Entrenador* persona){
 				queue_push(DISPONIBLES,persona);
 				pthread_mutex_unlock(&modificar_cola_disponibles);
 				log_info(logInit," = %d = PASA A LA COLA DISPONIBLES",persona->idEntrenador);
-				if(queue_size(POKEMONS)>0){
-					entrenador_mas_cercano(queue_peek(POKEMONS));
-				}
+				entrenador_mas_cercano(queue_peek(POKEMONS));
 				//fprintf(logTP,"Entrenador %d pasa de la cola EJECUTADOS a DISPONIBLES: tiene espacio para atrapar otro pokemon\n",persona->idEntrenador);
 			}
 			else{
@@ -611,12 +609,13 @@ void ingreso_a_colas_entrenador(Entrenador* persona){
 }
 
 void reintegrar_quantum(Entrenador* entrenador){
-	printf("\nSIN QUANTUM");
+	//printf("\nSIN QUANTUM");
 	pthread_mutex_lock(&modificar_cola_preparados);
 	queue_push(PREPARADOS,entrenador);
 	pthread_mutex_unlock(&modificar_cola_preparados);
-	entrenador->quantum_restante += configTeam->quantum;
+	entrenador->quantum_restante += quantumGlobal;
 	//fprintf(logTP,"Entrenador %d pasa de la cola PREPARADOS a PREPARADOS: se le acabo el quantum\n",entrenador->idEntrenador);
+	log_info(logInit,"= %d = SE ME ACABO EL QUANTUM, VUELVO A IR A LA COLA PREPARADOS",(entrenador)->idEntrenador);
 	sem_post(&hayPreparados);
 }
 
@@ -645,6 +644,145 @@ int suma(int x, int y){
 	return (x+y);
 }
 
+long enviarCatch(Pokemon* pokemonAtrapar){
+	CatchPokemon* pokemon = getCatchPokemon(pokemonAtrapar->nombre,pokemonAtrapar->x,pokemonAtrapar->y);
+	int conexionBroker = crear_conexion_cliente(configTeam.ip, configTeam.puerto);
+	if(conexionBroker != (-1)){
+		IDMensajePublisher* respuesta;
+
+		if(!enviarPublisherSinIDCorrelativo(logInit,conexionBroker, configTeam.ID, pokemon, CATCH, &respuesta)){
+			log_info(logInit, "NO SE PUDO MANDAR EL CATCH(%s)",pokemonAtrapar->nombre);
+		} else{
+			log_info(logInit, "SE PUDO MANDAR EL CATCH(%s)",pokemonAtrapar->nombre);
+		}
+
+		log_info(logInit, "ID CORRELATIVO: %ld", respuesta->IDMensaje);
+		liberar_conexion_cliente(conexionBroker);
+		return respuesta->IDMensaje;
+	}else{ // COMPORTAMIENTO DEFAULT
+		consultaGlobal.respuesta = 1;
+		sem_post(&consultaCatch);
+		return 0;
+	}
+}
+
+Pokemon* getPokemon(Pokemon* x){
+	return x;
+}
+
+int hayOtroEnLaReserva(Entrenador* entrenador){
+	int encontreUno=0;
+	float distanciaMinimaHaciaUnPokemon=(-1);
+	int indiceMenor=(-1);
+
+	// SI SE PUEDE BUSCAR OTRO POKEMON PARA REINTENTAR ATRAPAR EN LA COLA DE POKEMONS DEL MAPA, AGREGAR LO COMENTADO,
+	//SINO, SE REVISA SOLAMENTE EN LA COLA DE POKEMONS RESERVADOS
+
+	/*
+	pthread_mutex_lock(&modificar_cola_pokemons);
+	for(int indice=0;indice < queue_size(POKEMONS);indice++){
+		if(strcmp((entrenador->intentar_atrapar)->nombre,retornarNombrePosta(list_get(POKEMONS->elements,indice)))==0){
+			if(distanciaMinimaHaciaUnPokemon == (-1)){
+				encontreUno=1; //HAY AL MENOS 1
+				distanciaMinimaHaciaUnPokemon = distancia(entrenador->posicion[0],entrenador->posicion[1],getPokemon(list_get(POKEMONS->elements,indice))->x,getPokemon(list_get(POKEMONS->elements,indice))->y);
+				indiceMenor = indice;
+			}else{ // ya se habia calculado otra distancia en algun momento
+				if((distancia(entrenador->posicion[0],entrenador->posicion[1],getPokemon(list_get(POKEMONS->elements,indice))->x,getPokemon(list_get(POKEMONS->elements,indice))->y)) < distanciaMinimaHaciaUnPokemon){
+					distanciaMinimaHaciaUnPokemon = distancia(entrenador->posicion[0],entrenador->posicion[1],getPokemon(list_get(POKEMONS->elements,indice))->x,getPokemon(list_get(POKEMONS->elements,indice))->y);
+					indiceMenor = indice;
+				}
+			}
+		}
+	}
+	pthread_mutex_unlock(&modificar_cola_pokemons);
+	*/
+	if(encontreUno==0){// VOY A TENER QUE BUSCAR EN LA COLA DE RESERVA
+		pthread_mutex_lock(&modificar_cola_reservas);
+		for(int indice=0;indice < queue_size(POKEMONS_RESERVA);indice++){
+			if(strcmp((entrenador->intentar_atrapar)->nombre,retornarNombrePosta(list_get(POKEMONS_RESERVA->elements,indice)))==0){
+				if(distanciaMinimaHaciaUnPokemon == (-1)){
+					encontreUno=1; //HAY AL MENOS 1 EN LA RESERVA
+					distanciaMinimaHaciaUnPokemon = distancia(entrenador->posicion[0],entrenador->posicion[1],getPokemon(list_get(POKEMONS_RESERVA->elements,indice))->x,getPokemon(list_get(POKEMONS_RESERVA->elements,indice))->y);
+					indiceMenor = indice;
+				}else{ // ya se habia calculado otra distancia en algun momento
+					if((distancia(entrenador->posicion[0],entrenador->posicion[1],getPokemon(list_get(POKEMONS_RESERVA->elements,indice))->x,getPokemon(list_get(POKEMONS_RESERVA->elements,indice))->y)) < distanciaMinimaHaciaUnPokemon){
+						distanciaMinimaHaciaUnPokemon = distancia(entrenador->posicion[0],entrenador->posicion[1],getPokemon(list_get(POKEMONS_RESERVA->elements,indice))->x,getPokemon(list_get(POKEMONS_RESERVA->elements,indice))->y);
+						indiceMenor = indice;
+					}
+				}
+			}
+		}
+		if(encontreUno){
+			int mov_x = getPokemon(list_get(POKEMONS_RESERVA->elements,indiceMenor))->x - entrenador->posicion[0];
+			int mov_y = getPokemon(list_get(POKEMONS_RESERVA->elements,indiceMenor))->y - entrenador->posicion[1];
+			asignar_movimiento(entrenador,mov_x,mov_y,list_get(POKEMONS_RESERVA->elements,indiceMenor));
+		}
+		pthread_mutex_unlock(&modificar_cola_reservas);
+	}
+	/*
+	else{
+		int mov_x = getPokemon(list_get(POKEMONS->elements,indiceMenor))->x - entrenador->posicion[0];
+		int mov_y = getPokemon(list_get(POKEMONS->elements,indiceMenor))->y - entrenador->posicion[1];
+		asignar_movimiento(entrenador,mov_x,mov_y,list_get(POKEMONS->elements,indiceMenor));
+	}
+	*/
+	if(encontreUno==0){
+		incrementarObjetivoGlobal((entrenador->intentar_atrapar)->nombre);
+		log_info(logInit," = %d = NO HAY OTRO %s EN LA COLA DE RESERVA",entrenador->idEntrenador, (entrenador->intentar_atrapar)->nombre);
+		entrenador->intentar_atrapar = NULL;
+	}else{
+		pthread_mutex_lock(&modificar_cola_reservas);
+		queue_pop(POKEMONS_RESERVA);
+		pthread_mutex_unlock(&modificar_cola_reservas);
+		log_info(logInit," = %d = COMO HAY OTRO (%s,%d,%d) EN LA COLA DE RESERVA, VOY A INTENTAR ATRAPAR A ESE",entrenador->idEntrenador,(entrenador->intentar_atrapar)->nombre,(entrenador->intentar_atrapar)->x,(entrenador->intentar_atrapar)->y);
+	}
+	return encontreUno;
+}
+
+void consultar_atrapar(Entrenador* entrenador){
+	consultaGlobal.id_correlativo = enviarCatch(entrenador->intentar_atrapar);
+	sem_wait(&consultaCatch);
+	if(consultaGlobal.respuesta){
+		atrapar(entrenador);
+		ubicar_entrenador(entrenador);
+	}else{// BUSCAR OTRO EN LA COLA DE RESERVA
+		log_info(logInit," = %d = NO PUDE ATRAPAR A %s",entrenador->idEntrenador,(entrenador->intentar_atrapar)->nombre);
+		if(hayOtroEnLaReserva(entrenador)){ // VA A PREPARADOS
+			sem_post(&hayPreparados);
+		}else{ // VA A DISPONIBLES
+			pthread_mutex_lock(&modificar_cola_disponibles);
+			queue_push(DISPONIBLES,entrenador);
+			pthread_mutex_unlock(&modificar_cola_disponibles);
+			log_info(logInit," = %d = PASA A LA COLA DISPONIBLES",entrenador->idEntrenador);
+			entrenador_mas_cercano(queue_peek(POKEMONS));
+		}
+	}
+
+	if(strcmp(algoritmo,"RR")==0){
+		((entrenador)->quantum_restante)--;
+		if((entrenador)->quantum_restante == 0){
+			(entrenador)->quantum_restante += quantumGlobal;
+		}
+	}
+	sumarQuantum((entrenador)->idEntrenador,1);
+
+}
+
+void realizar_intercambio(Entrenador* entrenador){
+	intercambiar(entrenador,queue_peek(ESPERANDO));
+
+	if(strcmp(algoritmo,"RR")==0){
+		(entrenador)->quantum_restante -= 5;
+		if((entrenador)->quantum_restante == 0){
+			(entrenador)->quantum_restante += quantumGlobal;
+		}
+	}
+
+	sumarQuantum((entrenador)->idEntrenador,5);
+
+	ubicar_entrenador(entrenador);
+}
+
 void iniciar_entrenador(Entrenador** entrenador){
 	while(verificar_finalizacion(*entrenador)==0){
 		log_info(logInit,"= %d = BLOQUEADO",(*entrenador)->idEntrenador);
@@ -656,62 +794,32 @@ void iniciar_entrenador(Entrenador** entrenador){
 			if((*entrenador)->tipoAccion==ATRAPAR){
 				if(strcmp(algoritmo,"RR")==0){ // RR
 					if((*entrenador)->quantum_restante >= 1){ // TIENE QUANTUM COMO PARA HACER CONSULTA A BROKER
+						consultar_atrapar(*entrenador);
 						//fprintf(logTP,"Entrenador %d va a intentar atrapar a %s en (%d,%d)\n",(*entrenador)->idEntrenador,retornarNombrePosta((*entrenador)->intentar_atrapar),((*entrenador)->intentar_atrapar)->x,((*entrenador)->intentar_atrapar)->y);
-						
-						// AGREGAR FPRINTF PARA EL CASO DE QUE HAYA O NO ATRAPADO AL POKEMON
-
-						/*
-
-						MENSAJES CATCH - CAUGHT, depende del mensaje de Broker si entrenador atrapar o nó al pokemon
-
-						*/
-
-						atrapar(*entrenador);
-
-						((*entrenador)->quantum_restante)--;
-						sumarQuantum((*entrenador)->idEntrenador,1);
-
-						//sleep(tiempoRetardo);
-						if((*entrenador)->quantum_restante == 0){
-							(*entrenador)->quantum_restante += configTeam->quantum;
-						}
-						ubicar_entrenador(*entrenador);
 					}else{
+						log_info(logInit," = %d = NO TIENE QUANTUM PARA HACER UNA CONSULTA");
 						reintegrar_quantum(*entrenador);
 					}
 				}else{ // FIFO
 					//fprintf(logTP,"Entrenador %d va a intentar atrapar a %s en (%d,%d)\n",(*entrenador)->idEntrenador,retornarNombrePosta((*entrenador)->intentar_atrapar),((*entrenador)->intentar_atrapar)->x,((*entrenador)->intentar_atrapar)->y);
-					// AGREGAR FPRINTF PARA EL CASO DE QUE HAYA O NO ATRAPADO AL POKEMON
-					atrapar(*entrenador);
-					sumarQuantum((*entrenador)->idEntrenador,1);
-					ubicar_entrenador(*entrenador);
+					consultar_atrapar(*entrenador);
 				}
 			}else{ // INTERCAMBIO
 				if(strcmp(algoritmo,"RR")==0){ // RR
 					if((*entrenador)->quantum_restante >= 5){ // TIENE QUANTUM COMO PARA HACER UN INTERCAMBIO
-						intercambiar(*entrenador,queue_peek(ESPERANDO));
-
-						(*entrenador)->quantum_restante -= 5;
-						sumarQuantum((*entrenador)->idEntrenador,5);
-
-						if((*entrenador)->quantum_restante == 0){
-							(*entrenador)->quantum_restante += configTeam->quantum;
-						}
-						ubicar_entrenador(*entrenador);
+						realizar_intercambio(*entrenador);
 					}else{
+						log_info(logInit," = %d = NO TIENE QUANTUM PARA HACER UN INTERCAMBIO");
 						reintegrar_quantum(*entrenador);
 					}
 				}else{ // FIFO
-					intercambiar(*entrenador,queue_peek(ESPERANDO));
-					sumarQuantum((*entrenador)->idEntrenador,5);
-					ubicar_entrenador(*entrenador);
+					realizar_intercambio(*entrenador);
 				}
 			}
-		}else{ // EL QUANTUM LE QUEDO CORTO
+		}else{// EL QUANTUM LE QUEDO CORTO
 			reintegrar_quantum(*entrenador);
 		}
 		log_info(logInit,"= %d = YA TERMINE DE EJECUTARME",(*entrenador)->idEntrenador);
-		//mostrarEntrenador(*entrenador);
 		sem_post(&ya_termine);
 	}
 	log_info(logInit,"pthread_exit(%d)",(*entrenador)->idEntrenador);
@@ -740,30 +848,31 @@ int cantidad_arrays(char** array){ // retorna la cantidad posta de un array
 		return indice;
 }
 
-void cargarConfig(Config* conexionConfig, t_log* logger){
+void cargarConfig(t_log* logger){
 	t_config* config;
 	config = leer_config("configTeam.config", logger);
-	conexionConfig->posiciones = config_get_array_value(config,"POSICIONES_ENTRENADORES"); // lista de strings, ultimo elemento nulo
-	conexionConfig->pertenecientes = config_get_array_value(config,"POKEMON_ENTRENADORES");
-	conexionConfig->objetivos = config_get_array_value(config,"OBJETIVOS_ENTRENADORES");
-	conexionConfig->ip = config_get_string_value(config, "IP_BROKER");
-	conexionConfig->puerto = config_get_string_value(config, "PUERTO_BROKER");
-	conexionConfig->ipTeam = config_get_string_value(config, "IP_TEAM");
-	conexionConfig->puertoTeam = config_get_string_value(config, "PUERTO_TEAM");
-	conexionConfig->tiempoReconexion = config_get_int_value(config, "TIEMPO_RECONEXION");
-	conexionConfig->ID = 4 + config_get_int_value(config, "ID"); //Cosas turbias del Broker.
+	configTeam.posiciones = config_get_array_value(config,"POSICIONES_ENTRENADORES"); // lista de strings, ultimo elemento nulo
+	configTeam.pertenecientes = config_get_array_value(config,"POKEMON_ENTRENADORES");
+	configTeam.objetivos = config_get_array_value(config,"OBJETIVOS_ENTRENADORES");
+	configTeam.ip = config_get_string_value(config, "IP_BROKER");
+	configTeam.puerto = config_get_string_value(config, "PUERTO_BROKER");
+	configTeam.ipTeam = config_get_string_value(config, "IP_TEAM");
+	configTeam.puertoTeam = config_get_string_value(config, "PUERTO_TEAM");
+	configTeam.tiempoReconexion = config_get_int_value(config, "TIEMPO_RECONEXION");
+	configTeam.ID = 4 + config_get_int_value(config, "ID"); //Cosas turbias del Broker.
 	algoritmo = config_get_string_value(config, "ALGORITMO_PLANIFICACION");
 	tiempoRetardo = config_get_int_value(config, "RETARDO_CICLO_CPU");
 
 	printf("ALGORITMO DE PLANIFICACION = %s\n",algoritmo);
-	CANT_ENTRENADORES = cantidad_arrays(conexionConfig->pertenecientes);
+	CANT_ENTRENADORES = cantidad_arrays(configTeam.pertenecientes);
 	DEADLOCKS_RESUELTOS=0;
 	CAMBIOS_CONTEXTO=0;
-	/*
+
 	if(strcmp(algoritmo,"RR")==0){
-		configTeam->quantum = config_get_int_value(config,"QUANTUM");
+		quantumGlobal = config_get_int_value(config,"QUANTUM");
+		printf("QUANTUM = %d\n",quantumGlobal);
 	}
-	*/
+
 	METRICAS_ENTRENADORES = list_create();
 	for(int i=0; i < CANT_ENTRENADORES;i++){
 		Metrica *unaMetrica = malloc(sizeof(Metrica));
@@ -771,7 +880,7 @@ void cargarConfig(Config* conexionConfig, t_log* logger){
 		unaMetrica->quantumTotal = 0;
 		list_add(METRICAS_ENTRENADORES,unaMetrica);
 	}
-	logTP  = fopen (conexionConfig->path, "w");	
+	logTP  = fopen (configTeam.path, "w");
 }
 Pokemon* crearPokemon(char *nombre,int x, int y) {
 	Pokemon *new = malloc(sizeof(Pokemon));
@@ -948,8 +1057,8 @@ Entrenador* inicializarEntrenador(int id,char* posicion, char* pokePerteneciente
 	entrenador->estado = NUEVO;
 	asignarObjetivosActuales(entrenador);
 	asignarPertenecientesIntercambiables(entrenador);
-
 	
+
 
 	if(verificar_deadlock(entrenador)==1){
 		entrenador->estado = BLOQUEADO;
@@ -957,10 +1066,10 @@ Entrenador* inicializarEntrenador(int id,char* posicion, char* pokePerteneciente
 	if(verificar_finalizacion(entrenador)==0){
 		entrenador->movimiento[0]=0;entrenador->movimiento[1]=0;
 		entrenador->intentar_atrapar=NULL;
-		sem_init(&(entrenador->activador),0,0);/*
+		sem_init(&(entrenador->activador),0,0);
 		if(strcmp(algoritmo,"RR")==0){
-			entrenador->quantum_restante = configTeam->quantum;
-		}*/
+			entrenador->quantum_restante = quantumGlobal;
+		}
 	}else{
 		entrenador->estado = SALIR;
 	}
@@ -980,6 +1089,27 @@ void crearObjetivoGlobal(char* especiePokemon){
 Objetivo* getObj(Objetivo* x){
 	return x;
 }
+// EN EL CASO DE QUE CAUGHT RETORNE UN "NO", Y EN LA COLA DE POKEMONS DE RESERVA NO HAYA OTRO DE ESTA MISMA ESPECIE, SE DEBE USAR ESTA FUNCION
+void incrementarObjetivoGlobal(char* nombreObjetivo){
+	pthread_mutex_lock(&acceder_objetivos_globales);
+	for(int i=0;i < list_size(OBJETIVO_GLOBAL);i++){
+		if(strcmp(getObj(list_get(OBJETIVO_GLOBAL,i))->especie,nombreObjetivo)==0){
+			getObj(list_get(OBJETIVO_GLOBAL,i))->cantidad += 1;
+		}
+	}
+	pthread_mutex_unlock(&acceder_objetivos_globales);
+	log_info(logInit,"SE INCREMENTO EN 1 EL OJETIVO %s",nombreObjetivo);
+}
+void decrementarObjetivoGlobal(char* nombreObjetivo){
+	pthread_mutex_lock(&acceder_objetivos_globales);
+	for(int i=0;i < list_size(OBJETIVO_GLOBAL);i++){
+		if(strcmp(getObj(list_get(OBJETIVO_GLOBAL,i))->especie,nombreObjetivo)==0){
+			getObj(list_get(OBJETIVO_GLOBAL,i))->cantidad -= 1;
+		}
+	}
+	pthread_mutex_unlock(&acceder_objetivos_globales);
+	log_info(logInit,"SE DECREMENTO EN 1 EL OJETIVO %s",nombreObjetivo);
+}
 
 int yaEsObjetivoGlobal(PokemonFantasia* especiePokemon){
 	int loEs=0;
@@ -987,7 +1117,7 @@ int yaEsObjetivoGlobal(PokemonFantasia* especiePokemon){
 	for(int i=0;i < list_size(OBJETIVO_GLOBAL);i++){
 		if(strcmp(getObj(list_get(OBJETIVO_GLOBAL,i))->especie,especiePokemon->nombre)==0){
 			loEs=1;
-			getObj(list_get(OBJETIVO_GLOBAL,i))->cantidad += 1;
+			incrementarObjetivoGlobal(getObj(list_get(OBJETIVO_GLOBAL,i))->especie);
 		}
 	}
 	return loEs;
@@ -1016,6 +1146,7 @@ void getObjetivosGlobales(Team team){/*
 
 Team inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeObjetivos){
 	Entrenador** team = (Entrenador**)(malloc(sizeof(Entrenador)));
+
 	logInit = iniciar_logger("teamInit.log","Init");
 	sem_init(&esperar_pokemons,0,0);
 	sem_init(&s_match,0,0);
@@ -1028,6 +1159,7 @@ Team inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeO
 	sem_init(&finalizar_ejecucion,0,0);
 	sem_init(&intercambio_hecho,0,0);
 	sem_init(&hayPreparados,0,0);
+	sem_init(&consultaCatch,0,0);
 
 	OBJETIVO_GLOBAL = list_create();
 	//OBJETIVO_GLOBAL_FILTRADO = list_create();
@@ -1038,12 +1170,16 @@ Team inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeO
 	POKEMONS = queue_create();
 	EJECUTADOS = queue_create();
 	ESPERANDO = queue_create();
+	POKEMONS_RESERVA = queue_create();
+
+	pthread_mutex_init(&acceder_objetivos_globales,NULL);
 	pthread_mutex_init(&modificar_cola_preparados,NULL);
 	pthread_mutex_init(&modificar_cola_disponibles,NULL);
 	pthread_mutex_init(&modificar_cola_deadlocks,NULL);
 	pthread_mutex_init(&modificar_cola_pokemons,NULL);
 	pthread_mutex_init(&modificar_cola_ejecutados,NULL);
 	pthread_mutex_init(&modificar_cola_esperando,NULL);
+	pthread_mutex_init(&modificar_cola_reservas,NULL);
 	sem_init(&progreso,0,1);
 	pthread_t hilo[cantidad_arrays(posiciones)];
 	for(int i=0 ; i<cantidad_arrays(posiciones) ; i++){
@@ -1053,6 +1189,7 @@ Team inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeO
 		pthread_detach(hilo[i]);
 	}
 	//getObjetivosGlobales(team);
+	log_info(logInit,"IP BROKER: %s, PUERTO BROKER: %s",configTeam.ip,configTeam.puerto);
 	return team;
 }
 
