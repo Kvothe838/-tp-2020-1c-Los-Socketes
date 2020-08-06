@@ -121,8 +121,6 @@ void modificarTablaVacio(ItemTablaDinamica *tabla, int espacioRequerido, int pos
 	} else {
 		tabla[posicionVector].posicion += desplazamiento;
 	}
-
-	ItemTablaDinamica lala20 = tablaElementos[0];
 }
 
 int obtenerPosicionPorID(long ID){
@@ -517,6 +515,8 @@ int esSuscriptorEnviado(t_list* suscriptoresEnviados, Suscriptor suscriptor){
 		TipoModulo* suscriptorRecibido = list_get(suscriptoresEnviados, i);
 
 		if(*suscriptorRecibido == suscriptor.modulo){
+			pthread_mutex_unlock(&mutexDynamic);
+
 			return 1;
 		}
 	}

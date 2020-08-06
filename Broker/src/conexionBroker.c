@@ -153,9 +153,7 @@ void processRequest(int opCode, Suscriptor* suscriptor) {
 		break;
 	}
 
-	log_info(loggerObligatorio, "ANTES DE SEMCOLAMENSAJE NUEVO MSG");
 	sem_post(semColaMensajes);
-	log_info(loggerObligatorio, "DESPUÉS DE SEMCOLAMENSAJE NUEVO MSG");
 }
 
 void serveClient(int* socketCliente) {
@@ -276,9 +274,7 @@ void enviarMensajesPorCola(TipoCola tipoCola) {
 void enviarMensajesSuscriptores() {
 	int colas[] = { NEW, GET, CATCH, APPEARED, LOCALIZED, CAUGHT };
 	while (1) {
-		log_info(loggerObligatorio, "ANTES DE SEMCOLAMENSAJE ENVIO MSG");
 		sem_wait(semColaMensajes);
-		log_info(loggerObligatorio, "DESPUÉS DE SEMCOLAMENSAJE ENVIO MSG");
 
 		for(int i = 0; i < 6; i++) {
 			enviarMensajesPorCola(colas[i]);

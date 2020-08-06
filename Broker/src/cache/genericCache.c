@@ -65,7 +65,9 @@ int obtenerPosicionPorIDGeneric(long ID)
 	if(esParticiones)
 	{
 		pthread_mutex_lock(&mutexDynamic);
+
 		posicion = obtenerPosicionPorID(ID);
+
 		pthread_mutex_unlock(&mutexDynamic);
 	} else if(esBS) {
 		posicion = obtenerPosicionPorIDBuddySystem(ID, cache);
