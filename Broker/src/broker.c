@@ -58,7 +58,7 @@ static void sig_usr(int signo)
 {
 	if(signo == SIGUSR1)
 	{
-		obtenerDump();
+		obtenerDumpGeneric();
 	}
 }
 

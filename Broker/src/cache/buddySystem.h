@@ -37,5 +37,7 @@ long* obtenerIDCorrelativoItemBuddySystem(long ID);
 void agregarSuscriptorEnviadoBuddySystem(long IDMensaje, Suscriptor** suscriptor);
 void cambiarLRUBuddySystem(long ID);
 t_list* obtenerSuscriptoresEnviadosBuddySystem(long IDMensaje);
+void obtenerDumpBuddySystem();
+void agregarSuscriptorRecibidoBuddySystem(long IDMensaje, Suscriptor* suscriptor);
 
 #endif

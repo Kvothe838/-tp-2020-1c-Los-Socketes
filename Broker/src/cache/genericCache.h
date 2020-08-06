@@ -22,5 +22,7 @@ t_list* obtenerSuscriptoresEnviadosGeneric(long IDMensaje);
 int esSuscriptorEnviado(t_list* suscriptoresEnviados, Suscriptor suscriptor);
 void agregarSuscriptorEnviadoGeneric(long IDMensaje, Suscriptor** suscriptor);
 void cambiarLRUGeneric(long ID);
+void obtenerDumpGeneric();
+void agregarSuscriptorRecibidoGeneric(long IDMensaje, Suscriptor* suscriptor);
 
 #endif /* CACHE_GENERICCACHE_H_ */

@@ -456,7 +456,6 @@ void obtenerDump(){
 	list_destroy(lista);
 
 	pthread_mutex_unlock(&mutexDynamic);
-	log_info(loggerObligatorio, "Dump solicitado.");
 }
 //DUMP DE CACHE (FIN)
 

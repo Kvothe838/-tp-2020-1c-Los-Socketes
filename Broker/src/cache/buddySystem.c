@@ -210,13 +210,13 @@ void eliminarVictimaBuddySystem(){
 	{
 		return;
 	}
-	log_info(loggerAriel, "Nodo elegido: %s", item->fechaCreacion);
+
 	eliminarItemBuddySystem(item);
 
 	//Log obligatorio.
 	log_info(loggerObligatorio, "Eliminada partición con posición de inicio %d.", item->posicion);
 
-	imprimirCache();
+	//imprimirCache();
 
 	int reiniciarConsolidacion;
 
@@ -338,4 +338,80 @@ t_list* obtenerSuscriptoresEnviadosBuddySystem(long IDMensaje)
 	if(bloqueEncontrado == NULL) return NULL;
 
 	return bloqueEncontrado->suscriptoresEnviados;
+}
+
+void imprimirDatosBuddySystem(t_list* listaDeBloques){
+	uint32_t posicion = 0;
+	char stringFinal[10000];
+	FILE* archivoDump = fopen("dump.txt", "w+");
+
+	time_t t = time(NULL);
+	struct tm tm = *localtime(&t);
+
+	sprintf(stringFinal, "Dump: %d/%d/%d - %s\n", tm.tm_mday, tm.tm_mon + 1, tm.tm_year + 1900, temporal_get_string_time());
+	fwrite(stringFinal, string_length(stringFinal), 1, archivoDump);
+
+	while(posicion < list_size(listaDeBloques)){
+		Bloque* bloque = list_get(listaDeBloques, posicion);
+
+		if(bloque->tamanioOcupado > 0)
+		{
+			sprintf(stringFinal,
+				"Partición %-5d 0x%-3X - 0x%-10X\t[X]\tsize %-5db\tLRU: %-15s\tCOLA: %-5s\tID: %ld\n",
+				(posicion+1),
+				bloque->posicion,
+				(bloque->posicion + bloque->tamanio) - 1,
+				(bloque->tamanioOcupado),
+				bloque->fechaUltimoUso,
+				(char*)tipoColaToString(bloque->cola),
+				bloque->ID);
+		}
+		else
+		{
+			sprintf(stringFinal,
+				"Partición %-5d 0x%-3X - 0x%-10X\t[L]\tsize %d\n",
+				(posicion+1),
+				bloque->posicion,
+				(bloque->posicion + bloque->tamanio) - 1,
+				(bloque->tamanio)
+				);
+		}
+
+		fwrite(stringFinal, string_length(stringFinal), 1, archivoDump);
+		posicion++;
+	}
+
+	fclose(archivoDump);
+}
+
+void agregarBloques(t_list** bloques, Bloque* bloque)
+{
+	if(bloque == NULL) return;
+
+	if(bloque->tamanioOcupado > 0 || !bloque->estaDividido)
+	{
+		list_add(*bloques, bloque);
+		return;
+	}
+
+	agregarBloques(bloques, bloque->izq);
+	agregarBloques(bloques, bloque->der);
+}
+
+void obtenerDumpBuddySystem()
+{
+	t_list* bloques = list_create();
+
+	agregarBloques(&bloques, cache);
+
+	imprimirDatosBuddySystem(bloques);
+}
+
+void agregarSuscriptorRecibidoBuddySystem(long IDMensaje, Suscriptor* suscriptor)
+{
+	Bloque* bloqueEncontrado = obtenerBloquePorID(IDMensaje, cache);
+
+	if(bloqueEncontrado == NULL) return;
+
+	list_add(bloqueEncontrado->suscriptoresRecibidos, &(suscriptor->modulo));
 }

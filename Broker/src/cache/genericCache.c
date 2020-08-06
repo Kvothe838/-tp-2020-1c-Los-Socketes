@@ -169,3 +169,29 @@ void cambiarLRUGeneric(long ID)
 	}
 }
 
+void obtenerDumpGeneric()
+{
+	if(esParticiones)
+	{
+		obtenerDump();
+	}
+	else if(esBS)
+	{
+		obtenerDumpBuddySystem();
+	}
+
+	log_info(loggerObligatorio, "Dump solicitado.");
+}
+
+void agregarSuscriptorRecibidoGeneric(long IDMensaje, Suscriptor* suscriptor)
+{
+	if(esParticiones)
+	{
+		agregarSuscriptorRecibido(IDMensaje, suscriptor);
+	}
+	else if(esBS)
+	{
+		agregarSuscriptorRecibidoBuddySystem(IDMensaje, suscriptor);
+	}
+}
+
