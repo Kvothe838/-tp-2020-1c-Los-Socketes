@@ -311,5 +311,31 @@ long* obtenerIDCorrelativoItemBuddySystem(long ID)
 	return &(bloqueEncontrado->IDCorrelativo);
 }
 
+void agregarSuscriptorEnviadoBuddySystem(long IDMensaje, Suscriptor** suscriptor){
+	Bloque* bloqueEncontrado = obtenerBloquePorID(IDMensaje, cache);
 
+	int yaEnviado = list_contains_int(bloqueEncontrado->suscriptoresEnviados, (*suscriptor)->modulo);
 
+	if(!yaEnviado){
+		list_add(bloqueEncontrado->suscriptoresEnviados, &((*suscriptor)->modulo));
+	}
+}
+
+void cambiarLRUBuddySystem(long ID)
+{
+	Bloque* bloqueEncontrado = obtenerBloquePorID(ID, cache);
+
+	if(bloqueEncontrado != NULL){
+		free(bloqueEncontrado->fechaUltimoUso);
+		bloqueEncontrado->fechaUltimoUso = temporal_get_string_time();
+	}
+}
+
+t_list* obtenerSuscriptoresEnviadosBuddySystem(long IDMensaje)
+{
+	Bloque* bloqueEncontrado = obtenerBloquePorID(IDMensaje, cache);
+
+	if(bloqueEncontrado == NULL) return NULL;
+
+	return bloqueEncontrado->suscriptoresEnviados;
+}

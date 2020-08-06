@@ -224,7 +224,7 @@ void enviarMensajesPorCola(TipoCola tipoCola) {
 			if (suscriptor->estaCaido)
 				continue;
 
-			t_list* suscriptoresEnviados = obtenerSuscriptoresEnviados(*IDMensaje);
+			t_list* suscriptoresEnviados = obtenerSuscriptoresEnviadosGeneric(*IDMensaje);
 
 			if (suscriptoresEnviados != NULL
 					&& esSuscriptorEnviado(suscriptoresEnviados, *suscriptor))
@@ -252,9 +252,8 @@ void enviarMensajesPorCola(TipoCola tipoCola) {
 				continue;
 			}
 
-			agregarSuscriptorEnviado(*IDMensaje, &suscriptor);
-
-			cambiarLRU(*IDMensaje);
+			agregarSuscriptorEnviadoGeneric(*IDMensaje, &suscriptor);
+			cambiarLRUGeneric(*IDMensaje);
 
 			//Log obligatorio.
 			log_info(loggerObligatorio,

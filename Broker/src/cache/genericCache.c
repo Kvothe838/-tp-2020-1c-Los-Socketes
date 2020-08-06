@@ -118,3 +118,54 @@ long* obtenerIDCorrelativoItemGeneric(long ID)
 	return NULL;
 }
 
+t_list* obtenerSuscriptoresEnviadosGeneric(long IDMensaje)
+{
+	if(esParticiones)
+	{
+		return obtenerSuscriptoresEnviados(IDMensaje);
+	}
+	else if(esBS)
+	{
+		return obtenerSuscriptoresEnviadosBuddySystem(IDMensaje);
+	}
+
+	return NULL;
+}
+
+int esSuscriptorEnviado(t_list* suscriptoresEnviados, Suscriptor suscriptor){
+	for(int i = 0; i < list_size(suscriptoresEnviados); i++){
+		TipoModulo* suscriptorRecibido = list_get(suscriptoresEnviados, i);
+
+		if(*suscriptorRecibido == suscriptor.modulo){
+
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+void agregarSuscriptorEnviadoGeneric(long IDMensaje, Suscriptor** suscriptor)
+{
+	if(esParticiones)
+	{
+		agregarSuscriptorEnviado(IDMensaje, suscriptor);
+	}
+	else if(esBS)
+	{
+		agregarSuscriptorEnviadoBuddySystem(IDMensaje, suscriptor);
+	}
+}
+
+void cambiarLRUGeneric(long ID)
+{
+	if(esParticiones)
+	{
+		cambiarLRU(ID);
+	}
+	else if(esBS)
+	{
+		cambiarLRUBuddySystem(ID);
+	}
+}
+

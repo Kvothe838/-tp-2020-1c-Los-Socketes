@@ -39,7 +39,6 @@ int obtenerPosicionPorID(long ID);
 void agregarSuscriptorEnviado(long IDMensaje, Suscriptor** suscriptor);
 void agregarSuscriptorRecibido(long IDMensaje, Suscriptor* suscriptor);
 t_list* obtenerSuscriptoresEnviados(long IDMensaje);
-int esSuscriptorEnviado(t_list* suscriptoresRecibidos, Suscriptor suscriptor);
 int* obtenerTamanioItem(long ID);
 long* obtenerIDCorrelativoItem(long ID);
 void obtenerDump();

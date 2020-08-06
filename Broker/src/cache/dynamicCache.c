@@ -239,7 +239,10 @@ void* obtenerItem(long ID)
 
 	ItemTablaDinamica* item = obtenerItemTablaDinamica(ID);
 
-	if(item == NULL) return NULL;
+	if(item == NULL) {
+		pthread_mutex_unlock(&mutexDynamic);
+		return NULL;
+	}
 
 	void* valor = obtenerValor(item->tamanio, item->posicion);
 
@@ -453,6 +456,7 @@ void obtenerDump(){
 	list_destroy(lista);
 
 	pthread_mutex_unlock(&mutexDynamic);
+	log_info(loggerObligatorio, "Dump solicitado.");
 }
 //DUMP DE CACHE (FIN)
 
@@ -506,24 +510,6 @@ t_list* obtenerSuscriptoresEnviados(long IDMensaje){
 	pthread_mutex_unlock(&mutexDynamic);
 
 	return suscriptoresEnviados;
-}
-
-int esSuscriptorEnviado(t_list* suscriptoresEnviados, Suscriptor suscriptor){
-	pthread_mutex_lock(&mutexDynamic);
-
-	for(int i = 0; i < list_size(suscriptoresEnviados); i++){
-		TipoModulo* suscriptorRecibido = list_get(suscriptoresEnviados, i);
-
-		if(*suscriptorRecibido == suscriptor.modulo){
-			pthread_mutex_unlock(&mutexDynamic);
-
-			return 1;
-		}
-	}
-
-	pthread_mutex_unlock(&mutexDynamic);
-
-	return 0;
 }
 
 void liberarParticiones(){

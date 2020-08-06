@@ -18,5 +18,9 @@ int obtenerPosicionPorIDGeneric(long ID);
 void* obtenerItemGeneric(long ID);
 int* obtenerTamanioItemGeneric(long ID);
 long* obtenerIDCorrelativoItemGeneric(long ID);
+t_list* obtenerSuscriptoresEnviadosGeneric(long IDMensaje);
+int esSuscriptorEnviado(t_list* suscriptoresEnviados, Suscriptor suscriptor);
+void agregarSuscriptorEnviadoGeneric(long IDMensaje, Suscriptor** suscriptor);
+void cambiarLRUGeneric(long ID);
 
 #endif /* CACHE_GENERICCACHE_H_ */

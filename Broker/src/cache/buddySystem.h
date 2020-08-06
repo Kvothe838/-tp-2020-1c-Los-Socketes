@@ -34,5 +34,8 @@ int obtenerPosicionPorIDBuddySystem(long ID, Bloque* bloque);
 void* obtenerItemBuddySystem(long id);
 int* obtenerTamanioItemBuddySystem(long ID);
 long* obtenerIDCorrelativoItemBuddySystem(long ID);
+void agregarSuscriptorEnviadoBuddySystem(long IDMensaje, Suscriptor** suscriptor);
+void cambiarLRUBuddySystem(long ID);
+t_list* obtenerSuscriptoresEnviadosBuddySystem(long IDMensaje);
 
 #endif
