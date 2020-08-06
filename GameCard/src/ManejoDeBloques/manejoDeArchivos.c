@@ -234,15 +234,19 @@ void liberarVariablesGlobales(){
 
 t_config * validarArchivoAbierto(char* pokemonNombre, char path[1000], pokemonMetadata* datosPokemon) {
 	t_config *configPokemon;
+	sem_t* semaforoEspecifico = dictionary_get(diccionarioSemaforo, pokemonNombre);
 	do {
-		sem_wait(dictionary_get(diccionarioSemaforo, pokemonNombre));
+
+		sem_wait(semaforoEspecifico); //necesario para abrir el archivo Metadata de cada pokemon
 		configPokemon = config_create(path);
-		sem_post(dictionary_get(diccionarioSemaforo, pokemonNombre));
+		sem_post(semaforoEspecifico);
+
 		datosPokemon->esDirectorio = (strcmp(config_get_string_value(configPokemon, "DIRECTORY"), "Y") == 0) ? 1 : 0;
 		datosPokemon->tamanio = config_get_int_value(configPokemon, "SIZE");
 		//datosPokemon->bloquesAsociados = malloc(1000);
 		datosPokemon->bloquesAsociados = config_get_array_value(configPokemon, "BLOCKS");
-		datosPokemon->abierto =	(strcmp(config_get_string_value(configPokemon, "OPEN"), "Y") == 0) ? 1 : 0;
+		char* valorAbierto = config_get_string_value(configPokemon, "OPEN");
+		datosPokemon->abierto =	(strcmp(valorAbierto, "N") == 0) ? 1 : 0;
 
 		if (!datosPokemon->abierto) {
 			t_log* log = iniciar_logger("SeBloqueoPorEsperar.log", "GAMECARD");
@@ -253,10 +257,19 @@ t_config * validarArchivoAbierto(char* pokemonNombre, char path[1000], pokemonMe
 		}
 	} while (!datosPokemon->abierto);
 
-	config_set_value(configPokemon, "OPEN", "N");
+
+	config_set_value(configPokemon, "OPEN", "Y");
+
+	sem_wait(semaforoEspecifico); //necesario para poder modificar el archivo Metadata específico
 	config_save(configPokemon);
+	sem_post(semaforoEspecifico);
+
 	config_destroy(configPokemon);
+
+	sem_wait(semaforoEspecifico);
 	configPokemon = config_create(path);
+	sem_post(semaforoEspecifico);
+
 	return configPokemon;
 }
 
@@ -475,11 +488,16 @@ void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t
 		arrayStringToArrayConfig(cantidadDeBlocks, nuevoStringBloques, datosPokemon);
 
 		sleep(retardoDeOperacion);
-		config_set_value(configMetadata, "OPEN", "Y");
+		config_set_value(configMetadata, "OPEN", "N");
 		char* nuevoSize = string_itoa(datosPokemon->tamanio);
 		config_set_value(configMetadata, "SIZE", nuevoSize);
 		config_set_value(configMetadata, "BLOCKS", nuevoStringBloques);
+		sem_t* semaforoGlobal = dictionary_get(diccionarioSemaforo, pokemon);
+
+		sem_wait(semaforoGlobal);
 		config_save(configMetadata);
+		sem_post(semaforoGlobal);
+
 		free(nuevoSize);
 
 		config_destroy(configMetadata);
@@ -511,7 +529,7 @@ void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t
 
 		char datosBasico[1000] = "DIRECTORY=N\nSIZE=0\nBLOCKS=[";
 		strcat(datosBasico, str);
-		strcat(datosBasico, "]\nOPEN=Y");
+		strcat(datosBasico, "]\nOPEN=N");
 
 		strcat(path, "/Metadata.bin");
 
@@ -616,8 +634,12 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 					list_destroy(lista);
 
 				sleep(retardoDeOperacion);
-				config_set_value(configMetadata, "OPEN", "Y");
+				config_set_value(configMetadata, "OPEN", "N");
+				sem_t* semaforoGlobal = dictionary_get(diccionarioSemaforo, pokemon);
+
+				sem_wait(semaforoGlobal);
 				config_save(configMetadata);
+				sem_post(semaforoGlobal);
 
 				config_destroy(configMetadata);
 
@@ -646,8 +668,12 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 			free(datosPokemon->bloquesAsociados);
 
 			sleep(retardoDeOperacion);
-			config_set_value(configMetadata, "OPEN", "Y");
+			config_set_value(configMetadata, "OPEN", "N");
+			sem_t* semaforoGlobal = dictionary_get(diccionarioSemaforo, pokemon);
+
+			sem_wait(semaforoGlobal);
 			config_save(configMetadata);
+			sem_post(semaforoGlobal);
 			config_destroy(configMetadata);
 			free(posicionPokemon);
 	}
@@ -711,8 +737,12 @@ LocalizedPokemon * administrarGetPokemon(char* pokemon){
 		free(datosPokemon->bloquesAsociados);
 
 		sleep(retardoDeOperacion);
-		config_set_value(configMetadata, "OPEN", "Y");
+		config_set_value(configMetadata, "OPEN", "N");
+		sem_t* semaforoGlobal = dictionary_get(diccionarioSemaforo, pokemon);
+
+		sem_wait(semaforoGlobal);
 		config_save(configMetadata);
+		sem_post(semaforoGlobal);
 
 		config_destroy(configMetadata);
 	}
