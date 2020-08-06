@@ -27,7 +27,7 @@ endif
 all: broker
 
 dependents:
-	-cd /home/utnso/wrksp/tp-2020-1c-Los-Socketes/Shared/Debug && $(MAKE) all
+	-cd /home/utnso/wrksp/tp-2020-1c-Los-Socketes/Shared/Debug && $(MAKE) clean all
 
 # Tool invocations
 broker: $(OBJS) $(USER_OBJS) /home/utnso/wrksp/tp-2020-1c-Los-Socketes/Shared/Debug/libShared.a

@@ -298,8 +298,6 @@ int recibirMensajeSuscriber(int socket, t_log* logger, TipoModulo modulo, Mensaj
 	void *respuesta;
 	int bytes, recepcion;
 
-	log_info(logger, "RECEPCIÓN MENSAJE");
-
 	recepcion = recv(socket, &((*mensaje)->ID), sizeof(long), MSG_WAITALL);
 
 	if(recepcion == -1 || recepcion == 0) return 0;
@@ -321,15 +319,11 @@ int recibirMensajeSuscriber(int socket, t_log* logger, TipoModulo modulo, Mensaj
 
 	if(recepcion == -1 || recepcion == 0) return 0;
 
-	log_info(logger, "Nuevo mensaje recibido con ID %d de cola %s", (*mensaje)->ID, tipoColaToString((*mensaje)->cola));
-
 	respuesta = armarYSerializarAck((*mensaje)->ID, &bytes);
 
 	recepcion = send(socket, respuesta, bytes, 0);
 
 	if(recepcion == -1) return 0;
-
-	log_info(logger, "ACK enviado para mensaje con ID %d", (*mensaje)->ID);
 
 	return 1; //Retornar 0 en caso de error en algún recv.
 }
