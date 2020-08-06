@@ -28,141 +28,118 @@ int main(int argc, char **argv){
 	config = leer_config("configGameBoy.config", logger);
 
     if(argc == 1){
-        printf("\nNo se ha ingresado ningún argumento de línea de comando adicional que no sea el nombre del programa\n");
-		printf("Formato de ejecución: ./gameboy [BROKER|GAMECARD|TEAM|SUSCRIPTOR] [NEW_POKEMON|APPEARED_POKEMON|CATCH_POKEMON|CAUGHT_POKEMON|GET_POKEMON] [ARGUMENTOS]*\n");
-		abort();
+        log_info(logger, "No se ha ingresado ningún argumento de línea de comando adicional que no sea el nombre del programa");
+		log_info(logger, "Formato de ejecución: ./gameboy [BROKER|GAMECARD|TEAM|SUSCRIPTOR] [NEW_POKEMON|APPEARED_POKEMON|CATCH_POKEMON|CAUGHT_POKEMON|GET_POKEMON] [ARGUMENTOS]*");
+		exit(-1);
 	}
 
     if(argc < cantidadMinArgc || argc > cantidadMaxArgc)
     {
-		printf("\nPor favor, revise que está ingresando como MINIMO %d argumentos, y como MAXIMO %d argumentos, y vuelva a intentar\n", cantidadMinArgc, cantidadMaxArgc);
-		abort();
+		log_info(logger, "Por favor, revise que está ingresando como MINIMO %d argumentos, y como MAXIMO %d argumentos, y vuelva a intentar", cantidadMinArgc, cantidadMaxArgc);
+		exit(-1);
 	}
 
-	printf("\n\n");
 	IDMensajePublisher* mensajeRecibido;
 
 	switch(argvToModuloGameboy(argv[1]))
 	{
-		case BROKER_GAMEBOY:
-		{
+		case BROKER_GAMEBOY:;
 			ipBroker = config_get_string_value(config, "IP_BROKER");
 			puertoBroker = config_get_string_value(config, "PUERTO_BROKER");
-			log_info(logger, "IP_BROKER   %s y PUERTO_BROKER   %s", ipBroker, puertoBroker);
 			conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
 			if(conexionBroker == 0){
 				log_info(logger, "ERROR - No se pudo crear la conexión con %s", argv[1]);
-				abort();
+				exit(-1);
 			}
 
-			log_info(logger, "OK - Se estableció correctamente la conexión con el %s", argv[1]);
+			log_info(logger, "Conexión al proceso %s", argv[1]);
 
 			switch(argvToTipoCola(argv[2]))
 			{
-				case NEW:
-				{
-					NewPokemon* pokemon = getNewPokemon(argv[3], atoi(argv[4]), atoi(argv[5]), atoi(argv[6])); //usa malloc, entonces hay que hacer un free
+				case NEW:;
+					NewPokemon* newPokemon = getNewPokemon(argv[3], atoi(argv[4]), atoi(argv[5]), atoi(argv[6])); //usa malloc, entonces hay que hacer un free
 
-					if(!enviarPublisherSinIDCorrelativo(logger, conexionBroker, GAMEBOY, pokemon, NEW, &mensajeRecibido))
+					if(!enviarPublisherSinIDCorrelativo(logger, conexionBroker, GAMEBOY, newPokemon, NEW, &mensajeRecibido))
 					{
-						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
-						abort();
+						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %d %d %d", argv[1], argv[2], argv[3], atoi(argv[4]), atoi(argv[5]), atoi(argv[6]));
+						exit(-1);
 					}
 
 					liberar_conexion_cliente(conexionBroker);
 
-					free(pokemon);
+					free(newPokemon);
 
 					break;
-				}
 
-				case APPEARED:
-				{
-					AppearedPokemon* pokemon = getAppearedPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
+				case APPEARED:;
+					AppearedPokemon* appearedPokemon = getAppearedPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 
-					if(!enviarPublisherConIDCorrelativo(logger, conexionBroker, GAMEBOY, pokemon, APPEARED, (int)argv[6], &mensajeRecibido))
+					if(!enviarPublisherConIDCorrelativo(logger, conexionBroker, GAMEBOY, appearedPokemon, APPEARED, (int)argv[6], &mensajeRecibido))
 					{
-						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
-						abort();
+						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %d %d", argv[1], argv[2], argv[3], atoi(argv[4]), atoi(argv[5]));
+						exit(-1);
 					}
-
-					log_info(logger, "OK - Se envió correctamente el mensaje: %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
 
 					liberar_conexion_cliente(conexionBroker);
 
-					free(pokemon);
+					free(appearedPokemon);
 
 					break;
-				}
 
-				case CATCH:
-				{
-					CatchPokemon* pokemon = getCatchPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
+				case CATCH:;
+					CatchPokemon* catchPokemon = getCatchPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 
-					if(!enviarPublisherSinIDCorrelativo(logger, conexionBroker, GAMEBOY, pokemon, CATCH, &mensajeRecibido))
+					if(!enviarPublisherSinIDCorrelativo(logger, conexionBroker, GAMEBOY, catchPokemon, CATCH, &mensajeRecibido))
 					{
-						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %d %d", argv[1], argv[2], argv[3], argv[4], argv[5]);
-						abort();
+						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %d %d", argv[1], argv[2], argv[3], atoi(argv[4]), atoi(argv[5]));
+						exit(-1);
 					}
-
-					log_info(logger, "OK - Se envió correctamente el mensaje: %s %s %s %d %d", argv[1], argv[2], argv[3], argv[4], argv[5]);
 
 					liberar_conexion_cliente(conexionBroker);
 
-					free(pokemon);
+					free(catchPokemon);
 
 					break;
-				}
 
-				case CAUGHT:
-				{
-					CaughtPokemon* pokemon = getCaughtPokemon(atoi(argv[3]));//usa malloc, entonces hay que hacer un free
+				case CAUGHT:;
+					CaughtPokemon* caughtPokemon = getCaughtPokemon(atoi(argv[3]));//usa malloc, entonces hay que hacer un free
 
-					if(!enviarPublisherSinIDCorrelativo(logger, conexionBroker, GAMEBOY, pokemon, CAUGHT, &mensajeRecibido))
+					if(!enviarPublisherSinIDCorrelativo(logger, conexionBroker, GAMEBOY, caughtPokemon, CAUGHT, &mensajeRecibido))
 					{
-						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %d", argv[1], argv[2], argv[3]);
-						abort();
+						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %d", argv[1], argv[2], atoi(argv[3]));
+						exit(-1);
 					}
-
-					log_info(logger, "OK - Se envió correctamente el mensaje: %s %s %d", argv[1], argv[2], argv[3]);
-
 					liberar_conexion_cliente(conexionBroker);
 
-					free(pokemon);
+					free(caughtPokemon);
 
 					break;
-				}
 
-				case GET:
-				{
-					GetPokemon* pokemon = getGetPokemon(argv[3]);//usa malloc, entonces hay que hacer un free
+				case GET:;
+					GetPokemon* getPokemon = getGetPokemon(argv[3]);//usa malloc, entonces hay que hacer un free
 
-					if(!enviarPublisherSinIDCorrelativo(logger, conexionBroker, GAMEBOY, pokemon, GET, &mensajeRecibido))
+					if(!enviarPublisherSinIDCorrelativo(logger, conexionBroker, GAMEBOY, getPokemon, GET, &mensajeRecibido))
 					{
 						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s", argv[1], argv[2], argv[3]);
-						abort();
+						exit(-1);
 					}
-
-					log_info(logger, "OK - Se envió correctamente el mensaje: %s %s %s", argv[1], argv[2], argv[3]);
 
 					liberar_conexion_cliente(conexionBroker);
 
-					free(pokemon);
+					free(getPokemon);
 
 					break;
-				}
 
 				default:
 				{
 					log_info(logger, "ERROR. No se reconoce el tipo de cola ingresada.");
-					abort();
+					exit(-1);
 				}
 			}
-		break;
-		}
 
-		case TEAM_GAMEBOY:
-		{
+			break;
+
+		case TEAM_GAMEBOY:;
 			ipsPuertosTeam = config_get_array_value(config, "IPS_PUERTOS_TEAM");
 			cantidadTeams = config_get_int_value(config, "CANTIDAD_TEAMS");
 
@@ -174,42 +151,35 @@ int main(int argc, char **argv){
 
 				if(conexionTeam == 0){
 					log_info(logger, "ERROR - No se pudo crear la conexión con %s", argv[1]);
-					abort();
+					exit(-1);
 				}
 
-				log_info(logger, "OK - Se estableció correctamente la conexión con el %s", argv[1]);
-
+				log_info(logger, "Conexión al proceso %s", argv[1]);
 
 				switch(argvToTipoCola(argv[2]))
 				{
-					case APPEARED:
-					{
+					case APPEARED:;
 						AppearedPokemon* pokemon = getAppearedPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
 
 						if(!enviarMensajeASuscriptor(conexionTeam, 1, APPEARED, pokemon))
 						{
-							log_info(logger, "ERROR. No se pudo enviar el mensaje %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
-							abort();
+							log_info(logger, "ERROR. No se pudo enviar el mensaje %s %s %s %d %d", argv[1], argv[2], argv[3], atoi(argv[4]), atoi(argv[5]));
+							exit(-1);
 						}
-
-						log_info(logger, "OK - Se envió correctamente el mensaje: %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
 
 						liberar_conexion_cliente(conexionTeam);
 
 						free(pokemon);
 
 						break;
-					}
 
 					default:
-					{
 						log_info(logger, "ERROR. No se reconoce el tipo de cola ingresada.");
-						abort();
-					}
+						exit(-1);
 				}
 			}
-		break;
-		}
+
+			break;
 
 		case GAMECARD_GAMEBOY:
 		{
@@ -220,103 +190,82 @@ int main(int argc, char **argv){
 
 			if(conexionGamecard == 0){
 				log_info(logger, "ERROR - No se pudo crear la conexión con %s", argv[1]);
-				abort();
+				exit(-1);
 			}
 
-			log_info(logger, "OK - Se estableció correctamente la conexión con el %s", argv[1]);
+			log_info(logger, "Conexión al proceso %s", argv[1]);
 
 			switch(argvToTipoCola(argv[2]))
 			{
-				case CATCH:
-				{
-					CatchPokemon* pokemon = getCatchPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
-					long IDMensaje = (long)atoi(argv[6]);
+				case CATCH:;
+					CatchPokemon* catchPokemon = getCatchPokemon(argv[3], atoi(argv[4]), atoi(argv[5]));//usa malloc, entonces hay que hacer un free
+					long IDMensajeCatch = (long)atoi(argv[6]);
 
-					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, CATCH, pokemon))
+					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensajeCatch, CATCH, catchPokemon))
 					{
-						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
-						abort();
+						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %d %d %ld", argv[1], argv[2], argv[3], atoi(argv[4]), atoi(argv[5]), IDMensajeCatch);
+						exit(-1);
 					}
-
-					log_info(logger, "Largo del nombre %s, %d vs %d", pokemon->nombre, strlen(pokemon->nombre), pokemon->largoNombre);
-					log_info(logger, "OK - Se envió correctamente el mensaje: %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5]);
 
 					liberar_conexion_cliente(conexionGamecard);
 
-					free(pokemon);
+					free(catchPokemon);
 
 					break;
-				}
 
-				case GET:
-				{
-					GetPokemon* pokemon = getGetPokemon(argv[3]);//usa malloc, entonces hay que hacer un free
-					long IDMensaje = (long)atoi(argv[4]);
+				case GET:;
+					GetPokemon* getPokemon = getGetPokemon(argv[3]);//usa malloc, entonces hay que hacer un free
+					long IDMensajeGet = (long)atoi(argv[4]);
 
-					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, GET, pokemon))
+					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensajeGet, GET, getPokemon))
 					{
-						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s", argv[1], argv[2], argv[3]);
-						abort();
+						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %ld", argv[1], argv[2], argv[3], IDMensajeGet);
+						exit(-1);
 					}
-
-					log_info(logger, "OK - Se envió correctamente el mensaje: %s %s %s", argv[1], argv[2], argv[3]);
 
 					liberar_conexion_cliente(conexionGamecard);
 
-					free(pokemon);
+					free(getPokemon);
 
 					break;
-				}
 
-				case NEW:
-				{
-					NewPokemon* pokemon = getNewPokemon(argv[3], atoi(argv[4]), atoi(argv[5]), atoi(argv[6]));
-					long IDMensaje = (long)atoi(argv[7]);
-					log_info(logger, "ID MENSAJE: %ld", IDMensaje);
+				case NEW:;
+					NewPokemon* newPokemon = getNewPokemon(argv[3], atoi(argv[4]), atoi(argv[5]), atoi(argv[6]));
+					long IDMensajeNew = (long)atoi(argv[7]);
 
-					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensaje, NEW, pokemon))
+					if(!enviarMensajeASuscriptor(conexionGamecard, IDMensajeNew, NEW, newPokemon))
 					{
-						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s", argv[1], argv[2], argv[3]);
-						abort();
+						log_info(logger, "ERROR - No se pudo enviar el mensaje: %s %s %s %d %d %d %ld", argv[1], argv[2], argv[3], atoi(argv[4]), atoi(argv[5]), atoi(argv[6]), IDMensajeNew);
+						exit(-1);
 					}
-
-					log_info(logger, "OK - Se envió correctamente el mensaje: %s %s %s %s %s %s", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
 
 					Ack* respuesta;
 
-					int recibidoExitoso = recibirAck(conexionGamecard, &respuesta);
-
-					if(recibidoExitoso){
-						log_info(logger, "Recibido ACK");
-					} else {
-						log_info(logger, "Error al recibir ACK");
-					}
+					recibirAck(conexionGamecard, &respuesta);
 
 					liberar_conexion_cliente(conexionGamecard);
 
-					free(pokemon);
+					free(newPokemon);
 
 					break;
-				}
 
-
-				default:
-				{
+				default:;
 					log_info(logger, "ERROR - No se reconoce el tipo de cola ingresada.");
-					abort();
-				}
+					exit(-1);
 			}
 		break;
 		}
 
-	case SUSCRIPTOR_GAMEBOY:
-	{
-		// ./gameboy SUSCRIPTOR [COLA_DE_MENSAJES] [TIEMPO]
-		//   argv[0]   argv[1]      argv[2]         argv[3]
-
+	case SUSCRIPTOR_GAMEBOY:;
 		TipoCola colaDeMensaje;
 		pthread_t threadEscuchaBroker;
 		ArgumentosEscucharBroker argumentos;
+
+		if((colaDeMensaje = argvToTipoCola(argv[2])) == -1)
+		{
+			log_info(logger, "ERROR - No se reconoce el tipo de cola ingresada.");
+			exit(-1);
+		}
 
 		ipBroker = config_get_string_value(config, "IP_BROKER");
 		puertoBroker = config_get_string_value(config, "PUERTO_BROKER");
@@ -325,14 +274,11 @@ int main(int argc, char **argv){
 		if(conexionBroker == 0)
 		{
 			log_info(logger, "ERROR - No se pudo crear la conexión con BROKER");
-			abort();
+			exit(-1);
 		}
 
-		if((colaDeMensaje = argvToTipoCola(argv[2])) == -1)
-		{
-			log_info(logger, "ERROR - No se reconoce el tipo de cola ingresada.");
-			abort();
-		}
+		//Log obligatorio
+		log_info(logger, "Conexión al proceso %s", argv[1]);
 
 		int tiempo = atoi(argv[3]);
 		time_t start = time(0);
@@ -355,18 +301,15 @@ int main(int argc, char **argv){
 		pthread_create(&threadEscuchaBroker, NULL, (void*)escucharBroker, &argumentos);
 		pthread_detach(threadEscuchaBroker);
 
-		while ((time(0) - start) <= tiempo );
+		while ((time(0) - start) <= tiempo);
 
 		pthread_cancel(threadEscuchaBroker);
 
 		break;
-	}
 
-		default:
-		{
-			log_info(logger, "ERROR - No se reconoce el tipo de mensaje ingresado.");
-			abort();
-		}
+	default:
+		log_info(logger, "ERROR - No se reconoce el tipo de mensaje ingresado.");
+		exit(-1);
 	}
 
 	terminar_programa(logger, config);
@@ -384,14 +327,12 @@ void escucharBroker(ArgumentosEscucharBroker* argumentos)
 		recibido = recv(argumentos->socket, &codigo, sizeof(OpCode), MSG_WAITALL);
 
 		if(recibido == -1 || recibido == 0){
-			log_info(argumentos->logger, "Error recibiendo código");
-			abort();
+			exit(-1);
 		}
 
 		if(codigo != NUEVO_MENSAJE_SUSCRIBER)
 		{
-			log_info(argumentos->logger, "Recibí otro código");
-			abort();
+			exit(-1);
 		}
 
 		MensajeParaSuscriptor* mensaje = NULL;

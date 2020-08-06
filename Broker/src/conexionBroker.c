@@ -237,11 +237,11 @@ void enviarMensajesPorCola(TipoCola tipoCola) {
 					NUEVO_MENSAJE_SUSCRIBER, bytesMensajeSuscriptor, stream,
 					&bytes);
 			free(stream);
-			log_info(loggerObligatorio, "Intento enviar mensaje");
+
 			if ((send(suscriptor->socket, paqueteSerializado, bytes,
 					MSG_NOSIGNAL)) <= 0)
 				continue;
-			log_info(loggerObligatorio, "Logro enviar mensaje");
+
 			Ack* respuesta;
 
 			int recibidoExitoso = recibirAck(suscriptor->socket, &respuesta);
