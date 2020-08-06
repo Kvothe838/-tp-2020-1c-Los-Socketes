@@ -2,7 +2,6 @@
 
 void inicializarDataBasica(t_config* config){
 	tamanioCache = config_get_int_value(config, "TAMANO_MEMORIA");
-	log_info(loggerObligatorio, "TAMANIO: %d", tamanioCache);
 	tamanioParticionMinima = (int)config_get_int_value(config, "TAMANO_MINIMO_PARTICION");
 	algoritmoMemoria = config_get_string_value(config, "ALGORITMO_MEMORIA");
 	algoritmoEleccionDeParticionLibre = config_get_string_value(config,"ALGORITMO_PARTICION_LIBRE");

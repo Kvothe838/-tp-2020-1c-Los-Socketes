@@ -42,21 +42,10 @@ int main(void) {
 	semColaMensajes = malloc(sizeof(sem_t));
 	sem_init(semColaMensajes, 0, 0);
 
-	/*for(int i = 0; i < 20; i++)
-	{
-		NewPokemon* pokemon = getNewPokemon("Pikachu", 1, 2, 3);
-
-		agregarItem(pokemon, 23, i, 0, NEW);
-
-		ItemTablaDinamica lala = tablaElementos[0];
-		ItemTablaDinamica lala2 = tablaElementos[3];
-		ItemTablaDinamica lala3 = tablaElementos[6];
-	}*/
-
 	pthread_create(&threadIniciarServidor, NULL,(void*)iniciarServidor, (void*)&argumentos);
-	//pthread_create(&threadEnviarMensajesSuscriptores, NULL,(void*)enviarMensajesSuscriptores, NULL);
+	pthread_create(&threadEnviarMensajesSuscriptores, NULL,(void*)enviarMensajesSuscriptores, NULL);
 	pthread_join(threadIniciarServidor, NULL);
-	//pthread_join(threadEnviarMensajesSuscriptores, NULL);
+	pthread_join(threadEnviarMensajesSuscriptores, NULL);
 
 	liberarDiccionario();
 	liberarCache();

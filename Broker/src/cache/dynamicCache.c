@@ -314,7 +314,6 @@ void compactarCache(){
 	for(int i = 0; i < tamanioTabla; i++)
 	{
 		ItemTablaDinamica elementoActual = tablaElementos[i];
-		log_info(loggerObligatorio, "I: %d", i);
 
 		if(!elementoActual.estaVacio)
 		{
@@ -329,9 +328,7 @@ void compactarCache(){
 			posicionVieja = elementoActual.posicion;
 			tablaCompactada[posicionTablaNueva].posicion = posicionNueva;
 			tablaCompactada[posicionTablaNueva].estaVacio = 0;
-			log_info(loggerObligatorio, "ANTES DE MOVER BLOQUE: %d",  tablaElementos[13].posicion);
 			moverBloque(elementoActual.tamanio, posicionVieja, posicionNueva);
-			log_info(loggerObligatorio, "DESPUÉS DE MOVER BLOQUE: %d",  tablaElementos[13].posicion);
 			posicionNueva += obtenerDesplazamientoMinimo(elementoActual.tamanio);
 			posicionTablaNueva++;
 		}
@@ -379,13 +376,9 @@ void eliminarItem(long ID){
 	//Log obligatorio.
 	log_info(loggerObligatorio, "Eliminada partición con posición de inicio %d.", posDatoAEliminar);
 
-	log_info(loggerObligatorio, "POSI CION: %d", tablaElementos[13].posicion);
-
 	//log_info(loggerObligatorio, "UNO");
 
 	consolidarCache(posNuevoVacio, posDatoAEliminar);
-
-	log_info(loggerObligatorio, "POSI CION  2: %d", tablaElementos[13].posicion);
 
 	if(frecuenciaCompactacion <= 1 || particionesLiberadas == frecuenciaCompactacion){
 		compactarCache();

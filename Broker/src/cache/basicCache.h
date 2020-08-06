@@ -8,8 +8,8 @@
 #include <pthread.h>
 
 typedef void* CacheBasica;
-CacheBasica* cachePrincipal;
-CacheBasica* cacheAlternativa; //Sólo para compactar.
+CacheBasica cachePrincipal;
+CacheBasica cacheAlternativa; //Sólo para compactar.
 pthread_mutex_t mutexBasic;
 
 void inicializarCache(int tamanio);
