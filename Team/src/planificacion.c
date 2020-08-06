@@ -26,6 +26,7 @@ void ejecucion_entrenadores(){
 		}*/
 	}
 	log_info(logPlanificacion,"pthread_exit(EJECUCION)");
+	seguir_abierto_servidor=0;
 	pthread_exit(NULL);
 }
 
@@ -41,7 +42,8 @@ void match_atrapar(){
 		sem_wait(&esperar_finalizacion);
 		//mostrarColas();
 		//intercambios();
-		if(queue_size(DISPONIBLES)==0 && queue_size(EJECUTADOS)>0){ // EJECUTADOS --> DISPONIBLES // TERMINAN
+		//if(queue_size(DISPONIBLES)==0 && queue_size(EJECUTADOS)>0){ // EJECUTADOS --> DISPONIBLES // TERMINAN
+		if(queue_size(EJECUTADOS)>0){ // EJECUTADOS --> DISPONIBLES // TERMINAN
 			while(queue_size(EJECUTADOS)>0){
 				ingreso_a_colas_entrenador(queue_peek(EJECUTADOS));
 				pthread_mutex_lock(&modificar_cola_ejecutados); // SACAR
@@ -78,11 +80,11 @@ void planificacion_fifo(){
 	//log_info(logger, "IP %s y PUERTO %s", configTeam->ip, configTeam->puerto);
 	//pthread_create(&conexiones,NULL,(void*)iniciar_servidor,&configTeam);
 	pthread_create(&atrapar,NULL,(void*)match_atrapar,NULL);
-	pthread_detach(atrapar);
 	log_info(logPlanificacion,"ENTRO A match_atrapar");
 	pthread_create(&ejecucion,NULL,(void*)ejecucion_entrenadores,NULL);
-	pthread_detach(ejecucion);
 	log_info(logPlanificacion,"ENTRO A ejecucion_entrenadores");
+	pthread_join(atrapar,NULL);
+	pthread_join(ejecucion,NULL);
 
 
 	//pthread_join(ejecucion,NULL);

@@ -29,28 +29,29 @@ void metricas(){
 }
 
 int main(void) {
-	Config* configTeam = malloc(sizeof(Config));
+	seguir_abierto_servidor=1;
+	//Config* configTeam = malloc(sizeof(Config));
 	t_log* logger = iniciar_logger("PRUEBA.log", "TEAM");
 	//pthread_t threadIniciarServidor;
-	IniciarServidorArgs argumentos;
 
 	logger = iniciar_logger("Team.log", "Team");
-	cargarConfig(configTeam, logger);
+	cargarConfig(logger);
+	//log_info(logger,"111");
+	argumentos.ip = configTeam.ipTeam;
+	argumentos.puerto = configTeam.puertoTeam;
 
-	argumentos.ip = configTeam->ipTeam;
-	argumentos.puerto = configTeam->puertoTeam;
-
-	ipBroker = configTeam->ip;
-	puertoBroker = configTeam->puerto;
-	Team team = inicializarTeam(configTeam->posiciones,configTeam->pertenecientes,configTeam->objetivos);
+	ipBroker = configTeam.ip;
+	puertoBroker = configTeam.puerto;
+	Team team = inicializarTeam(configTeam.posiciones,configTeam.pertenecientes,configTeam.objetivos);
 	//log_info(logger,"VOY A INGRESAR A PLANIFICAR");
-	pthread_t planificacion;
-	pthread_create(&planificacion, NULL,(void*)planificacion_fifo,NULL);
-	pthread_join(planificacion,NULL);
-
+	//pthread_t h_conexiones;
+	//pthread_create(&h_conexiones, NULL,(void*)conexiones,&team);
+	//pthread_join(h_conexiones,NULL);
+	conexiones(team);
 	//fclose(logTP);
 	//log_info(logger,"VOY A INGRESAR A CONEXIONES");
-	conexiones(configTeam,logger, team, argumentos);
+	//conexiones(team);
+	planificacion_fifo();
 	//log_info(logger,"YA INICIALICE A TEAM");
 	//pthread_create(&threadIniciarServidor, NULL,(void*)iniciarServidorTeam, (void*)&argumentos);
 
@@ -65,6 +66,11 @@ int main(void) {
 
 	//free(configTeam);
 	//liberarTeam(team);
+/*
+	for(int i=0;i<CANT_ENTRENADORES;i++){
+		free(team[i]);
+	}
+*/
 	printf(" \nprograma finalizado\n");
 	return 0;
 }
