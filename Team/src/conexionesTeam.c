@@ -251,7 +251,7 @@ void escucharABroker(){
 				//log_info(logConexiones, "RESULTADO %d, NO HAY CONEXION CON BROKER", resultado);
 				liberar_conexion_cliente(conexionBroker);
 				log_info(logConexiones,"VOY A ESPERAR UNOS SEGUNDOS PARA VOLVER A RECONECTARME");
-				sleep(configTeam->tiempoReconexion);
+				sleep(configTeam.tiempoReconexion);
 				conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
 				//suscripcionEnviada =
 					enviarSuscripcion(conexionBroker, configTeam.ID, 3, APPEARED, LOCALIZED, CAUGHT);
@@ -261,7 +261,7 @@ void escucharABroker(){
 			//log_info(logConexiones, "RESULTADO %d, NO HAY CONEXION CON BROKER", resultado);
 			liberar_conexion_cliente(conexionBroker);
 			log_info(logConexiones,"VOY A ESPERAR UNOS SEGUNDOS PARA VOLVER A RECONECTARME");
-			sleep(configTeam->tiempoReconexion);
+			sleep(configTeam.tiempoReconexion);
 			conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
 			//suscripcionEnviada =
 				enviarSuscripcion(conexionBroker, configTeam.ID, 3, APPEARED, LOCALIZED, CAUGHT);
