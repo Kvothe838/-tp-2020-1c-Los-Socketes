@@ -11,6 +11,10 @@ void agregar_pokemon_cola(Pokemon* nuevo){
 	log_info(logInit,"POKEMON (%s,%d,%d) AGREGADO AL MAPA",nuevo->nombre,nuevo->x,nuevo->y);
 }
 
+Pokemon* getPokemon(Pokemon* x){
+	return x;
+}
+
 void asignar_movimiento(Entrenador* entrenador,int mov_x,int mov_y,Pokemon* pokemon){
 	entrenador->intentar_atrapar = pokemon;
 	entrenador->movimiento[0]=mov_x;
@@ -149,19 +153,12 @@ int a_e1_le_interesa_alguno_de_e2(Entrenador* e1, Entrenador* e2){
 				y1++;
 			}
 		}
-
 		if(encontrado){
 			x1++;
 		}
 	}
-
-	if(encontrado==0){ //KHÉEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-
-		//RETURN !ENCONTRADO;
-		//LA PUTA MADRE.
-
-
-		//printf("\nhay interes de %d por %d",e1->idEntrenador,e2->idEntrenador);
+	if(encontrado==0){
+		log_info(logInit,"\nhay interes de %d por %d (%s con un indice de intercambiables: %d)\n",e1->idEntrenador,e2->idEntrenador,getPokemon(list_get(e2->pertenecientesIntercambiables,e2->indiceDar))->nombre,e2->indiceDar);
 		return 1;
 	}else{
 		//printf("\nno hay interes de %d por %d",e1->idEntrenador,e2->idEntrenador);
@@ -171,8 +168,8 @@ int a_e1_le_interesa_alguno_de_e2(Entrenador* e1, Entrenador* e2){
 
 void intercambio_forzoso(Entrenador* mover, Entrenador* quieto){
 	mover->tipoAccion = INTERCAMBIAR;
-	mover->intentar_atrapar = list_get(quieto->mios,quieto->indiceDar);
-	quieto->intentar_atrapar = list_get(mover->mios,mover->indiceDar);
+	mover->intentar_atrapar = list_get(quieto->pertenecientesIntercambiables,quieto->indiceDar);
+	quieto->intentar_atrapar = list_get(mover->pertenecientesIntercambiables,mover->indiceDar);
 	mover->movimiento[0] = ((quieto->posicion[0])-(mover->posicion[0]));
 	mover->movimiento[1] = ((quieto->posicion[1])-(mover->posicion[1]));
 	pthread_mutex_lock(&modificar_cola_deadlocks);
@@ -192,7 +189,11 @@ void intercambio_forzoso(Entrenador* mover, Entrenador* quieto){
 	list_remove(DEADLOCKS->elements,getIndice(quieto->idEntrenador));
 	list_remove(DEADLOCKS->elements,getIndice(mover->idEntrenador));
 
-	log_info(logInit," = %d = VA A INTERCAMBIAR CON %d",mover->idEntrenador,quieto->idEntrenador);
+	log_info(logInit,"<<<< = %d = VA A INTERCAMBIAR CON %d\n\n",mover->idEntrenador,quieto->idEntrenador);
+
+	log_info(logInit,"\n\n FORZADAMENTE <<<<<<< %d --> %s --> %d >>>>>>",mover->idEntrenador,getPokemon(list_get(mover->pertenecientesIntercambiables,mover->indiceDar))->nombre,quieto->idEntrenador);
+	log_info(logInit," FORZADAMENTE <<<<<<< %d --> %s --> %d >>>>>>\n\n",quieto->idEntrenador,getPokemon(list_get(quieto->pertenecientesIntercambiables,quieto->indiceDar))->nombre,mover->idEntrenador);
+
 
 	//printf("\nSE SUMA 1 HAY_PREPARADOS");
 	sem_post(&hayPreparados);
@@ -266,13 +267,13 @@ void verificar_espera_circular(){
 			//printf("\nhay espera circular");
 			log_info(logInit,"SE DETECTO ESPERA CIRCULAR");
 			//fprintf(logTP,"se detecto una situacion de Deadlock\n");
-			/*
+/*
 			printf("\n-------------------------------------------\n");
 			for(temporal=0;temporal < columnas;temporal++){//ESTE ES EL INDICE DE DEADLOCKS
 				printf("ID: %d (%d) // ESPERA: %d // RETIENE: %d \n",temporal,esperaCircular[0][temporal],esperaCircular[1][temporal],esperaCircular[2][temporal]);
 			}
 			printf("\n-------------------------------------------\n");// ESPERA CIRCULAR CONFIRMADA Y VERIFICADA CON 3 O + ENTRENADORES INVOLUCRADOS
-			*/
+*/
 			//printf("\nprimero: %d (dl : %d)",esperaCircular[0][0],getIndice(esperaCircular[0][0]));
 			//printf("\nsegundo: %d (dl : %d)",esperaCircular[0][(esperaCircular[2][0])],getIndice(esperaCircular[0][(esperaCircular[2][0])]));
 
@@ -440,7 +441,8 @@ void intercambiar(Entrenador* persona, Entrenador* quieto){
 
 	list_add(persona->mios,persona->intentar_atrapar);
 	list_add(quieto->mios,quieto->intentar_atrapar);
-
+	log_info(logInit," <<<<<<< %d --> %s --> %d >>>>>>",persona->idEntrenador,getPokemon(list_get(persona->mios,persona->indiceDar))->nombre,quieto->idEntrenador);
+	log_info(logInit," <<<<<<< %d --> %s --> %d >>>>>>",quieto->idEntrenador,getPokemon(list_get(quieto->mios,quieto->indiceDar))->nombre,persona->idEntrenador);
 	list_remove(persona->mios,persona->indiceDar);
 	list_remove(quieto->mios,quieto->indiceDar);
 
@@ -664,10 +666,6 @@ long enviarCatch(Pokemon* pokemonAtrapar){
 		sem_post(&consultaCatch);
 		return 0;
 	}
-}
-
-Pokemon* getPokemon(Pokemon* x){
-	return x;
 }
 
 int hayOtroEnLaReserva(Entrenador* entrenador){
