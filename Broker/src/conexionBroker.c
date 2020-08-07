@@ -29,6 +29,7 @@ void manejarSuscripcion(t_list* colas, int cantidadColas,
 }
 
 long* generarIDMensaje() {
+	pthread_mutex_lock(&mutexGeneracionHash);
 	int continuar = 0;
 	long* hash;
 
@@ -56,6 +57,8 @@ long* generarIDMensaje() {
 	} while(continuar);
 
 	list_add(IDsMensajes, hash);
+
+	pthread_mutex_unlock(&mutexGeneracionHash);
 
 	return hash;
 }

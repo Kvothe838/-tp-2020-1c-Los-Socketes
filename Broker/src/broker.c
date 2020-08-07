@@ -42,6 +42,7 @@ int main(void) {
 	semColaMensajes = malloc(sizeof(sem_t));
 	sem_init(semColaMensajes, 0, 0);
 	IDsMensajes = list_create();
+	pthread_mutex_init(&mutexGeneracionHash, NULL);
 
 	pthread_create(&threadIniciarServidor, NULL,(void*)iniciarServidor, (void*)&argumentos);
 	pthread_create(&threadEnviarMensajesSuscriptores, NULL,(void*)enviarMensajesSuscriptores, NULL);

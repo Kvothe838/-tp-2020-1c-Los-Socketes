@@ -23,6 +23,7 @@
 pthread_t thread;
 sem_t* semColaMensajes;
 t_list* IDsMensajes;
+pthread_mutex_t mutexGeneracionHash;
 
 void iniciarServidor(IniciarServidorArgs* argumentos);
 void enviarMensajesSuscriptores();
