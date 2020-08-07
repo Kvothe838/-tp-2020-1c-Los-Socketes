@@ -165,9 +165,9 @@ void iniciar_servidor(t_config* config, int socketBroker)
 				if(!recepcionExitosa) continue;
 				log_trace(logger, "Llegó algo de la cola %s", tipoColaToString(mensaje->cola));
 
-				//pthread_create(&thread,NULL,(void*)process_request,mensaje);
-				//pthread_detach(thread);
-				process_request(mensaje);
+				pthread_create(&thread,NULL,(void*)process_request,mensaje);
+				pthread_detach(thread);
+				//process_request(mensaje);
 			}
 
 		} else{
