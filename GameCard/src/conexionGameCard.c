@@ -204,45 +204,37 @@ void esperarGameBoy(int socket_servidor)
 void iniciarServidorGameboy(IniciarServidorArgs* argumentos){
 	int socket_servidor;
 
-	log_info(loggerSecundario, "ENTRÓ A SERVIDOR GAMEBOY");
+  struct addrinfo hints, *servinfo, *p;
 
-    struct addrinfo hints, *servinfo, *p;
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_UNSPEC;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_flags = AI_PASSIVE;
 
-    memset(&hints, 0, sizeof(hints));
-    hints.ai_family = AF_UNSPEC;
-    hints.ai_socktype = SOCK_STREAM;
-    hints.ai_flags = AI_PASSIVE;
+  getaddrinfo(argumentos->ip, argumentos->puerto, &hints, &servinfo);
 
-    getaddrinfo(argumentos->ip, argumentos->puerto, &hints, &servinfo);
+  for (p=servinfo; p != NULL; p = p->ai_next)
+  {
+      if ((socket_servidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
+          continue;
 
-    log_info(loggerSecundario, "IP: %d", argumentos->ip);
-    log_info(loggerSecundario, "PUERTO: %d", argumentos->puerto);
+      int one = 1;
+      setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)); //ESTO ES ESENCIAL.
 
-
-    for (p=servinfo; p != NULL; p = p->ai_next)
-    {
-        if ((socket_servidor = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1)
-            continue;
-
-        int one = 1;
-        setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one)); //ESTO ES ESENCIAL.
-
-        if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1) {
-            close(socket_servidor);
-            continue;
-        }
-        break;
-    }
+      if (bind(socket_servidor, p->ai_addr, p->ai_addrlen) == -1) {
+          close(socket_servidor);
+          continue;
+      }
+      break;
+  }
 
 	listen(socket_servidor, SOMAXCONN);
 
-    freeaddrinfo(servinfo);
+  freeaddrinfo(servinfo);
 
-    log_info(loggerSecundario, "A punto de escuchar a GameBoy");
-    while(1){
-    	esperarGameBoy(socket_servidor);
-    }
+  while(1){
+  	esperarGameBoy(socket_servidor);
+  }
 
-    log_info(loggerSecundario, "Liberando");
-    liberar_conexion_cliente(socket_servidor);
+  liberar_conexion_cliente(socket_servidor);
 }
