@@ -147,8 +147,6 @@ int main(int argc, char **argv){
 				char* ipTeam = ipsPuertosTeam[i];
 				char* puertoTeam = ipsPuertosTeam[i+1];
 
-				log_info(logger, "IPTEAM: %s | PUERTOTEAM: %s", ipTeam, puertoTeam);
-
 				int conexionTeam = crear_conexion_cliente(ipTeam, puertoTeam);
 
 				if(conexionTeam == 0){
