@@ -22,6 +22,7 @@
 
 pthread_t thread;
 sem_t* semColaMensajes;
+t_list* IDsMensajes;
 
 void iniciarServidor(IniciarServidorArgs* argumentos);
 void enviarMensajesSuscriptores();

@@ -29,15 +29,31 @@ void manejarSuscripcion(t_list* colas, int cantidadColas,
 }
 
 long* generarIDMensaje() {
-	char* str = temporal_get_string_time();
-	long* hash = malloc(sizeof(long));
-	*hash = 0;
-	int c;
+	int continuar = 0;
+	long* hash;
 
-	while ((c = *str++))
-		*hash = c + (*hash << 6) + (*hash << 16) - *hash;
+	do {
+		char* str = temporal_get_string_time();
+		hash = malloc(sizeof(long));
+		*hash = 0;
+		int c;
 
-	//free(str);
+		while ((c = *str++))
+			*hash = c + (*hash << 6) + (*hash << 16) - *hash;
+
+		//free(str);
+
+		for(int i = 0; i < list_size(IDsMensajes); i++)
+		{
+			long* nuevoElemento = list_get(IDsMensajes, i);
+
+			if(*hash == *nuevoElemento)
+			{
+				continuar = 1;
+				free(hash);
+			}
+		}
+	} while(continuar);
 
 	return hash;
 }
