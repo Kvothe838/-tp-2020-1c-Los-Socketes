@@ -56,7 +56,7 @@ dkms.conf
 *.bin
 .vscode/
 
-Team/.cproject
-GameCard/.cproject
-GameBoy/.cproject
-Broker/.cproject
+*.cproject
+*.cproject
+*.cproject
+*.cproject
