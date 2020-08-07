@@ -262,6 +262,8 @@ void enviarMensajesPorCola(TipoCola tipoCola) {
 					&& esSuscriptorEnviado(suscriptoresEnviados, *suscriptor))
 				continue;
 
+			log_info(loggerObligatorio, "TAMANIO ANTES DE ENVIAR: %d | ID MENSAJE: %ld | TIPO COLA: %s", *tamanioItem, *IDMensaje, tipoColaToString(tipoCola));
+
 			int bytes, bytesMensajeSuscriptor;
 			void* stream = serializarMensajeSuscriptor(*IDMensaje,
 					*IDCorrelativo, mensaje, *tamanioItem, tipoCola,

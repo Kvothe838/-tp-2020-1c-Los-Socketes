@@ -23,6 +23,7 @@ typedef struct Bloque {
 }Bloque, *Cache;
 
 Cache cache;
+pthread_mutex_t mutexBuddySystem;
 
 void inicializarBuddySystem(int tamanio);
 void liberarBuddySystem();

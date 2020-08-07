@@ -5,9 +5,9 @@ void imprimirBloque(Bloque* bloque)
 {
 	if(bloque == NULL) return;
 
-	printf("Posición: %d | Tamanio: %d | Tamanio ocupado: %d | Está dividido: %s | LRU: %s | Fecha FIFO: %s\n",
+	printf("Posición: %d | Tamanio: %d | Tamanio ocupado: %d | Está dividido: %s | LRU: %s | Fecha FIFO: %s | ID: %ld\n",
 			bloque->posicion, bloque->tamanio, bloque->tamanioOcupado, bloque->estaDividido ? "Si" : "No",
-			bloque->fechaUltimoUso == NULL ? "N" : bloque->fechaUltimoUso, bloque->fechaCreacion);
+			bloque->fechaUltimoUso == NULL ? "N" : bloque->fechaUltimoUso, bloque->fechaCreacion, bloque->ID);
 
 	if(bloque->estaDividido)
 	{
@@ -52,6 +52,10 @@ void crearBloque(Bloque* bloqueActual, int nuevoTamanio)
 	bloqueActual->der->suscriptoresEnviados = NULL;
 	bloqueActual->izq->suscriptoresRecibidos = NULL;
 	bloqueActual->der->suscriptoresRecibidos = NULL;
+	bloqueActual->izq->ID = 0;
+	bloqueActual->der->ID = 0;
+	bloqueActual->izq->IDCorrelativo = 0;
+	bloqueActual->der->IDCorrelativo = 0;
 }
 
 void inicializarBuddySystem(int tamanio)
@@ -61,6 +65,8 @@ void inicializarBuddySystem(int tamanio)
 	cache->tamanioOcupado = 0;
 	cache->posicion = 0;
 	cache->estaDividido = 0;
+	cache->ID = 0;
+	cache->IDCorrelativo = 0;
 }
 
 void liberarInfoBloque(Bloque* bloqueActual)
@@ -139,9 +145,9 @@ int calcularEspacio(Bloque* bloque, int espacioRequerido, Bloque** bloqueAModifi
 	else
 	{
 		*bloqueAModificar = bloque;
-	}
 
-	return 1;
+		return 1;
+	}
 }
 
 int hayEspacioBuddySystem(int espacioRequerido, Bloque** bloqueAModificar)
@@ -245,6 +251,8 @@ void agregarElementoValidoBuddySystem(Bloque** bloqueAModificar, void* item, int
 
 void agregarItemBuddySystem(void* item, int tamanioItem, long ID, long IDCorrelativo, TipoCola cola)
 {
+	pthread_mutex_lock(&mutexBuddySystem);
+
 	Bloque* bloqueAModificar;
 
 	int hayEspacioParaItem = hayEspacioBuddySystem(tamanioItem, &bloqueAModificar);
@@ -256,6 +264,8 @@ void agregarItemBuddySystem(void* item, int tamanioItem, long ID, long IDCorrela
 	}
 
 	agregarElementoValidoBuddySystem(&bloqueAModificar, item, tamanioItem, ID, IDCorrelativo, cola);
+
+	pthread_mutex_unlock(&mutexBuddySystem);
 }
 
 Bloque* obtenerBloquePorID(long ID, Bloque* bloque)
@@ -284,18 +294,29 @@ int obtenerPosicionPorIDBuddySystem(long ID, Bloque* bloque)
 
 void* obtenerItemBuddySystem(long ID)
 {
+	pthread_mutex_lock(&mutexBuddySystem);
+
 	Bloque* bloqueEncontrado = obtenerBloquePorID(ID, cache);
 
-	if(bloqueEncontrado == NULL) return NULL;
+	if(bloqueEncontrado == NULL) {
+		pthread_mutex_unlock(&mutexBuddySystem);
+		return NULL;
+	}
 
 	void* valor = obtenerValor(bloqueEncontrado->tamanioOcupado, bloqueEncontrado->posicion);
+
+	pthread_mutex_unlock(&mutexBuddySystem);
 
 	return valor;
 }
 
 int* obtenerTamanioItemBuddySystem(long ID)
 {
+	pthread_mutex_lock(&mutexBuddySystem);
+
 	Bloque* bloqueEncontrado = obtenerBloquePorID(ID, cache);
+
+	pthread_mutex_unlock(&mutexBuddySystem);
 
 	if(bloqueEncontrado == NULL) return NULL;
 
@@ -304,7 +325,11 @@ int* obtenerTamanioItemBuddySystem(long ID)
 
 long* obtenerIDCorrelativoItemBuddySystem(long ID)
 {
+	pthread_mutex_lock(&mutexBuddySystem);
+
 	Bloque* bloqueEncontrado = obtenerBloquePorID(ID, cache);
+
+	pthread_mutex_unlock(&mutexBuddySystem);
 
 	if(bloqueEncontrado == NULL) return NULL;
 
@@ -325,17 +350,25 @@ void agregarSuscriptorEnviadoBuddySystem(long IDMensaje, Suscriptor** suscriptor
 
 void cambiarLRUBuddySystem(long ID)
 {
+	pthread_mutex_lock(&mutexBuddySystem);
+
 	Bloque* bloqueEncontrado = obtenerBloquePorID(ID, cache);
 
 	if(bloqueEncontrado != NULL){
 		free(bloqueEncontrado->fechaUltimoUso);
 		bloqueEncontrado->fechaUltimoUso = temporal_get_string_time();
 	}
+
+	pthread_mutex_unlock(&mutexBuddySystem);
 }
 
 t_list* obtenerSuscriptoresEnviadosBuddySystem(long IDMensaje)
 {
+	pthread_mutex_lock(&mutexBuddySystem);
+
 	Bloque* bloqueEncontrado = obtenerBloquePorID(IDMensaje, cache);
+
+	pthread_mutex_unlock(&mutexBuddySystem);
 
 	if(bloqueEncontrado == NULL) return NULL;
 
@@ -402,18 +435,29 @@ void agregarBloques(t_list** bloques, Bloque* bloque)
 
 void obtenerDumpBuddySystem()
 {
+	pthread_mutex_lock(&mutexBuddySystem);
+
 	t_list* bloques = list_create();
 
 	agregarBloques(&bloques, cache);
 
 	imprimirDatosBuddySystem(bloques);
+
+	pthread_mutex_unlock(&mutexBuddySystem);
 }
 
 void agregarSuscriptorRecibidoBuddySystem(long IDMensaje, Suscriptor* suscriptor)
 {
+	pthread_mutex_lock(&mutexBuddySystem);
+
 	Bloque* bloqueEncontrado = obtenerBloquePorID(IDMensaje, cache);
 
-	if(bloqueEncontrado == NULL) return;
+	if(bloqueEncontrado == NULL) {
+		pthread_mutex_unlock(&mutexBuddySystem);
+		return;
+	}
 
 	list_add(bloqueEncontrado->suscriptoresRecibidos, &(suscriptor->modulo));
+
+	pthread_mutex_unlock(&mutexBuddySystem);
 }

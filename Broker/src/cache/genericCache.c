@@ -27,6 +27,7 @@ void inicializarDataBasica(t_config* config){
 	}
 	else if(esBS)
 	{
+		pthread_mutex_init(&mutexBuddySystem, NULL);
 		inicializarBuddySystem(tamanioCache);
 	}
 }
@@ -70,7 +71,11 @@ int obtenerPosicionPorIDGeneric(long ID)
 
 		pthread_mutex_unlock(&mutexDynamic);
 	} else if(esBS) {
+		pthread_mutex_lock(&mutexBuddySystem);
+
 		posicion = obtenerPosicionPorIDBuddySystem(ID, cache);
+
+		pthread_mutex_unlock(&mutexBuddySystem);
 	}
 
 	return posicion;
