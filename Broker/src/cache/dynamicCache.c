@@ -13,6 +13,11 @@ int calcularBestFit(int desiredSize) {
 		if(!currentEntry.estaVacio && currentEntry.tamanio >= desiredSize){
 			int diff = currentEntry.tamanio - desiredSize;
 			if(bestDifference >= 0 && (bestDifference == NULL || diff < *bestDifference)){
+				if(bestDifference == NULL)
+				{
+					bestDifference = malloc(sizeof(int));
+				}
+
 				*bestDifference = diff;
 				bestposicion = i;
 				found = 1;
