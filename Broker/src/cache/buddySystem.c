@@ -314,6 +314,8 @@ long* obtenerIDCorrelativoItemBuddySystem(long ID)
 void agregarSuscriptorEnviadoBuddySystem(long IDMensaje, Suscriptor** suscriptor){
 	Bloque* bloqueEncontrado = obtenerBloquePorID(IDMensaje, cache);
 
+	if(bloqueEncontrado == NULL) return;
+
 	int yaEnviado = list_contains_int(bloqueEncontrado->suscriptoresEnviados, (*suscriptor)->modulo);
 
 	if(!yaEnviado){
