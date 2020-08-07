@@ -36,21 +36,17 @@ int main(void) {
 
 	t_log* logger = iniciar_logger("Team.log", "Team");
 	cargarConfig(logger);
-	log_info(logger,"111");
 	argumentos.ip = configTeam.ipTeam;
 	argumentos.puerto = configTeam.puertoTeam;
 
 	ipBroker = configTeam.ip;
 	puertoBroker = configTeam.puerto;
-  log_info(logger,"222");
 	Team team = inicializarTeam(configTeam.posiciones,configTeam.pertenecientes,configTeam.objetivos);
-  log_info(logger,"333");
 	//log_info(logger,"VOY A INGRESAR A PLANIFICAR");
 	//pthread_t h_conexiones;
 	//pthread_create(&h_conexiones, NULL,(void*)conexiones,&team);
 	//pthread_join(h_conexiones,NULL);
 	conexiones(team);
-  log_info(logger,"444");
 	//fclose(logTP);
 	//log_info(logger,"VOY A INGRESAR A CONEXIONES");
 	//conexiones(team);
