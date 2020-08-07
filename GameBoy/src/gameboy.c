@@ -143,15 +143,16 @@ int main(int argc, char **argv){
 			ipsPuertosTeam = config_get_array_value(config, "IPS_PUERTOS_TEAM");
 			cantidadTeams = config_get_int_value(config, "CANTIDAD_TEAMS");
 
-			for(int i = 0; i < cantidadTeams; i = i+2){
+			for(int i = 0; i < cantidadTeams * 2; i = i+2){
 				char* ipTeam = ipsPuertosTeam[i];
 				char* puertoTeam = ipsPuertosTeam[i+1];
+
+				log_info(logger, "IPTEAM: %s | PUERTOTEAM: %s", ipTeam, puertoTeam);
 
 				int conexionTeam = crear_conexion_cliente(ipTeam, puertoTeam);
 
 				if(conexionTeam == 0){
 					log_info(logger, "ERROR - No se pudo crear la conexión con %s", argv[1]);
-					exit(-1);
 				}
 
 				log_info(logger, "Conexión al proceso %s", argv[1]);
@@ -164,7 +165,6 @@ int main(int argc, char **argv){
 						if(!enviarMensajeASuscriptor(conexionTeam, 1, APPEARED, pokemon))
 						{
 							log_info(logger, "ERROR. No se pudo enviar el mensaje %s %s %s %d %d", argv[1], argv[2], argv[3], atoi(argv[4]), atoi(argv[5]));
-							exit(-1);
 						}
 
 						liberar_conexion_cliente(conexionTeam);

@@ -26,7 +26,7 @@ endif
 all: gameboy
 
 dependents:
-	-cd /home/utnso/tp-2020-1c-Los-Socketes/Shared/Debug && $(MAKE) clean all
+	-cd /home/utnso/tp-2020-1c-Los-Socketes/Shared/Debug && $(MAKE) all
 
 # Tool invocations
 gameboy: $(OBJS) $(USER_OBJS) /home/utnso/tp-2020-1c-Los-Socketes/Shared/Debug/libShared.a
