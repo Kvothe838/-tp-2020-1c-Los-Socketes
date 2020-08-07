@@ -347,7 +347,7 @@ void iniciarServidorTeam(){
 	while(1){
 		esperarConexionGameBoy(socket_servidor);
 	}
-	log_info(logConexiones,"pthread_exit(iniciarServidorTeam)");
+
 	liberar_conexion_cliente(socket_servidor);
 }
 
