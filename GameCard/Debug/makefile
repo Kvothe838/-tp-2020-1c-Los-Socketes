@@ -28,7 +28,7 @@ endif
 all: gamecard
 
 dependents:
-	-cd /home/utnso/tp-2020-1c-Los-Socketes/Shared/Debug && $(MAKE) all
+	-cd /home/utnso/tp-2020-1c-Los-Socketes/Shared/Debug && $(MAKE) clean all
 
 # Tool invocations
 gamecard: $(OBJS) $(USER_OBJS) /home/utnso/tp-2020-1c-Los-Socketes/Shared/Debug/libShared.a
