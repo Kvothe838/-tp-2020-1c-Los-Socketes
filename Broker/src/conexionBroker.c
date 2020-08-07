@@ -34,6 +34,7 @@ long* generarIDMensaje() {
 	long* hash;
 
 	do {
+		continuar = 0;
 		char* str = temporal_get_string_time();
 		hash = malloc(sizeof(long));
 		*hash = 0;
@@ -52,6 +53,7 @@ long* generarIDMensaje() {
 			{
 				continuar = 1;
 				free(hash);
+				break;
 			}
 		}
 	} while(continuar);
