@@ -1,6 +1,4 @@
 #include "manejoDeArchivos.h"
-#include <dirent.h>
-#include <semaphore.h>
 
 t_dictionary* diccionarioSemaforo = NULL;
 
@@ -142,6 +140,10 @@ int mismaPosicion(pokemonDatoPosicion* a){
 void inicializarData(t_log* logger) {
 	t_config *configGameBoy, *metadata;
 
+
+
+	sem_init(&mutexFS,0,1);
+
 	configGameBoy = leer_config("GameCard.config", logger);
 
 	char* puntoDeMontajeTemporal = config_get_string_value(configGameBoy, "PUNTO_MONTAJE_TALLGRASS");
@@ -249,11 +251,8 @@ t_config * validarArchivoAbierto(char* pokemonNombre, char path[1000], pokemonMe
 		datosPokemon->abierto =	(strcmp(valorAbierto, "N") == 0) ? 1 : 0;
 
 		if (!datosPokemon->abierto) {
-			t_log* log = iniciar_logger("SeBloqueoPorEsperar.log", "GAMECARD");
-			log_trace(log, "A DORMIR");
 			config_destroy(configPokemon);
 			sleep(reintentoOperacion);
-			log_destroy(log);
 		}
 	} while (!datosPokemon->abierto);
 
@@ -550,9 +549,6 @@ void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t
 	}
 	free(datosPokemon);
 	//free(posicionPokemon);
-	t_log* logger = iniciar_logger("Ejemplo.log", "TEAM");
-	log_info(logger, "DICCIONARIO %d", dictionary_size(diccionarioSemaforo));
-	log_destroy(logger);
 
 	if(path != NULL)
 		free(path);
@@ -562,7 +558,6 @@ void administrarNewPokemon(char* pokemon, uint32_t posX, uint32_t posY, uint32_t
 
 
 uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
-	t_log* logger = iniciar_logger("GAMECARD.log", "Catch");
 	uint32_t cantidadDeBlocks;
 	char* path = agregarPuntoDeMontajeConMagicNumber("/Files/");
 	strcat(path, pokemon);
@@ -650,7 +645,6 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 				free(datosPokemon->bloquesAsociados);
 
 
-				log_destroy(logger);
 				free(datosPokemon);
 				free(path);
 				free(posicionPokemon);
@@ -658,7 +652,7 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 			}
 			else{
 				list_destroy_and_destroy_elements(lista, (void*)free);
-				log_info(logger, "No se encontró la posición %d - %d del pokemon %s", posX, posY, pokemon);
+				log_info(loggerObligatorio, "No se encontró la posición %d - %d del pokemon %s", posX, posY, pokemon);
 			}
 
 
@@ -678,9 +672,8 @@ uint32_t administrarCatchPokemon(char* pokemon, uint32_t posX, uint32_t posY){
 			free(posicionPokemon);
 	}
 	else
-		log_info(logger, "No se encontró el archivo del pokemon %s", pokemon);
+		log_info(loggerObligatorio, "No se encontró el archivo del pokemon %s", pokemon);
 
-	log_destroy(logger);
 	free(datosPokemon);
 	free(path);
 	return 0;

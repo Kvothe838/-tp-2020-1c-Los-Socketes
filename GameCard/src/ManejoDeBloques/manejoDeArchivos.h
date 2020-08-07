@@ -12,6 +12,8 @@
 #include <stdint.h>
 #include <string.h>
 #include "../conexionBinario/conexionBinario.h"
+#include <dirent.h>
+#include <semaphore.h>
 
 typedef struct {
 	uint32_t esDirectorio;
@@ -26,6 +28,10 @@ typedef struct {
 	uint32_t cantidad;
 } pokemonDatoPosicion;
 
+sem_t mutexFS;
+
+t_log* loggerObligatorio;
+t_log* loggerSecundario;
 
 char *puntoDeMontaje;
 char *numeroMagico;

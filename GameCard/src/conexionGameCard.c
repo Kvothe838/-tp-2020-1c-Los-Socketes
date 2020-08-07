@@ -25,7 +25,7 @@ void mandarMensajeABroker(void* datosRecibidos,	TipoModulo cola, long IDCorrelat
 }
 
 void process_request(MensajeParaSuscriptor* mensaje){
-	t_log* logger = log_create("pruebaLOCA.log", "CONEXION", true, LOG_LEVEL_INFO);
+	sem_wait(&mutexFS);
 	NewPokemon* pokemonNew;
 	GetPokemon* pokemonGet;
 	CatchPokemon* pokemonCatch;
@@ -37,13 +37,13 @@ void process_request(MensajeParaSuscriptor* mensaje){
 
 			pokemonNew = deserializarNew(mensaje->contenido);
 
-			log_info(logger, "LLEGÓ NEW POKEMON CON NOMBRE: %s en la pos %d-%d y son %d", pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY, pokemonNew->cantidad);
+			log_info(loggerSecundario, "LLEGÓ NEW POKEMON CON NOMBRE: %s en la pos %d-%d y son %d", pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY, pokemonNew->cantidad);
 
 			administrarNewPokemon(pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY, pokemonNew->cantidad);
 
 			AppearedPokemon* dataAppeared = getAppearedPokemon(pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY);
 
-			mandarMensajeABroker(dataAppeared, APPEARED, mensaje->ID, logger);
+			mandarMensajeABroker(dataAppeared, APPEARED, mensaje->ID, loggerObligatorio);
 
 			//free(dataAppeared->nombre);
 			free(dataAppeared);
@@ -56,36 +56,34 @@ void process_request(MensajeParaSuscriptor* mensaje){
 
 			pokemonGet = deserializarGet(mensaje->contenido);
 
-			log_info(logger, "LLEGÓ GET POKEMON CON NOMBRE: %s", pokemonGet->nombre);
+			log_info(loggerSecundario, "LLEGÓ GET POKEMON CON NOMBRE: %s", pokemonGet->nombre);
 
 			LocalizedPokemon * dataLocalized = administrarGetPokemon(pokemonGet->nombre);
 
-			printf("Nombre completo: %s\n", dataLocalized->nombre);
+			/*printf("Nombre completo: %s\n", dataLocalized->nombre);
 			printf("Larog del nombre: %d\n", dataLocalized->largoNombre);
 			printf("Posiciones en el mapa: %d\n", dataLocalized->cantidadDeParesDePosiciones);
-			printf("Cantidad de elementos en la lista %d\n", list_size(dataLocalized->posiciones));
+			printf("Cantidad de elementos en la lista %d\n", list_size(dataLocalized->posiciones));*/
 
 
 			//Esto está solamente para poder confirmar que el contenido de la lista está bien
-			uint32_t *data;
+			/*uint32_t *data;
 			uint32_t ciclos = dataLocalized->cantidadDeParesDePosiciones, X = 0, Y = 1;
 			while(ciclos != 0){
 				ciclos--;
 
 				data = list_get(dataLocalized->posiciones, X);
-				log_info(logger, "X:%d", *data);
+				log_info(loggerObligatorio, "X:%d", *data);
 				data = list_get(dataLocalized->posiciones, Y);
-				log_info(logger, "Y:%d", *data);
+				log_info(loggerObligatorio, "Y:%d", *data);
 
 				X += 2;
 				Y += 2;
-
-
-			}
+			}*/
 
 			//Acá terminó de leer el contenido y empiezo a mandar el mensaje
 
-			mandarMensajeABroker(dataLocalized, LOCALIZED, mensaje->ID, logger);
+			mandarMensajeABroker(dataLocalized, LOCALIZED, mensaje->ID, loggerObligatorio);
 
 			//free(dataLocalized->nombre);
 			list_destroy(dataLocalized->posiciones);
@@ -98,13 +96,13 @@ void process_request(MensajeParaSuscriptor* mensaje){
 
 			pokemonCatch = deserializarCatch(mensaje->contenido);
 
-			log_info(logger, "LLEGÓ CATCH POKEMON CON NOMBRE: %s en la pos %d-%d", pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
+			log_info(loggerSecundario, "LLEGÓ CATCH POKEMON CON NOMBRE: %s en la pos %d-%d", pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
 
 			uint32_t resultado = administrarCatchPokemon(pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
 
 			CaughtPokemon* dataCaught = getCaughtPokemon(resultado);
 
-			mandarMensajeABroker(dataCaught, CAUGHT, mensaje->ID, logger);
+			mandarMensajeABroker(dataCaught, CAUGHT, mensaje->ID, loggerObligatorio);
 
 			free(dataCaught);
 
@@ -117,6 +115,7 @@ void process_request(MensajeParaSuscriptor* mensaje){
 	}
 
 	free(mensaje);
+	sem_post(&mutexFS);
 }
 
 
@@ -135,15 +134,17 @@ void atenderMensajeGameboy(int* socket)
 
 		if(!recepcionExitosa) return;
 
-		process_request(mensaje);
-		//pthread_create(&threadGameBoy, NULL, (void*)process_request, mensaje);
-		//pthread_detach(thread);
+		//process_request(mensaje);
+		pthread_create(&threadGameBoy, NULL, (void*)process_request, mensaje);
+		pthread_detach(thread);
 
 	}
 }
 
 void iniciar_servidor(t_config* config, int socketBroker)
 {
+	loggerObligatorio = iniciar_logger("LoggerObligatorioGamecard.log", "GAMECARDObligatorio");
+	loggerSecundario = iniciar_logger("LoggerSecundarioGamecard.log", "GAMECARDSecundario");
 	int socketActual = socketBroker;
 	int resultado;
     while(1){
@@ -157,13 +158,11 @@ void iniciar_servidor(t_config* config, int socketBroker)
 		if(resultado != 0 && resultado != -1 && socketActual != 0){
 			if(codigo == NUEVO_MENSAJE_SUSCRIBER)
 			{
-				t_log* logger = log_create("respuesta.log", "RESPUESTA", true, LOG_LEVEL_TRACE);
-				log_trace(logger, "Llegó algo");
 				MensajeParaSuscriptor* mensaje = NULL;
-				int recepcionExitosa = recibirMensajeSuscriber(socketActual, logger, TEAM, &mensaje, ipBroker, puertoBroker);
+				int recepcionExitosa = recibirMensajeSuscriber(socketActual, loggerObligatorio, TEAM, &mensaje, ipBroker, puertoBroker);
 
 				if(!recepcionExitosa) continue;
-				log_trace(logger, "Llegó algo de la cola %s", tipoColaToString(mensaje->cola));
+				log_trace(loggerSecundario, "Llegó algo de la cola %s", tipoColaToString(mensaje->cola));
 
 				pthread_create(&thread,NULL,(void*)process_request,mensaje);
 				pthread_detach(thread);
@@ -171,22 +170,16 @@ void iniciar_servidor(t_config* config, int socketBroker)
 			}
 
 		} else{
-			t_log* logger = log_create("pruebaLOCA.log", "CONEXION", true, LOG_LEVEL_INFO);
-
-			log_info(logger, "RESULTADO %d", resultado);
-
 			liberar_conexion_cliente(socketActual);
 			socketActual = crear_conexion_cliente(ipBroker, puertoBroker);
-			if(socketActual != -1)
+			if(socketActual != -1){
 				enviarSuscripcion(socketActual, GAMECARD, 3, NEW, GET, CATCH);
+				log_info(loggerSecundario,"Conexión con Broker recuperada");
+			}
 			if(resultado == 0)
-				log_info(logger,"SE CAYÓ BROKER :0");
-			if(resultado == -1)
-				log_info(logger,"BROKER SIGUE CAIDO D:");
-			//volverABUscarSocket(&socketBroker);
+				log_info(loggerSecundario,"Conexión con Broker caida");
 
-			sleep(1);
-			log_destroy(logger);
+			sleep(reintentoConexion);
 		}
 
     }
@@ -219,6 +212,9 @@ void iniciarServidorGameboy(IniciarServidorArgs* argumentos){
     hints.ai_flags = AI_PASSIVE;
 
     getaddrinfo(argumentos->ip, argumentos->puerto, &hints, &servinfo);
+    log_info(loggerSecundario, argumentos->ip);
+    log_info(loggerSecundario, argumentos->puerto);
+
 
     for (p=servinfo; p != NULL; p = p->ai_next)
     {
@@ -245,5 +241,3 @@ void iniciarServidorGameboy(IniciarServidorArgs* argumentos){
 
     liberar_conexion_cliente(socket_servidor);
 }
-
-
