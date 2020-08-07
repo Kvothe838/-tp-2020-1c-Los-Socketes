@@ -29,47 +29,33 @@ void manejarSuscripcion(t_list* colas, int cantidadColas,
 }
 
 long* generarIDMensaje() {
-	log_info(loggerObligatorio, "Antes del lock");
 	pthread_mutex_lock(&mutexGeneracionHash);
-	log_info(loggerObligatorio, "Después del lock");
 	int continuar = 0;
 	long* hash;
 
-	//log_info(loggerObligatorio, "Antes del do");
 	do {
-		//log_info(loggerObligatorio, "Entro a do");
 		continuar = 0;
 		char* str = temporal_get_string_time();
 		hash = malloc(sizeof(long));
-		//log_info(loggerObligatorio, "HASH1: %p", hash);
 		*hash = 0;
 		int c;
 
-		//log_info(loggerObligatorio, "Antes de while");
 		while ((c = *str++))
 			*hash = c + (*hash << 6) + (*hash << 16) - *hash;
-		//log_info(loggerObligatorio, "Después de while");
-		//free(str);
 
-		//log_info(loggerObligatorio, "Antes del for");
 		for(int i = 0; i < list_size(IDsMensajes); i++)
 		{
-			//log_info(loggerObligatorio, "Nuevo for");
 			long* nuevoElemento = list_get(IDsMensajes, i);
 
-			//log_info(loggerObligatorio, "El hash: %ld | El elemento: %ld", *hash, *nuevoElemento);
 			if(*hash == *nuevoElemento)
 			{
-				//log_info(loggerObligatorio, "Son iguales");
 				continuar = 1;
 				free(hash);
 				break;
 			}
 		}
-		//log_info(loggerObligatorio, "Salgo del do");
 	} while(continuar);
 
-	//log_info(loggerObligatorio, "HASH2: %p", hash);
 	list_add(IDsMensajes, hash);
 
 	pthread_mutex_unlock(&mutexGeneracionHash);
