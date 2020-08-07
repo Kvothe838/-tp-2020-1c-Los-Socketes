@@ -153,7 +153,6 @@ int main(int argc, char **argv){
 
 				if(conexionTeam == 0){
 					log_info(logger, "ERROR - No se pudo crear la conexión con %s", argv[1]);
-					exit(-1);
 				}
 
 				log_info(logger, "Conexión al proceso %s", argv[1]);
@@ -166,7 +165,6 @@ int main(int argc, char **argv){
 						if(!enviarMensajeASuscriptor(conexionTeam, 1, APPEARED, pokemon))
 						{
 							log_info(logger, "ERROR. No se pudo enviar el mensaje %s %s %s %d %d", argv[1], argv[2], argv[3], atoi(argv[4]), atoi(argv[5]));
-							exit(-1);
 						}
 
 						liberar_conexion_cliente(conexionTeam);
