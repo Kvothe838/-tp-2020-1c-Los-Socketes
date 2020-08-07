@@ -3,7 +3,6 @@
 int crear_conexion_cliente(char *ip, char* puerto)
 {
   printf("8.1");
-  fflush(stdout);
 	struct addrinfo hints;
 	struct addrinfo *server_info;
 
