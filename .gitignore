@@ -55,3 +55,8 @@ dkms.conf
 *.log
 *.bin
 .vscode/
+
+Team/.cproject
+GameCard/.cproject
+GameBoy/.cproject
+Broker/.cproject
