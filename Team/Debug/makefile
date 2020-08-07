@@ -26,13 +26,13 @@ endif
 all: team
 
 dependents:
-	-cd /home/utnso/tp-2020-1c-Los-Socketes/Shared/Debug && $(MAKE) clean all
+	-cd /home/utnso/wrksp/tp-2020-1c-Los-Socketes/Shared/Debug && $(MAKE) clean all
 
 # Tool invocations
-team: $(OBJS) $(USER_OBJS) /home/utnso/tp-2020-1c-Los-Socketes/Shared/Debug/libShared.a
+team: $(OBJS) $(USER_OBJS) /home/utnso/wrksp/tp-2020-1c-Los-Socketes/Shared/Debug/libShared.a
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C Linker'
-	gcc -L"/home/utnso/tp-2020-1c-Los-Socketes/Shared/Debug" -o "team" $(OBJS) $(USER_OBJS) $(LIBS)
+	gcc -L"/home/utnso/wrksp/tp-2020-1c-Los-Socketes/Shared/Debug" -o "team" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
@@ -42,6 +42,6 @@ clean:
 	-@echo ' '
 
 .PHONY: all clean dependents
-/home/utnso/tp-2020-1c-Los-Socketes/Shared/Debug/libShared.a:
+/home/utnso/wrksp/tp-2020-1c-Los-Socketes/Shared/Debug/libShared.a:
 
 -include ../makefile.targets

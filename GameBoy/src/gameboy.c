@@ -143,9 +143,11 @@ int main(int argc, char **argv){
 			ipsPuertosTeam = config_get_array_value(config, "IPS_PUERTOS_TEAM");
 			cantidadTeams = config_get_int_value(config, "CANTIDAD_TEAMS");
 
-			for(int i = 0; i < cantidadTeams; i = i+2){
+			for(int i = 0; i < cantidadTeams * 2; i = i+2){
 				char* ipTeam = ipsPuertosTeam[i];
 				char* puertoTeam = ipsPuertosTeam[i+1];
+
+				log_info(logger, "IPTEAM: %s | PUERTOTEAM: %s", ipTeam, puertoTeam);
 
 				int conexionTeam = crear_conexion_cliente(ipTeam, puertoTeam);
 

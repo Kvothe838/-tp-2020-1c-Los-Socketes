@@ -344,7 +344,7 @@ void iniciarServidorTeam(){
 
 	freeaddrinfo(servinfo);
 
-	while(seguir_abierto_servidor==1){
+	while(1){
 		esperarConexionGameBoy(socket_servidor);
 	}
 	log_info(logConexiones,"pthread_exit(iniciarServidorTeam)");
