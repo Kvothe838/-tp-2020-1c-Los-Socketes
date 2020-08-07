@@ -1,595 +1,388 @@
-==10078== Memcheck, a memory error detector
-==10078== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
-==10078== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
-==10078== Command: ./broker
-==10078== Parent PID: 9864
-==10078== 
-==10078== Thread 4:
-==10078== Conditional jump or move depends on uninitialised value(s)
-==10078==    at 0x8049CDC: obtenerBloquePorID (buddySystem.c:265)
-==10078==    by 0x8049D36: obtenerPosicionPorIDBuddySystem (buddySystem.c:278)
-==10078==    by 0x804BD59: obtenerPosicionPorIDGeneric (genericCache.c:73)
-==10078==    by 0x804C8C5: manejarPublisher (conexionBroker.c:108)
-==10078==    by 0x804CA4D: processRequest (conexionBroker.c:149)
-==10078==    by 0x804CB3B: serveClient (conexionBroker.c:180)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078== 
-==10078== Thread 3:
-==10078== Conditional jump or move depends on uninitialised value(s)
-==10078==    at 0x8049CDC: obtenerBloquePorID (buddySystem.c:265)
-==10078==    by 0x8049D67: obtenerItemBuddySystem (buddySystem.c:287)
-==10078==    by 0x804BD97: obtenerItemGeneric (genericCache.c:87)
-==10078==    by 0x804CC49: enviarMensajesPorCola (conexionBroker.c:212)
-==10078==    by 0x804CF11: enviarMensajesSuscriptores (conexionBroker.c:279)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078== 
-==10078== Conditional jump or move depends on uninitialised value(s)
-==10078==    at 0x8049CDC: obtenerBloquePorID (buddySystem.c:265)
-==10078==    by 0x8049DB1: obtenerTamanioItemBuddySystem (buddySystem.c:298)
-==10078==    by 0x804BDD6: obtenerTamanioItemGeneric (genericCache.c:101)
-==10078==    by 0x804CC5D: enviarMensajesPorCola (conexionBroker.c:213)
-==10078==    by 0x804CF11: enviarMensajesSuscriptores (conexionBroker.c:279)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078== 
-==10078== Conditional jump or move depends on uninitialised value(s)
-==10078==    at 0x8049CDC: obtenerBloquePorID (buddySystem.c:265)
-==10078==    by 0x8049DE3: obtenerIDCorrelativoItemBuddySystem (buddySystem.c:307)
-==10078==    by 0x804BE15: obtenerIDCorrelativoItemGeneric (genericCache.c:115)
-==10078==    by 0x804CC71: enviarMensajesPorCola (conexionBroker.c:214)
-==10078==    by 0x804CF11: enviarMensajesSuscriptores (conexionBroker.c:279)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078== 
-==10078== Thread 4:
-==10078== Invalid read of size 4
-==10078==    at 0x4071010: _isEnableLevelInLogger (in /usr/lib/libcommons.so)
-==10078==    by 0x4070EF3: _log_write_in_level (in /usr/lib/libcommons.so)
-==10078==    by 0x4070D8D: log_info (in /usr/lib/libcommons.so)
-==10078==    by 0x8049B4E: eliminarVictimaBuddySystem (buddySystem.c:213)
-==10078==    by 0x8049C72: agregarItemBuddySystem (buddySystem.c:254)
-==10078==    by 0x804BCF0: agregarItemGeneric (genericCache.c:57)
-==10078==    by 0x804C8B4: manejarPublisher (conexionBroker.c:106)
-==10078==    by 0x804CA4D: processRequest (conexionBroker.c:149)
-==10078==    by 0x804CB3B: serveClient (conexionBroker.c:180)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078==  Address 0x8 is not stack'd, malloc'd or (recently) free'd
-==10078== 
-==10078== 
-==10078== Process terminating with default action of signal 11 (SIGSEGV)
-==10078==  Access not within mapped region at address 0x8
-==10078==    at 0x4071010: _isEnableLevelInLogger (in /usr/lib/libcommons.so)
-==10078==    by 0x4070EF3: _log_write_in_level (in /usr/lib/libcommons.so)
-==10078==    by 0x4070D8D: log_info (in /usr/lib/libcommons.so)
-==10078==    by 0x8049B4E: eliminarVictimaBuddySystem (buddySystem.c:213)
-==10078==    by 0x8049C72: agregarItemBuddySystem (buddySystem.c:254)
-==10078==    by 0x804BCF0: agregarItemGeneric (genericCache.c:57)
-==10078==    by 0x804C8B4: manejarPublisher (conexionBroker.c:106)
-==10078==    by 0x804CA4D: processRequest (conexionBroker.c:149)
-==10078==    by 0x804CB3B: serveClient (conexionBroker.c:180)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078==  If you believe this happened as a result of a stack
-==10078==  overflow in your program's main thread (unlikely but
-==10078==  possible), you can try to increase the size of the
-==10078==  main thread stack using the --main-stacksize= flag.
-==10078==  The main thread stack size used in this run was 8388608.
-==10078== 
-==10078== HEAP SUMMARY:
-==10078==     in use at exit: 2,467 bytes in 95 blocks
-==10078==   total heap usage: 354 allocs, 259 frees, 28,906 bytes allocated
-==10078== 
-==10078== Thread 1:
-==10078== 4 bytes in 1 blocks are still reachable in loss record 1 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40ED2C5: strdup (strdup.c:42)
-==10078==    by 0x4072B2D: dictionary_put (in /usr/lib/libcommons.so)
-==10078==    by 0x804C1E5: crearDiccionario (brokerColas.c:9)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 4 bytes in 1 blocks are still reachable in loss record 2 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40ED2C5: strdup (strdup.c:42)
-==10078==    by 0x4072B2D: dictionary_put (in /usr/lib/libcommons.so)
-==10078==    by 0x804C20E: crearDiccionario (brokerColas.c:10)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 6 bytes in 1 blocks are still reachable in loss record 3 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40ED2C5: strdup (strdup.c:42)
-==10078==    by 0x4072B2D: dictionary_put (in /usr/lib/libcommons.so)
-==10078==    by 0x804C237: crearDiccionario (brokerColas.c:11)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 7 bytes in 1 blocks are still reachable in loss record 4 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40ED2C5: strdup (strdup.c:42)
-==10078==    by 0x407109A: string_duplicate (in /usr/lib/libcommons.so)
-==10078==    by 0x4070C49: log_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804F143: iniciar_logger (utils.c:7)
-==10078==    by 0x804BFBA: main (broker.c:21)
-==10078== 
-==10078== 7 bytes in 1 blocks are still reachable in loss record 5 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40ED2C5: strdup (strdup.c:42)
-==10078==    by 0x407109A: string_duplicate (in /usr/lib/libcommons.so)
-==10078==    by 0x4070C49: log_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804F194: iniciarLoggerSinConsola (utils.c:19)
-==10078==    by 0x804BFD4: main (broker.c:22)
-==10078== 
-==10078== 7 bytes in 1 blocks are still reachable in loss record 6 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40ED2C5: strdup (strdup.c:42)
-==10078==    by 0x4072B2D: dictionary_put (in /usr/lib/libcommons.so)
-==10078==    by 0x804C2B2: crearDiccionario (brokerColas.c:14)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 7 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4073393: config_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804F1E1: leer_config (utils.c:31)
-==10078==    by 0x804BFEF: main (broker.c:23)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 8 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x804C344: crearColaConSuscriptores (brokerColas.c:34)
-==10078==    by 0x804C1C4: crearDiccionario (brokerColas.c:9)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 9 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804C34F: crearColaConSuscriptores (brokerColas.c:35)
-==10078==    by 0x804C1C4: crearDiccionario (brokerColas.c:9)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 10 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804C35B: crearColaConSuscriptores (brokerColas.c:36)
-==10078==    by 0x804C1C4: crearDiccionario (brokerColas.c:9)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 11 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x804C344: crearColaConSuscriptores (brokerColas.c:34)
-==10078==    by 0x804C1ED: crearDiccionario (brokerColas.c:10)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 12 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804C34F: crearColaConSuscriptores (brokerColas.c:35)
-==10078==    by 0x804C1ED: crearDiccionario (brokerColas.c:10)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 13 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804C35B: crearColaConSuscriptores (brokerColas.c:36)
-==10078==    by 0x804C1ED: crearDiccionario (brokerColas.c:10)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 14 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x804C344: crearColaConSuscriptores (brokerColas.c:34)
-==10078==    by 0x804C216: crearDiccionario (brokerColas.c:11)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 15 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804C34F: crearColaConSuscriptores (brokerColas.c:35)
-==10078==    by 0x804C216: crearDiccionario (brokerColas.c:11)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 16 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804C35B: crearColaConSuscriptores (brokerColas.c:36)
-==10078==    by 0x804C216: crearDiccionario (brokerColas.c:11)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 17 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x804C344: crearColaConSuscriptores (brokerColas.c:34)
-==10078==    by 0x804C23F: crearDiccionario (brokerColas.c:12)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 18 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804C34F: crearColaConSuscriptores (brokerColas.c:35)
-==10078==    by 0x804C23F: crearDiccionario (brokerColas.c:12)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 19 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804C35B: crearColaConSuscriptores (brokerColas.c:36)
-==10078==    by 0x804C23F: crearDiccionario (brokerColas.c:12)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 20 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x804C344: crearColaConSuscriptores (brokerColas.c:34)
-==10078==    by 0x804C268: crearDiccionario (brokerColas.c:13)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 21 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804C34F: crearColaConSuscriptores (brokerColas.c:35)
-==10078==    by 0x804C268: crearDiccionario (brokerColas.c:13)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 22 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804C35B: crearColaConSuscriptores (brokerColas.c:36)
-==10078==    by 0x804C268: crearDiccionario (brokerColas.c:13)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 23 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x804C344: crearColaConSuscriptores (brokerColas.c:34)
-==10078==    by 0x804C291: crearDiccionario (brokerColas.c:14)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 24 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804C34F: crearColaConSuscriptores (brokerColas.c:35)
-==10078==    by 0x804C291: crearDiccionario (brokerColas.c:14)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 8 bytes in 1 blocks are still reachable in loss record 25 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804C35B: crearColaConSuscriptores (brokerColas.c:36)
-==10078==    by 0x804C291: crearDiccionario (brokerColas.c:14)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 9 bytes in 1 blocks are still reachable in loss record 26 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40ED2C5: strdup (strdup.c:42)
-==10078==    by 0x4072B2D: dictionary_put (in /usr/lib/libcommons.so)
-==10078==    by 0x804C260: crearDiccionario (brokerColas.c:12)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 10 bytes in 1 blocks are still reachable in loss record 27 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40ED2C5: strdup (strdup.c:42)
-==10078==    by 0x4072B2D: dictionary_put (in /usr/lib/libcommons.so)
-==10078==    by 0x804C289: crearDiccionario (brokerColas.c:13)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 11 bytes in 1 blocks are still reachable in loss record 28 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x804C78C: recibirPublisher (conexionBroker.c:73)
-==10078==    by 0x804C842: manejarPublisher (conexionBroker.c:98)
-==10078==    by 0x804CA4D: processRequest (conexionBroker.c:149)
-==10078==    by 0x804CB3B: serveClient (conexionBroker.c:180)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078== 
-==10078== 12 bytes in 1 blocks are still reachable in loss record 29 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x804CA97: serveClient (conexionBroker.c:160)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078== 
-==10078== 12 bytes in 3 blocks are still reachable in loss record 30 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x804C651: generarIDMensaje (conexionBroker.c:33)
-==10078==    by 0x804C834: manejarPublisher (conexionBroker.c:96)
-==10078==    by 0x804CA4D: processRequest (conexionBroker.c:149)
-==10078==    by 0x804CB3B: serveClient (conexionBroker.c:180)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078== 
-==10078== 16 bytes in 1 blocks are still reachable in loss record 31 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40729F7: dictionary_create (in /usr/lib/libcommons.so)
-==10078==    by 0x40733B6: config_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804F1E1: leer_config (utils.c:31)
-==10078==    by 0x804BFEF: main (broker.c:23)
-==10078== 
-==10078== 16 bytes in 1 blocks are still reachable in loss record 32 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40729F7: dictionary_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804C1BA: crearDiccionario (brokerColas.c:8)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 16 bytes in 1 blocks are still reachable in loss record 33 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4073004: dictionary_create_element (in /usr/lib/libcommons.so)
-==10078==    by 0x4072B3F: dictionary_put (in /usr/lib/libcommons.so)
-==10078==    by 0x804C1E5: crearDiccionario (brokerColas.c:9)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 16 bytes in 1 blocks are still reachable in loss record 34 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4073004: dictionary_create_element (in /usr/lib/libcommons.so)
-==10078==    by 0x4072B3F: dictionary_put (in /usr/lib/libcommons.so)
-==10078==    by 0x804C20E: crearDiccionario (brokerColas.c:10)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 16 bytes in 1 blocks are still reachable in loss record 35 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4073004: dictionary_create_element (in /usr/lib/libcommons.so)
-==10078==    by 0x4072B3F: dictionary_put (in /usr/lib/libcommons.so)
-==10078==    by 0x804C237: crearDiccionario (brokerColas.c:11)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 16 bytes in 1 blocks are still reachable in loss record 36 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4073004: dictionary_create_element (in /usr/lib/libcommons.so)
-==10078==    by 0x4072B3F: dictionary_put (in /usr/lib/libcommons.so)
-==10078==    by 0x804C260: crearDiccionario (brokerColas.c:12)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 16 bytes in 1 blocks are still reachable in loss record 37 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4073004: dictionary_create_element (in /usr/lib/libcommons.so)
-==10078==    by 0x4072B3F: dictionary_put (in /usr/lib/libcommons.so)
-==10078==    by 0x804C289: crearDiccionario (brokerColas.c:13)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 16 bytes in 1 blocks are still reachable in loss record 38 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4073004: dictionary_create_element (in /usr/lib/libcommons.so)
-==10078==    by 0x4072B3F: dictionary_put (in /usr/lib/libcommons.so)
-==10078==    by 0x804C2B2: crearDiccionario (brokerColas.c:14)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 16 bytes in 1 blocks are still reachable in loss record 39 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x804C0AA: main (broker.c:42)
-==10078== 
-==10078== 16 bytes in 2 blocks are still reachable in loss record 40 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
-==10078==    by 0x8049C05: agregarElementoValidoBuddySystem (buddySystem.c:237)
-==10078==    by 0x8049CA8: agregarItemBuddySystem (buddySystem.c:258)
-==10078==    by 0x804BCF0: agregarItemGeneric (genericCache.c:57)
-==10078==    by 0x804C8B4: manejarPublisher (conexionBroker.c:106)
-==10078==    by 0x804CA4D: processRequest (conexionBroker.c:149)
-==10078==    by 0x804CB3B: serveClient (conexionBroker.c:180)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078== 
-==10078== 16 bytes in 2 blocks are still reachable in loss record 41 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
-==10078==    by 0x8049C12: agregarElementoValidoBuddySystem (buddySystem.c:238)
-==10078==    by 0x8049CA8: agregarItemBuddySystem (buddySystem.c:258)
-==10078==    by 0x804BCF0: agregarItemGeneric (genericCache.c:57)
-==10078==    by 0x804C8B4: manejarPublisher (conexionBroker.c:106)
-==10078==    by 0x804CA4D: processRequest (conexionBroker.c:149)
-==10078==    by 0x804CB3B: serveClient (conexionBroker.c:180)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078== 
-==10078== 20 bytes in 1 blocks are still reachable in loss record 42 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4070BA3: log_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804F143: iniciar_logger (utils.c:7)
-==10078==    by 0x804BFBA: main (broker.c:21)
-==10078== 
-==10078== 20 bytes in 1 blocks are still reachable in loss record 43 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4070BA3: log_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804F194: iniciarLoggerSinConsola (utils.c:19)
-==10078==    by 0x804BFD4: main (broker.c:22)
-==10078== 
-==10078== 20 bytes in 1 blocks are still reachable in loss record 44 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40ED2C5: strdup (strdup.c:42)
-==10078==    by 0x40733A7: config_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804F1E1: leer_config (utils.c:31)
-==10078==    by 0x804BFEF: main (broker.c:23)
-==10078== 
-==10078== 23 bytes in 1 blocks are still reachable in loss record 45 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x804C7DD: recibirPublisher (conexionBroker.c:80)
-==10078==    by 0x804C842: manejarPublisher (conexionBroker.c:98)
-==10078==    by 0x804CA4D: processRequest (conexionBroker.c:149)
-==10078==    by 0x804CB3B: serveClient (conexionBroker.c:180)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078== 
-==10078== 24 bytes in 3 blocks are still reachable in loss record 46 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4072905: list_create_element (in /usr/lib/libcommons.so)
-==10078==    by 0x4071E3D: list_add (in /usr/lib/libcommons.so)
-==10078==    by 0x804C4E4: agregarMensaje (brokerColas.c:82)
-==10078==    by 0x804C888: manejarPublisher (conexionBroker.c:105)
-==10078==    by 0x804CA4D: processRequest (conexionBroker.c:149)
-==10078==    by 0x804CB3B: serveClient (conexionBroker.c:180)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078== 
-==10078== 26 bytes in 2 blocks are still reachable in loss record 47 of 64
-==10078==    at 0x402E2CC: realloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40739A9: temporal_get_string_time (in /usr/lib/libcommons.so)
-==10078==    by 0x8049BEB: agregarElementoValidoBuddySystem (buddySystem.c:235)
-==10078==    by 0x8049CA8: agregarItemBuddySystem (buddySystem.c:258)
-==10078==    by 0x804BCF0: agregarItemGeneric (genericCache.c:57)
-==10078==    by 0x804C8B4: manejarPublisher (conexionBroker.c:106)
-==10078==    by 0x804CA4D: processRequest (conexionBroker.c:149)
-==10078==    by 0x804CB3B: serveClient (conexionBroker.c:180)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078== 
-==10078== 26 bytes in 2 blocks are still reachable in loss record 48 of 64
-==10078==    at 0x402E2CC: realloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40739A9: temporal_get_string_time (in /usr/lib/libcommons.so)
-==10078==    by 0x8049BF8: agregarElementoValidoBuddySystem (buddySystem.c:236)
-==10078==    by 0x8049CA8: agregarItemBuddySystem (buddySystem.c:258)
-==10078==    by 0x804BCF0: agregarItemGeneric (genericCache.c:57)
-==10078==    by 0x804C8B4: manejarPublisher (conexionBroker.c:106)
-==10078==    by 0x804CA4D: processRequest (conexionBroker.c:149)
-==10078==    by 0x804CB3B: serveClient (conexionBroker.c:180)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078== 
-==10078== 33 bytes in 8 blocks are still reachable in loss record 49 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40ED2C5: strdup (strdup.c:42)
-==10078==    by 0x407109A: string_duplicate (in /usr/lib/libcommons.so)
-==10078==    by 0x4071BA9: _string_split (in /usr/lib/libcommons.so)
-==10078==    by 0x40716AF: string_n_split (in /usr/lib/libcommons.so)
-==10078==    by 0x40732B0: add_cofiguration.2909 (in /usr/lib/libcommons.so)
-==10078==    by 0x4071846: string_iterate_lines (in /usr/lib/libcommons.so)
-==10078==    by 0x4073444: config_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804F1E1: leer_config (utils.c:31)
-==10078==    by 0x804BFEF: main (broker.c:23)
-==10078== 
-==10078== 39 bytes in 3 blocks are definitely lost in loss record 50 of 64
-==10078==    at 0x402E2CC: realloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40739A9: temporal_get_string_time (in /usr/lib/libcommons.so)
-==10078==    by 0x804C644: generarIDMensaje (conexionBroker.c:32)
-==10078==    by 0x804C834: manejarPublisher (conexionBroker.c:96)
-==10078==    by 0x804CA4D: processRequest (conexionBroker.c:149)
-==10078==    by 0x804CB3B: serveClient (conexionBroker.c:180)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078== 
-==10078== 52 bytes in 1 blocks are still reachable in loss record 51 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x80496C1: inicializarBuddySystem (buddySystem.c:59)
-==10078==    by 0x804BC62: inicializarDataBasica (genericCache.c:30)
-==10078==    by 0x804C02C: main (broker.c:28)
-==10078== 
-==10078== 52 bytes in 1 blocks are still reachable in loss record 52 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x8049587: crearBloque (buddySystem.c:33)
-==10078==    by 0x8049857: dividirBloque (buddySystem.c:120)
-==10078==    by 0x804989B: calcularEspacio (buddySystem.c:129)
-==10078==    by 0x8049913: hayEspacioBuddySystem (buddySystem.c:149)
-==10078==    by 0x8049C65: agregarItemBuddySystem (buddySystem.c:250)
-==10078==    by 0x804BCF0: agregarItemGeneric (genericCache.c:57)
-==10078==    by 0x804C8B4: manejarPublisher (conexionBroker.c:106)
-==10078==    by 0x804CA4D: processRequest (conexionBroker.c:149)
-==10078==    by 0x804CB3B: serveClient (conexionBroker.c:180)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078== 
-==10078== 52 bytes in 1 blocks are still reachable in loss record 53 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x804959C: crearBloque (buddySystem.c:34)
-==10078==    by 0x8049857: dividirBloque (buddySystem.c:120)
-==10078==    by 0x804989B: calcularEspacio (buddySystem.c:129)
-==10078==    by 0x8049913: hayEspacioBuddySystem (buddySystem.c:149)
-==10078==    by 0x8049C65: agregarItemBuddySystem (buddySystem.c:250)
-==10078==    by 0x804BCF0: agregarItemGeneric (genericCache.c:57)
-==10078==    by 0x804C8B4: manejarPublisher (conexionBroker.c:106)
-==10078==    by 0x804CA4D: processRequest (conexionBroker.c:149)
-==10078==    by 0x804CB3B: serveClient (conexionBroker.c:180)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078== 
-==10078== 64 bytes in 1 blocks are still reachable in loss record 54 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x80492DE: inicializarCache (basicCache.c:7)
-==10078==    by 0x804BC07: inicializarDataBasica (genericCache.c:19)
-==10078==    by 0x804C02C: main (broker.c:28)
-==10078== 
-==10078== 64 bytes in 1 blocks are still reachable in loss record 55 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x80492F2: inicializarCache (basicCache.c:8)
-==10078==    by 0x804BC07: inicializarDataBasica (genericCache.c:19)
-==10078==    by 0x804C02C: main (broker.c:28)
-==10078== 
-==10078== 80 bytes in 1 blocks are still reachable in loss record 56 of 64
-==10078==    at 0x402E0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4072A18: dictionary_create (in /usr/lib/libcommons.so)
-==10078==    by 0x40733B6: config_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804F1E1: leer_config (utils.c:31)
-==10078==    by 0x804BFEF: main (broker.c:23)
-==10078== 
-==10078== 80 bytes in 1 blocks are still reachable in loss record 57 of 64
-==10078==    at 0x402E0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4072A18: dictionary_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804C1BA: crearDiccionario (brokerColas.c:8)
-==10078==    by 0x804C034: main (broker.c:29)
-==10078== 
-==10078== 128 bytes in 8 blocks are still reachable in loss record 58 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4073004: dictionary_create_element (in /usr/lib/libcommons.so)
-==10078==    by 0x4072B3F: dictionary_put (in /usr/lib/libcommons.so)
-==10078==    by 0x40732D3: add_cofiguration.2909 (in /usr/lib/libcommons.so)
-==10078==    by 0x4071846: string_iterate_lines (in /usr/lib/libcommons.so)
-==10078==    by 0x4073444: config_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804F1E1: leer_config (utils.c:31)
-==10078==    by 0x804BFEF: main (broker.c:23)
-==10078== 
-==10078== 136 bytes in 1 blocks are possibly lost in loss record 59 of 64
-==10078==    at 0x402E0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4011726: allocate_dtv (dl-tls.c:322)
-==10078==    by 0x401214B: _dl_allocate_tls (dl-tls.c:539)
-==10078==    by 0x4057CC3: allocate_stack (allocatestack.c:588)
-==10078==    by 0x4057CC3: pthread_create@@GLIBC_2.1 (pthread_create.c:539)
-==10078==    by 0x804C0DC: main (broker.c:45)
-==10078== 
-==10078== 136 bytes in 1 blocks are possibly lost in loss record 60 of 64
-==10078==    at 0x402E0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4011726: allocate_dtv (dl-tls.c:322)
-==10078==    by 0x401214B: _dl_allocate_tls (dl-tls.c:539)
-==10078==    by 0x4057CC3: allocate_stack (allocatestack.c:588)
-==10078==    by 0x4057CC3: pthread_create@@GLIBC_2.1 (pthread_create.c:539)
-==10078==    by 0x804C0F2: main (broker.c:46)
-==10078== 
-==10078== 136 bytes in 1 blocks are possibly lost in loss record 61 of 64
-==10078==    at 0x402E0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x4011726: allocate_dtv (dl-tls.c:322)
-==10078==    by 0x401214B: _dl_allocate_tls (dl-tls.c:539)
-==10078==    by 0x4057CC3: allocate_stack (allocatestack.c:588)
-==10078==    by 0x4057CC3: pthread_create@@GLIBC_2.1 (pthread_create.c:539)
-==10078==    by 0x804CBB6: esperarCliente (conexionBroker.c:199)
-==10078==    by 0x804D044: iniciarServidor (conexionBroker.c:317)
-==10078==    by 0x4057294: start_thread (pthread_create.c:333)
-==10078==    by 0x415F0AD: clone (clone.S:114)
-==10078== 
-==10078== 151 bytes in 8 blocks are still reachable in loss record 62 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40ED2C5: strdup (strdup.c:42)
-==10078==    by 0x4072B2D: dictionary_put (in /usr/lib/libcommons.so)
-==10078==    by 0x40732D3: add_cofiguration.2909 (in /usr/lib/libcommons.so)
-==10078==    by 0x4071846: string_iterate_lines (in /usr/lib/libcommons.so)
-==10078==    by 0x4073444: config_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804F1E1: leer_config (utils.c:31)
-==10078==    by 0x804BFEF: main (broker.c:23)
-==10078== 
-==10078== 344 bytes in 1 blocks are still reachable in loss record 63 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40D6359: __fopen_internal (iofopen.c:69)
-==10078==    by 0x40D641D: fopen@@GLIBC_2.1 (iofopen.c:97)
-==10078==    by 0x4070ADA: txt_open_for_append (in /usr/lib/libcommons.so)
-==10078==    by 0x4070BE3: log_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804F143: iniciar_logger (utils.c:7)
-==10078==    by 0x804BFBA: main (broker.c:21)
-==10078== 
-==10078== 344 bytes in 1 blocks are still reachable in loss record 64 of 64
-==10078==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
-==10078==    by 0x40D6359: __fopen_internal (iofopen.c:69)
-==10078==    by 0x40D641D: fopen@@GLIBC_2.1 (iofopen.c:97)
-==10078==    by 0x4070ADA: txt_open_for_append (in /usr/lib/libcommons.so)
-==10078==    by 0x4070BE3: log_create (in /usr/lib/libcommons.so)
-==10078==    by 0x804F194: iniciarLoggerSinConsola (utils.c:19)
-==10078==    by 0x804BFD4: main (broker.c:22)
-==10078== 
-==10078== LEAK SUMMARY:
-==10078==    definitely lost: 39 bytes in 3 blocks
-==10078==    indirectly lost: 0 bytes in 0 blocks
-==10078==      possibly lost: 408 bytes in 3 blocks
-==10078==    still reachable: 2,020 bytes in 89 blocks
-==10078==         suppressed: 0 bytes in 0 blocks
-==10078== 
-==10078== For counts of detected and suppressed errors, rerun with: -v
-==10078== Use --track-origins=yes to see where uninitialised values come from
-==10078== ERROR SUMMARY: 16 errors from 9 contexts (suppressed: 0 from 0)
+==5252== Memcheck, a memory error detector
+==5252== Copyright (C) 2002-2015, and GNU GPL'd, by Julian Seward et al.
+==5252== Using Valgrind-3.11.0 and LibVEX; rerun with -h for copyright info
+==5252== Command: ./broker
+==5252== Parent PID: 4126
+==5252== 
+==5252== 
+==5252== Process terminating with default action of signal 2 (SIGINT)
+==5252==    at 0x40583FB: pthread_join (pthread_join.c:90)
+==5252==    by 0x804C34A: main (broker.c:50)
+==5252== 
+==5252== HEAP SUMMARY:
+==5252==     in use at exit: 2,030 bytes in 73 blocks
+==5252==   total heap usage: 161 allocs, 88 frees, 18,235 bytes allocated
+==5252== 
+==5252== 4 bytes in 1 blocks are still reachable in loss record 1 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x40ED2C5: strdup (strdup.c:42)
+==5252==    by 0x4072B2D: dictionary_put (in /usr/lib/libcommons.so)
+==5252==    by 0x804C42A: crearDiccionario (brokerColas.c:9)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 4 bytes in 1 blocks are still reachable in loss record 2 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x40ED2C5: strdup (strdup.c:42)
+==5252==    by 0x4072B2D: dictionary_put (in /usr/lib/libcommons.so)
+==5252==    by 0x804C453: crearDiccionario (brokerColas.c:10)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 6 bytes in 1 blocks are still reachable in loss record 3 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x40ED2C5: strdup (strdup.c:42)
+==5252==    by 0x4072B2D: dictionary_put (in /usr/lib/libcommons.so)
+==5252==    by 0x804C47C: crearDiccionario (brokerColas.c:11)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 7 bytes in 1 blocks are still reachable in loss record 4 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x40ED2C5: strdup (strdup.c:42)
+==5252==    by 0x407109A: string_duplicate (in /usr/lib/libcommons.so)
+==5252==    by 0x4070C49: log_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804F33D: iniciar_logger (utils.c:7)
+==5252==    by 0x804C1D9: main (broker.c:21)
+==5252== 
+==5252== 7 bytes in 1 blocks are still reachable in loss record 5 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x40ED2C5: strdup (strdup.c:42)
+==5252==    by 0x407109A: string_duplicate (in /usr/lib/libcommons.so)
+==5252==    by 0x4070C49: log_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804F38E: iniciarLoggerSinConsola (utils.c:19)
+==5252==    by 0x804C1F3: main (broker.c:22)
+==5252== 
+==5252== 7 bytes in 1 blocks are still reachable in loss record 6 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x40ED2C5: strdup (strdup.c:42)
+==5252==    by 0x4072B2D: dictionary_put (in /usr/lib/libcommons.so)
+==5252==    by 0x804C4F7: crearDiccionario (brokerColas.c:14)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 7 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4073393: config_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804F3DB: leer_config (utils.c:31)
+==5252==    by 0x804C20E: main (broker.c:23)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 8 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x804C589: crearColaConSuscriptores (brokerColas.c:34)
+==5252==    by 0x804C409: crearDiccionario (brokerColas.c:9)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 9 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804C594: crearColaConSuscriptores (brokerColas.c:35)
+==5252==    by 0x804C409: crearDiccionario (brokerColas.c:9)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 10 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804C5A0: crearColaConSuscriptores (brokerColas.c:36)
+==5252==    by 0x804C409: crearDiccionario (brokerColas.c:9)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 11 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x804C589: crearColaConSuscriptores (brokerColas.c:34)
+==5252==    by 0x804C432: crearDiccionario (brokerColas.c:10)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 12 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804C594: crearColaConSuscriptores (brokerColas.c:35)
+==5252==    by 0x804C432: crearDiccionario (brokerColas.c:10)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 13 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804C5A0: crearColaConSuscriptores (brokerColas.c:36)
+==5252==    by 0x804C432: crearDiccionario (brokerColas.c:10)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 14 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x804C589: crearColaConSuscriptores (brokerColas.c:34)
+==5252==    by 0x804C45B: crearDiccionario (brokerColas.c:11)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 15 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804C594: crearColaConSuscriptores (brokerColas.c:35)
+==5252==    by 0x804C45B: crearDiccionario (brokerColas.c:11)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 16 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804C5A0: crearColaConSuscriptores (brokerColas.c:36)
+==5252==    by 0x804C45B: crearDiccionario (brokerColas.c:11)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 17 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x804C589: crearColaConSuscriptores (brokerColas.c:34)
+==5252==    by 0x804C484: crearDiccionario (brokerColas.c:12)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 18 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804C594: crearColaConSuscriptores (brokerColas.c:35)
+==5252==    by 0x804C484: crearDiccionario (brokerColas.c:12)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 19 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804C5A0: crearColaConSuscriptores (brokerColas.c:36)
+==5252==    by 0x804C484: crearDiccionario (brokerColas.c:12)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 20 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x804C589: crearColaConSuscriptores (brokerColas.c:34)
+==5252==    by 0x804C4AD: crearDiccionario (brokerColas.c:13)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 21 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804C594: crearColaConSuscriptores (brokerColas.c:35)
+==5252==    by 0x804C4AD: crearDiccionario (brokerColas.c:13)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 22 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804C5A0: crearColaConSuscriptores (brokerColas.c:36)
+==5252==    by 0x804C4AD: crearDiccionario (brokerColas.c:13)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 23 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x804C589: crearColaConSuscriptores (brokerColas.c:34)
+==5252==    by 0x804C4D6: crearDiccionario (brokerColas.c:14)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 24 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804C594: crearColaConSuscriptores (brokerColas.c:35)
+==5252==    by 0x804C4D6: crearDiccionario (brokerColas.c:14)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 25 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804C5A0: crearColaConSuscriptores (brokerColas.c:36)
+==5252==    by 0x804C4D6: crearDiccionario (brokerColas.c:14)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 8 bytes in 1 blocks are still reachable in loss record 26 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4071E01: list_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804C2EB: main (broker.c:44)
+==5252== 
+==5252== 9 bytes in 1 blocks are still reachable in loss record 27 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x40ED2C5: strdup (strdup.c:42)
+==5252==    by 0x4072B2D: dictionary_put (in /usr/lib/libcommons.so)
+==5252==    by 0x804C4A5: crearDiccionario (brokerColas.c:12)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 10 bytes in 1 blocks are still reachable in loss record 28 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x40ED2C5: strdup (strdup.c:42)
+==5252==    by 0x4072B2D: dictionary_put (in /usr/lib/libcommons.so)
+==5252==    by 0x804C4CE: crearDiccionario (brokerColas.c:13)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 16 bytes in 1 blocks are still reachable in loss record 29 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x40729F7: dictionary_create (in /usr/lib/libcommons.so)
+==5252==    by 0x40733B6: config_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804F3DB: leer_config (utils.c:31)
+==5252==    by 0x804C20E: main (broker.c:23)
+==5252== 
+==5252== 16 bytes in 1 blocks are still reachable in loss record 30 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x40729F7: dictionary_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804C3FF: crearDiccionario (brokerColas.c:8)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 16 bytes in 1 blocks are still reachable in loss record 31 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4073004: dictionary_create_element (in /usr/lib/libcommons.so)
+==5252==    by 0x4072B3F: dictionary_put (in /usr/lib/libcommons.so)
+==5252==    by 0x804C42A: crearDiccionario (brokerColas.c:9)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 16 bytes in 1 blocks are still reachable in loss record 32 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4073004: dictionary_create_element (in /usr/lib/libcommons.so)
+==5252==    by 0x4072B3F: dictionary_put (in /usr/lib/libcommons.so)
+==5252==    by 0x804C453: crearDiccionario (brokerColas.c:10)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 16 bytes in 1 blocks are still reachable in loss record 33 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4073004: dictionary_create_element (in /usr/lib/libcommons.so)
+==5252==    by 0x4072B3F: dictionary_put (in /usr/lib/libcommons.so)
+==5252==    by 0x804C47C: crearDiccionario (brokerColas.c:11)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 16 bytes in 1 blocks are still reachable in loss record 34 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4073004: dictionary_create_element (in /usr/lib/libcommons.so)
+==5252==    by 0x4072B3F: dictionary_put (in /usr/lib/libcommons.so)
+==5252==    by 0x804C4A5: crearDiccionario (brokerColas.c:12)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 16 bytes in 1 blocks are still reachable in loss record 35 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4073004: dictionary_create_element (in /usr/lib/libcommons.so)
+==5252==    by 0x4072B3F: dictionary_put (in /usr/lib/libcommons.so)
+==5252==    by 0x804C4CE: crearDiccionario (brokerColas.c:13)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 16 bytes in 1 blocks are still reachable in loss record 36 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4073004: dictionary_create_element (in /usr/lib/libcommons.so)
+==5252==    by 0x4072B3F: dictionary_put (in /usr/lib/libcommons.so)
+==5252==    by 0x804C4F7: crearDiccionario (brokerColas.c:14)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 16 bytes in 1 blocks are still reachable in loss record 37 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x804C2C9: main (broker.c:42)
+==5252== 
+==5252== 20 bytes in 1 blocks are still reachable in loss record 38 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4070BA3: log_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804F33D: iniciar_logger (utils.c:7)
+==5252==    by 0x804C1D9: main (broker.c:21)
+==5252== 
+==5252== 20 bytes in 1 blocks are still reachable in loss record 39 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4070BA3: log_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804F38E: iniciarLoggerSinConsola (utils.c:19)
+==5252==    by 0x804C1F3: main (broker.c:22)
+==5252== 
+==5252== 20 bytes in 1 blocks are still reachable in loss record 40 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x40ED2C5: strdup (strdup.c:42)
+==5252==    by 0x40733A7: config_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804F3DB: leer_config (utils.c:31)
+==5252==    by 0x804C20E: main (broker.c:23)
+==5252== 
+==5252== 33 bytes in 8 blocks are still reachable in loss record 41 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x40ED2C5: strdup (strdup.c:42)
+==5252==    by 0x407109A: string_duplicate (in /usr/lib/libcommons.so)
+==5252==    by 0x4071BA9: _string_split (in /usr/lib/libcommons.so)
+==5252==    by 0x40716AF: string_n_split (in /usr/lib/libcommons.so)
+==5252==    by 0x40732B0: add_cofiguration.2909 (in /usr/lib/libcommons.so)
+==5252==    by 0x4071846: string_iterate_lines (in /usr/lib/libcommons.so)
+==5252==    by 0x4073444: config_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804F3DB: leer_config (utils.c:31)
+==5252==    by 0x804C20E: main (broker.c:23)
+==5252== 
+==5252== 52 bytes in 1 blocks are still reachable in loss record 42 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x80496FF: inicializarBuddySystem (buddySystem.c:63)
+==5252==    by 0x804BE22: inicializarDataBasica (genericCache.c:31)
+==5252==    by 0x804C24B: main (broker.c:28)
+==5252== 
+==5252== 64 bytes in 1 blocks are still reachable in loss record 43 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x80492DE: inicializarCache (basicCache.c:7)
+==5252==    by 0x804BDB5: inicializarDataBasica (genericCache.c:19)
+==5252==    by 0x804C24B: main (broker.c:28)
+==5252== 
+==5252== 64 bytes in 1 blocks are still reachable in loss record 44 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x80492F2: inicializarCache (basicCache.c:8)
+==5252==    by 0x804BDB5: inicializarDataBasica (genericCache.c:19)
+==5252==    by 0x804C24B: main (broker.c:28)
+==5252== 
+==5252== 80 bytes in 1 blocks are still reachable in loss record 45 of 52
+==5252==    at 0x402E0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4072A18: dictionary_create (in /usr/lib/libcommons.so)
+==5252==    by 0x40733B6: config_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804F3DB: leer_config (utils.c:31)
+==5252==    by 0x804C20E: main (broker.c:23)
+==5252== 
+==5252== 80 bytes in 1 blocks are still reachable in loss record 46 of 52
+==5252==    at 0x402E0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4072A18: dictionary_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804C3FF: crearDiccionario (brokerColas.c:8)
+==5252==    by 0x804C253: main (broker.c:29)
+==5252== 
+==5252== 128 bytes in 8 blocks are still reachable in loss record 47 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4073004: dictionary_create_element (in /usr/lib/libcommons.so)
+==5252==    by 0x4072B3F: dictionary_put (in /usr/lib/libcommons.so)
+==5252==    by 0x40732D3: add_cofiguration.2909 (in /usr/lib/libcommons.so)
+==5252==    by 0x4071846: string_iterate_lines (in /usr/lib/libcommons.so)
+==5252==    by 0x4073444: config_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804F3DB: leer_config (utils.c:31)
+==5252==    by 0x804C20E: main (broker.c:23)
+==5252== 
+==5252== 136 bytes in 1 blocks are possibly lost in loss record 48 of 52
+==5252==    at 0x402E0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4011726: allocate_dtv (dl-tls.c:322)
+==5252==    by 0x401214B: _dl_allocate_tls (dl-tls.c:539)
+==5252==    by 0x4057CC3: allocate_stack (allocatestack.c:588)
+==5252==    by 0x4057CC3: pthread_create@@GLIBC_2.1 (pthread_create.c:539)
+==5252==    by 0x804C321: main (broker.c:48)
+==5252== 
+==5252== 136 bytes in 1 blocks are possibly lost in loss record 49 of 52
+==5252==    at 0x402E0B8: calloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x4011726: allocate_dtv (dl-tls.c:322)
+==5252==    by 0x401214B: _dl_allocate_tls (dl-tls.c:539)
+==5252==    by 0x4057CC3: allocate_stack (allocatestack.c:588)
+==5252==    by 0x4057CC3: pthread_create@@GLIBC_2.1 (pthread_create.c:539)
+==5252==    by 0x804C337: main (broker.c:49)
+==5252== 
+==5252== 151 bytes in 8 blocks are still reachable in loss record 50 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x40ED2C5: strdup (strdup.c:42)
+==5252==    by 0x4072B2D: dictionary_put (in /usr/lib/libcommons.so)
+==5252==    by 0x40732D3: add_cofiguration.2909 (in /usr/lib/libcommons.so)
+==5252==    by 0x4071846: string_iterate_lines (in /usr/lib/libcommons.so)
+==5252==    by 0x4073444: config_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804F3DB: leer_config (utils.c:31)
+==5252==    by 0x804C20E: main (broker.c:23)
+==5252== 
+==5252== 344 bytes in 1 blocks are still reachable in loss record 51 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x40D6359: __fopen_internal (iofopen.c:69)
+==5252==    by 0x40D641D: fopen@@GLIBC_2.1 (iofopen.c:97)
+==5252==    by 0x4070ADA: txt_open_for_append (in /usr/lib/libcommons.so)
+==5252==    by 0x4070BE3: log_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804F33D: iniciar_logger (utils.c:7)
+==5252==    by 0x804C1D9: main (broker.c:21)
+==5252== 
+==5252== 344 bytes in 1 blocks are still reachable in loss record 52 of 52
+==5252==    at 0x402C17C: malloc (in /usr/lib/valgrind/vgpreload_memcheck-x86-linux.so)
+==5252==    by 0x40D6359: __fopen_internal (iofopen.c:69)
+==5252==    by 0x40D641D: fopen@@GLIBC_2.1 (iofopen.c:97)
+==5252==    by 0x4070ADA: txt_open_for_append (in /usr/lib/libcommons.so)
+==5252==    by 0x4070BE3: log_create (in /usr/lib/libcommons.so)
+==5252==    by 0x804F38E: iniciarLoggerSinConsola (utils.c:19)
+==5252==    by 0x804C1F3: main (broker.c:22)
+==5252== 
+==5252== LEAK SUMMARY:
+==5252==    definitely lost: 0 bytes in 0 blocks
+==5252==    indirectly lost: 0 bytes in 0 blocks
+==5252==      possibly lost: 272 bytes in 2 blocks
+==5252==    still reachable: 1,758 bytes in 71 blocks
+==5252==         suppressed: 0 bytes in 0 blocks
+==5252== 
+==5252== For counts of detected and suppressed errors, rerun with: -v
+==5252== ERROR SUMMARY: 2 errors from 2 contexts (suppressed: 0 from 0)
