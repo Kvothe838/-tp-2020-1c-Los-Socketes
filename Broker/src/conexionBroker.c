@@ -55,6 +55,8 @@ long* generarIDMensaje() {
 		}
 	} while(continuar);
 
+	list_add(IDsMensajes, hash);
+
 	return hash;
 }
 
