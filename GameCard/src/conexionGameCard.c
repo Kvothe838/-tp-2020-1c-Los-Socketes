@@ -204,6 +204,8 @@ void esperarGameBoy(int socket_servidor)
 void iniciarServidorGameboy(IniciarServidorArgs* argumentos){
 	int socket_servidor;
 
+	log_info(loggerSecundario, "ENTRÓ A SERVIDOR GAMEBOY");
+
     struct addrinfo hints, *servinfo, *p;
 
     memset(&hints, 0, sizeof(hints));
@@ -212,8 +214,9 @@ void iniciarServidorGameboy(IniciarServidorArgs* argumentos){
     hints.ai_flags = AI_PASSIVE;
 
     getaddrinfo(argumentos->ip, argumentos->puerto, &hints, &servinfo);
-    log_info(loggerSecundario, argumentos->ip);
-    log_info(loggerSecundario, argumentos->puerto);
+
+    log_info(loggerSecundario, "IP: %d", argumentos->ip);
+    log_info(loggerSecundario, "PUERTO: %d", argumentos->puerto);
 
 
     for (p=servinfo; p != NULL; p = p->ai_next)
@@ -235,9 +238,11 @@ void iniciarServidorGameboy(IniciarServidorArgs* argumentos){
 
     freeaddrinfo(servinfo);
 
+    log_info(loggerSecundario, "A punto de escuchar a GameBoy");
     while(1){
     	esperarGameBoy(socket_servidor);
     }
 
+    log_info(loggerSecundario, "Liberando");
     liberar_conexion_cliente(socket_servidor);
 }
