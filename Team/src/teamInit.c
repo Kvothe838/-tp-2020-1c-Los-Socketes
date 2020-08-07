@@ -847,8 +847,10 @@ int cantidad_arrays(char** array){ // retorna la cantidad posta de un array
 }
 
 void cargarConfig(t_log* logger){
+  log_info(logger, "AAA");
 	t_config* config;
 	config = leer_config("configTeam.config", logger);
+  log_info(logger, "BBB");
 	configTeam.posiciones = config_get_array_value(config,"POSICIONES_ENTRENADORES"); // lista de strings, ultimo elemento nulo
 	configTeam.pertenecientes = config_get_array_value(config,"POKEMON_ENTRENADORES");
 	configTeam.objetivos = config_get_array_value(config,"OBJETIVOS_ENTRENADORES");
@@ -861,6 +863,8 @@ void cargarConfig(t_log* logger){
 	algoritmo = config_get_string_value(config, "ALGORITMO_PLANIFICACION");
 	tiempoRetardo = config_get_int_value(config, "RETARDO_CICLO_CPU");
 
+  log_info(logger, "CCC");
+
 	printf("ALGORITMO DE PLANIFICACION = %s\n",algoritmo);
 	CANT_ENTRENADORES = cantidad_arrays(configTeam.pertenecientes);
 	DEADLOCKS_RESUELTOS=0;
@@ -871,6 +875,8 @@ void cargarConfig(t_log* logger){
 		printf("QUANTUM = %d\n",quantumGlobal);
 	}
 
+  log_info(logger, "DDD");
+
 	METRICAS_ENTRENADORES = list_create();
 	for(int i=0; i < CANT_ENTRENADORES;i++){
 		Metrica *unaMetrica = malloc(sizeof(Metrica));
@@ -878,7 +884,9 @@ void cargarConfig(t_log* logger){
 		unaMetrica->quantumTotal = 0;
 		list_add(METRICAS_ENTRENADORES,unaMetrica);
 	}
-	logTP  = fopen (configTeam.path, "w");
+
+  log_info(logger, "EEE");
+	//logTP  = fopen (configTeam.path, "w");
 }
 Pokemon* crearPokemon(char *nombre,int x, int y) {
 	Pokemon *new = malloc(sizeof(Pokemon));
