@@ -43,6 +43,7 @@ int main(void) {
 	sem_init(semColaMensajes, 0, 0);
 	IDsMensajes = list_create();
 	pthread_mutex_init(&mutexGeneracionHash, NULL);
+	ultimoIDMensaje = 0;
 
 	pthread_create(&threadIniciarServidor, NULL,(void*)iniciarServidor, (void*)&argumentos);
 	pthread_create(&threadEnviarMensajesSuscriptores, NULL,(void*)enviarMensajesSuscriptores, NULL);

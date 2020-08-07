@@ -28,7 +28,19 @@ void manejarSuscripcion(t_list* colas, int cantidadColas,
 	}
 }
 
-long* generarIDMensaje() {
+long* generarIDMensaje(){
+	long* nuevoIDMensaje = malloc(sizeof(long));
+	pthread_mutex_lock(&mutexGeneracionHash);
+
+	ultimoIDMensaje++;
+	*nuevoIDMensaje = ultimoIDMensaje;
+
+	pthread_mutex_unlock(&mutexGeneracionHash);
+
+	return nuevoIDMensaje;
+}
+
+/*long* generarIDMensaje() {
 	pthread_mutex_lock(&mutexGeneracionHash);
 	int continuar = 0;
 	long* hash;
@@ -61,7 +73,7 @@ long* generarIDMensaje() {
 	pthread_mutex_unlock(&mutexGeneracionHash);
 
 	return hash;
-}
+}*/
 
 Publicacion* recibirPublisher(int socket) {
 	Publicacion* publicacion;
