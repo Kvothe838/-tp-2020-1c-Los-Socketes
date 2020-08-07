@@ -56,7 +56,4 @@ dkms.conf
 *.bin
 .vscode/
 
-*.cproject
-*.cproject
-*.cproject
-*.cproject
+*/.cproject
