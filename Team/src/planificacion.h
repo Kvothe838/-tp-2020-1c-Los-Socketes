@@ -5,13 +5,10 @@
 #include <stdio.h>
 
 #include "teamInit.h"
-//#include "conexionesTeam.h"
 
-
-
+void activar_entrenador(Entrenador* persona);
+void ejecucion_entrenadores();
 void match_atrapar();
-void matchear_pokemon();
-void llegada_pokemons();
-void planificacion_fifo();
+void planificacion();
 
 #endif /* PLANIFICACION_H_ */
