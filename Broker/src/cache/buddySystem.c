@@ -161,6 +161,8 @@ void eliminarItemBuddySystem(Bloque* bloque)
 	bloque->tamanioOcupado = 0;
 	bloque->estaDividido = 0;
 	bloque->cola = 0;
+	bloque->ID = 0;
+	bloque->IDCorrelativo = 0;
 }
 
 void consolidarBuddySystem(Bloque* bloque, int* reiniciarConsolidacion)
@@ -222,8 +224,6 @@ void eliminarVictimaBuddySystem(){
 	//Log obligatorio.
 	log_info(loggerObligatorio, "Eliminada partición con posición de inicio %d.", item->posicion);
 
-	//imprimirCache();
-
 	int reiniciarConsolidacion;
 
 	do {
@@ -272,7 +272,7 @@ Bloque* obtenerBloquePorID(long ID, Bloque* bloque)
 {
 	if(bloque == NULL) return NULL;
 
-	if(bloque->ID == ID) return bloque;
+	if(bloque->tamanioOcupado > 0 && bloque->ID == ID) return bloque;
 
 	Bloque* bloqueEncontradoIzq = obtenerBloquePorID(ID, bloque->izq);
 

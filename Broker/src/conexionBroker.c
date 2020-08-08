@@ -23,8 +23,7 @@ void manejarSuscripcion(t_list* colas, int cantidadColas,
 		agregarSuscriptor(*cola, suscriptor);
 
 		//Log obligatorio.
-		log_info(loggerObligatorio, "Suscripción de proceso a cola %s.",
-				tipoColaToString(*cola));
+		log_info(loggerObligatorio, "Suscripción de proceso a cola %s.", tipoColaToString(*cola));
 	}
 }
 
@@ -39,41 +38,6 @@ long* generarIDMensaje(){
 
 	return nuevoIDMensaje;
 }
-
-/*long* generarIDMensaje() {
-	pthread_mutex_lock(&mutexGeneracionHash);
-	int continuar = 0;
-	long* hash;
-
-	do {
-		continuar = 0;
-		char* str = temporal_get_string_time();
-		hash = malloc(sizeof(long));
-		*hash = 0;
-		int c;
-
-		while ((c = *str++))
-			*hash = c + (*hash << 6) + (*hash << 16) - *hash;
-
-		for(int i = 0; i < list_size(IDsMensajes); i++)
-		{
-			long* nuevoElemento = list_get(IDsMensajes, i);
-
-			if(*hash == *nuevoElemento)
-			{
-				continuar = 1;
-				free(hash);
-				break;
-			}
-		}
-	} while(continuar);
-
-	list_add(IDsMensajes, hash);
-
-	pthread_mutex_unlock(&mutexGeneracionHash);
-
-	return hash;
-}*/
 
 Publicacion* recibirPublisher(int socket) {
 	Publicacion* publicacion;
@@ -175,6 +139,7 @@ void processRequest(int opCode, Suscriptor* suscriptor) {
 		int cantidadColas;
 		t_list* colas = recibirSuscripcion(suscriptor->socket, &cantidadColas);
 		manejarSuscripcion(colas, cantidadColas, suscriptor);
+		list_destroy_and_destroy_elements(colas, free);
 
 		break;
 	case PUBLISHER:;
@@ -201,9 +166,15 @@ void serveClient(int* socketCliente) {
 		modulo = -1;
 	}
 
+	char* moduloMostrar = tipoModuloToString(modulo);
+
 	//Log obligatorio.
-	log_info(loggerObligatorio, "Conexión de proceso %s a Broker.",
-			tipoModuloToString(modulo));
+	log_info(loggerObligatorio, "Conexión de proceso %s a Broker.", moduloMostrar);
+
+	if(modulo > TEAM)
+	{
+		free(moduloMostrar);
+	}
 
 	suscriptor->socket = *socketCliente;
 	suscriptor->modulo = modulo;
@@ -211,7 +182,7 @@ void serveClient(int* socketCliente) {
 
 	processRequest(opCode, suscriptor);
 
-	if (opCode != SUSCRIBER) {
+	if(opCode != SUSCRIBER) {
 		free(suscriptor);
 	}
 }
@@ -271,9 +242,10 @@ void enviarMensajesPorCola(TipoCola tipoCola) {
 					&bytes);
 			free(stream);
 
-			if ((send(suscriptor->socket, paqueteSerializado, bytes,
-					MSG_NOSIGNAL)) <= 0)
+			if ((send(suscriptor->socket, paqueteSerializado, bytes, MSG_NOSIGNAL)) <= 0)
 				continue;
+
+			free(paqueteSerializado);
 
 			Ack* respuesta;
 
@@ -287,10 +259,15 @@ void enviarMensajesPorCola(TipoCola tipoCola) {
 			agregarSuscriptorEnviadoGeneric(*IDMensaje, &suscriptor);
 			cambiarLRUGeneric(*IDMensaje);
 
+			char* moduloMostrar = tipoModuloToString(suscriptor->modulo);
+
 			//Log obligatorio.
-			log_info(loggerObligatorio,
-					"Envío de mensaje con ID %ld a suscriptor %s", *IDMensaje,
-					tipoModuloToString(suscriptor->modulo));
+			log_info(loggerObligatorio,	"Envío de mensaje con ID %ld a suscriptor %s", *IDMensaje, moduloMostrar);
+
+			if(suscriptor->modulo > TEAM)
+			{
+				free(moduloMostrar);
+			}
 
 			manejarACK(respuesta, suscriptor);
 			free(respuesta);

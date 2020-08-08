@@ -71,7 +71,7 @@ void* armarYSerializarContenidoHaciaBroker(TipoModulo modulo, int tamanioConteni
 
 void* serializarAck(Ack contenido, int* bytes)
 {
-	*bytes = sizeof(ACK);
+	*bytes = sizeof(Ack);
 	void* contenidoSerializado = malloc(*bytes);
 	int offset = 0;
 
@@ -349,6 +349,8 @@ NewPokemon* deserializarNew(void* mensaje){
 	strncpy(pokemon->nombre, stringRecibido, pokemon->largoNombre);
 	pokemon->nombre[pokemon->largoNombre] = '\0';
 
+	free(stringRecibido);
+
 	return pokemon;
 }
 
@@ -370,6 +372,8 @@ AppearedPokemon* deserializarAppeared(void* mensaje){
 	pokemon->nombre = malloc(pokemon->largoNombre + 1);
 	strncpy(pokemon->nombre, stringRecibido, pokemon->largoNombre);
 	pokemon->nombre[pokemon->largoNombre] = '\0';
+
+	free(stringRecibido);
 
 	return pokemon;
 }

@@ -175,7 +175,11 @@ int main(int argc, char **argv){
 						log_info(logger, "ERROR. No se reconoce el tipo de cola ingresada.");
 						exit(-1);
 				}
+
+				free(ipTeam);
 			}
+
+			free(ipsPuertosTeam);
 
 			break;
 
@@ -183,7 +187,6 @@ int main(int argc, char **argv){
 		{
 			ipGamecard = config_get_string_value(config, "IP_GAMECARD");
 			puertoGamecard = config_get_string_value(config, "PUERTO_GAMECARD");
-			log_info(logger, "IP_GAMECARD %s y PUERTO_GAMECARD %s\n", ipGamecard, puertoGamecard);
 			conexionGamecard = crear_conexion_cliente(ipGamecard, puertoGamecard);
 
 			if(conexionGamecard == 0){
@@ -251,7 +254,11 @@ int main(int argc, char **argv){
 					log_info(logger, "ERROR - No se reconoce el tipo de cola ingresada.");
 					exit(-1);
 			}
-		break;
+
+			free(ipGamecard);
+			free(puertoGamecard);
+
+			break;
 		}
 
 	case SUSCRIPTOR_GAMEBOY:;
@@ -310,6 +317,8 @@ int main(int argc, char **argv){
 		exit(-1);
 	}
 
+	free(mensajeRecibido);
+
 	terminar_programa(logger, config);
 
 	return EXIT_SUCCESS;
@@ -344,6 +353,7 @@ void escucharBroker(ArgumentosEscucharBroker* argumentos)
 			log_info(argumentos->logger, "Error enviando mensaje.");
 		}
 
+		free(mensaje->contenido);
 		free(mensaje);
 	}
 }

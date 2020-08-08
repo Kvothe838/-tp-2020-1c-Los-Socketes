@@ -18,7 +18,7 @@ void destructorDataDiccionario(void* colaBuffer)
 {
 	ColaConSuscriptores* cola = (ColaConSuscriptores*)colaBuffer;
 
-	list_destroy_and_destroy_elements(cola->suscriptores, free);
+	list_destroy(cola->suscriptores);
 	list_destroy_and_destroy_elements(cola->IDMensajes, free);
 
 	free(cola);

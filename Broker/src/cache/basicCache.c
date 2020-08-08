@@ -34,6 +34,8 @@ void moverBloque(int tamanio, int posicionVieja, int posicionNueva){
 
 	memcpy(cacheAlternativa + posicionNueva, item, tamanio);
 
+	free(item);
+
 	pthread_mutex_unlock(&mutexBasic);
 }
 

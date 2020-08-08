@@ -32,7 +32,7 @@ int main(void) {
 	LocalizedPokemon* squirtle = getLocalized("Squirtle", 1, 3, 1);
 	funcionDePruebaParaGabo(logger, ipBroker, puertoBroker, squirtle);*/
 	pthread_create(&threadEscucharGameboy, NULL,(void*)iniciarServidorGameboy, (void*)&argumentosGameboy);
-	//crearDiccionarioSemaforo();
+	pthread_detach(threadEscucharGameboy);
 
 	int conexionBroker = crear_conexion_cliente(ipBroker, puertoBroker);
 
@@ -41,7 +41,7 @@ int main(void) {
 	if(suscripcionEnviada)
 		iniciar_servidor(config, conexionBroker);
 
-	pthread_join(threadEscucharGameboy, NULL);
+	//pthread_join(threadEscucharGameboy, NULL);
 
 	//liberarVariablesGlobales();
 

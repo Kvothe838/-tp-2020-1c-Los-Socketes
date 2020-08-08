@@ -11,14 +11,12 @@
 #include <semaphore.h>
 #include <commons/collections/queue.h>
 IniciarServidorArgs argumentos;
-t_log* logger;
-FILE* logTP;
-FILE* metricasTP;
+t_log* logTP;
+t_log* logTP_aux;
+
 int CANT_ENTRENADORES;
 int CAMBIOS_CONTEXTO;
 int DEADLOCKS_RESUELTOS;
-int seguir_abierto_servidor;
-//int MENSAJES_BROKER;
 
 t_list* OBJETIVO_GLOBAL;
 t_list* OBJETIVO_GLOBAL_FILTRADO;

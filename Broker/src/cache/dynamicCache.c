@@ -25,6 +25,8 @@ int calcularBestFit(int desiredSize) {
 		}
 	}
 
+	free(bestDifference);
+
 	return found >= 0 ? bestposicion : found;
 }
 
@@ -342,7 +344,9 @@ void compactarCache(){
 
 	modificarTablaVacio(tablaNuevoVacio, posicionNueva, 0);
 	memcpy(tablaElementos, tablaCompactada, sizeof(ItemTablaDinamica) * tamanioTabla);
+	free(tablaCompactada);
 	memcpy(tablaVacios, tablaNuevoVacio, sizeof(ItemTablaDinamica) * tamanioTabla);
+	free(tablaNuevoVacio);
 	reemplazarCache(tamanioCache);
 
 	//Log obligatorio.
@@ -518,18 +522,20 @@ t_list* obtenerSuscriptoresEnviados(long IDMensaje){
 
 void liberarParticiones(){
 	for(int i = 0; i < tamanioTabla; i++){
-		if(!tablaElementos[i].estaVacio)
-		{
-			free(tablaElementos[i].suscriptoresEnviados);
-			free(tablaElementos[i].suscriptoresRecibidos);
+		if(tablaElementos[i].suscriptoresEnviados != NULL)
+			list_destroy_and_destroy_elements(tablaElementos[i].suscriptoresEnviados, free);
+
+		if(tablaElementos[i].suscriptoresRecibidos != NULL)
+			list_destroy_and_destroy_elements(tablaElementos[i].suscriptoresRecibidos, free);
+
+		if(tablaElementos[i].fechaCreacion != NULL)
 			free(tablaElementos[i].fechaCreacion);
+
+		if(tablaElementos[i].fechaUltimoUso != NULL)
 			free(tablaElementos[i].fechaUltimoUso);
-		}
 	}
 
 	free(tablaElementos);
 	free(tablaVacios);
-
-	liberarBasicCache();
 }
 

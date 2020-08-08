@@ -41,7 +41,6 @@ int main(void) {
 
 	semColaMensajes = malloc(sizeof(sem_t));
 	sem_init(semColaMensajes, 0, 0);
-	IDsMensajes = list_create();
 	pthread_mutex_init(&mutexGeneracionHash, NULL);
 	ultimoIDMensaje = 0;
 
@@ -51,7 +50,10 @@ int main(void) {
 	pthread_join(threadEnviarMensajesSuscriptores, NULL);
 
 	liberarDiccionario();
-	liberarCache();
+	liberarCacheGeneric();
+	sem_destroy(semColaMensajes);
+	free(semColaMensajes);
+	log_destroy(loggerObligatorio);
 	terminar_programa(loggerInterno, config);
 
 	return 0;
