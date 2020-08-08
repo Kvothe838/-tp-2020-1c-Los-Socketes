@@ -52,6 +52,8 @@ int main(void) {
 
 	liberarDiccionario();
 	liberarCache();
+	sem_destroy(semColaMensajes);
+	free(IDsMensajes);
 	terminar_programa(loggerInterno, config);
 
 	return 0;

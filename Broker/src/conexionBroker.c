@@ -23,8 +23,7 @@ void manejarSuscripcion(t_list* colas, int cantidadColas,
 		agregarSuscriptor(*cola, suscriptor);
 
 		//Log obligatorio.
-		log_info(loggerObligatorio, "Suscripción de proceso a cola %s.",
-				tipoColaToString(*cola));
+		log_info(loggerObligatorio, "Suscripción de proceso a cola %s.", tipoColaToString(*cola));
 	}
 }
 
@@ -39,41 +38,6 @@ long* generarIDMensaje(){
 
 	return nuevoIDMensaje;
 }
-
-/*long* generarIDMensaje() {
-	pthread_mutex_lock(&mutexGeneracionHash);
-	int continuar = 0;
-	long* hash;
-
-	do {
-		continuar = 0;
-		char* str = temporal_get_string_time();
-		hash = malloc(sizeof(long));
-		*hash = 0;
-		int c;
-
-		while ((c = *str++))
-			*hash = c + (*hash << 6) + (*hash << 16) - *hash;
-
-		for(int i = 0; i < list_size(IDsMensajes); i++)
-		{
-			long* nuevoElemento = list_get(IDsMensajes, i);
-
-			if(*hash == *nuevoElemento)
-			{
-				continuar = 1;
-				free(hash);
-				break;
-			}
-		}
-	} while(continuar);
-
-	list_add(IDsMensajes, hash);
-
-	pthread_mutex_unlock(&mutexGeneracionHash);
-
-	return hash;
-}*/
 
 Publicacion* recibirPublisher(int socket) {
 	Publicacion* publicacion;
@@ -271,9 +235,10 @@ void enviarMensajesPorCola(TipoCola tipoCola) {
 					&bytes);
 			free(stream);
 
-			if ((send(suscriptor->socket, paqueteSerializado, bytes,
-					MSG_NOSIGNAL)) <= 0)
+			if ((send(suscriptor->socket, paqueteSerializado, bytes, MSG_NOSIGNAL)) <= 0)
 				continue;
+
+			free(paqueteSerializado);
 
 			Ack* respuesta;
 

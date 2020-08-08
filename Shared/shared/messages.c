@@ -63,6 +63,7 @@ int enviarSuscripcion(int socket, TipoModulo modulo, int cantidadColas, ...){
 	va_end(colasRecibidas);
 
 	suscripcionSerializada = serializarSuscripcion(cantidadColas, colas, &bytesSuscripcion);
+	free(colas);
 	contenidoSerializado = armarYSerializarContenidoHaciaBroker(modulo, bytesSuscripcion, suscripcionSerializada, &bytesContenido);
 	serializacionFinal = armarPaqueteYSerializar(SUSCRIBER, bytesContenido, contenidoSerializado, &bytes);
 
@@ -71,6 +72,8 @@ int enviarSuscripcion(int socket, TipoModulo modulo, int cantidadColas, ...){
 		resultado = -1;
 	}
 
+	free(suscripcionSerializada);
+	free(contenidoSerializado);
 	free(serializacionFinal);
 
 	return resultado;
@@ -322,6 +325,8 @@ int recibirMensajeSuscriber(int socket, t_log* logger, TipoModulo modulo, Mensaj
 	respuesta = armarYSerializarAck((*mensaje)->ID, &bytes);
 
 	recepcion = send(socket, respuesta, bytes, 0);
+
+	free(respuesta);
 
 	if(recepcion == -1) return 0;
 
