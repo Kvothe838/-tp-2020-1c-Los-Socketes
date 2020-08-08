@@ -285,6 +285,7 @@ void verificar_espera_circular(){
 		}
 	}else if(columnas==2){
 		if(datos[0][0]==datos[1][1] && datos[1][0]==datos[0][1]){
+			DEADLOCKS_RESUELTOS += 1;
 			log_info(logTP,"Resultado del algoritmo de deteccion de Deadlock: hay Deadlock entre los entrenadores");
 			//printf("\nhay espera circular");
 			//log_info(logInit,"SE DETECTO ESPERA CIRCULAR");
@@ -754,10 +755,11 @@ int hayOtroEnLaReserva(Entrenador* entrenador){
 }
 
 void consultar_atrapar(Entrenador* entrenador){
+	entrenador->estado = BLOQUEADO;
 	log_info(logTP,"Se va a enviar un CATCH para ver si %d atrapó a %s en (%d,%d)",entrenador->idEntrenador,(entrenador->intentar_atrapar)->nombre,(entrenador->intentar_atrapar)->x,(entrenador->intentar_atrapar)->y);
 	consultaGlobal.id_correlativo = enviarCatch(entrenador->intentar_atrapar);
+	entrenador->estado = EJECUTANDO;
 	sem_wait(&consultaCatch);
-
 	if(consultaGlobal.respuesta){
 		log_info(logTP,"Entrenador %d pudo atrapar a %s en (%d,%d)",
 			entrenador->idEntrenador,
@@ -804,7 +806,6 @@ void consultar_atrapar(Entrenador* entrenador){
 		}
 	}
 	sumarQuantum((entrenador)->idEntrenador,1);
-
 }
 
 void realizar_intercambio(Entrenador* entrenador){
@@ -923,6 +924,7 @@ void cargarConfig(t_log* logger){
 		unaMetrica->quantumTotal = 0;
 		list_add(METRICAS_ENTRENADORES,unaMetrica);
 	}
+
 	logTP = iniciar_logger(configTeam.path,"Team");
 	logTP_aux = iniciar_logger("loggerAuxiliar.log","Aux");
 }

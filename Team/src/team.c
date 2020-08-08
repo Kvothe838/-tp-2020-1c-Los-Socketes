@@ -1,33 +1,31 @@
 #include "team.h"
-/*
+
 int sumarCiclos(){
 	int suma=0;
-
 	for(int i=0;i < CANT_ENTRENADORES;i++){
 		suma += getQuantum(i);
 	}
-
 	return suma;
 }
 void mostrarCiclosIndividuales(){
 	for(int z=0;z<CANT_ENTRENADORES;z++){
-		//fprintf(logTPmetricasTP,"Entrenador %d realizo %d ciclos de cpu\n",z,getQuantum(z));
+		log_info(logTP,"Entrenador %d realizo %d ciclos de cpu",z,getQuantum(z));
 	}
 }
 void metricas(){
-	printf("\n-------------------METRICAS-------------------------\n");
+		/*
+		printf("\n-------------------METRICAS-------------------------\n");
 		for(int i=0;i < CANT_ENTRENADORES;i++){
 			printf("\n%d -> %d",i,getQuantum(i));
 		}
-		metricasTP  = fopen ("/home/utnso/Logs/metricas.txt", "w");
-		//fprintf(logTPmetricasTP,"Ciclos de cpu totales: %d\n",sumarCiclos());
-		//fprintf(logTPmetricasTP,"Ciclos de cpu de cada entrenador:\n");
+		*/
+		log_info(logTP,"Ciclos de cpu totales: %d",sumarCiclos());
+		log_info(logTP,"Ciclos de cpu de cada entrenador:");
 		mostrarCiclosIndividuales();
-		//fprintf(logTPmetricasTP,"Cantidad de cambios de contexto: %d\n",CAMBIOS_CONTEXTO);
-		//fprintf(logTPmetricasTP,"Cantidad de deadlocks resueltos: %d\n",DEADLOCKS_RESUELTOS);
-		fclose(metricasTP);
+		log_info(logTP,"Cantidad de cambios de contexto: %d",CAMBIOS_CONTEXTO);
+		log_info(logTP,"Cantidad de deadlocks resueltos: %d",DEADLOCKS_RESUELTOS);
 }
-*/
+
 int main(void) {
 	t_log* logger = iniciar_logger("CargarConfiguracion.log", "ConfigTeam");
 	cargarConfig(logger);
@@ -36,6 +34,7 @@ int main(void) {
 	Team team = inicializarTeam(configTeam.posiciones,configTeam.pertenecientes,configTeam.objetivos);
 	conexiones(team);
 	planificacion();
+	metricas();
 	printf(" \nprograma finalizado\n");
 	return 0;
 }
