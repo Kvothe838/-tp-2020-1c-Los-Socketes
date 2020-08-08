@@ -81,6 +81,7 @@ void crearDiccionarioSemaforo()
 			//printf("%s\n", dir->d_name);
 		}
 	}
+	free(path);
 	closedir(d); // finally close the directory
 }
 
