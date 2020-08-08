@@ -37,7 +37,7 @@ void process_request(MensajeParaSuscriptor* mensaje){
 
 			pokemonNew = deserializarNew(mensaje->contenido);
 
-			log_info(loggerSecundario, "LLEGÓ NEW POKEMON CON NOMBRE: %s en la pos %d-%d y son %d", pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY, pokemonNew->cantidad);
+			log_info(loggerSecundario, "Llegó new: %s en la pos %d-%d y son %d", pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY, pokemonNew->cantidad);
 
 			administrarNewPokemon(pokemonNew->nombre, pokemonNew->posX, pokemonNew->posY, pokemonNew->cantidad);
 
@@ -45,7 +45,7 @@ void process_request(MensajeParaSuscriptor* mensaje){
 
 			mandarMensajeABroker(dataAppeared, APPEARED, mensaje->ID, loggerObligatorio);
 
-			//free(dataAppeared->nombre);
+			free(dataAppeared->nombre);
 			free(dataAppeared);
 
 			free(pokemonNew);
@@ -56,7 +56,7 @@ void process_request(MensajeParaSuscriptor* mensaje){
 
 			pokemonGet = deserializarGet(mensaje->contenido);
 
-			log_info(loggerSecundario, "LLEGÓ GET POKEMON CON NOMBRE: %s", pokemonGet->nombre);
+			log_info(loggerSecundario, "Llegó get: %s", pokemonGet->nombre);
 
 			LocalizedPokemon * dataLocalized = administrarGetPokemon(pokemonGet->nombre);
 
@@ -85,7 +85,7 @@ void process_request(MensajeParaSuscriptor* mensaje){
 
 			mandarMensajeABroker(dataLocalized, LOCALIZED, mensaje->ID, loggerObligatorio);
 
-			//free(dataLocalized->nombre);
+			free(dataLocalized->nombre);
 			list_destroy(dataLocalized->posiciones);
 			free(dataLocalized);
 
@@ -96,7 +96,7 @@ void process_request(MensajeParaSuscriptor* mensaje){
 
 			pokemonCatch = deserializarCatch(mensaje->contenido);
 
-			log_info(loggerSecundario, "LLEGÓ CATCH POKEMON CON NOMBRE: %s en la pos %d-%d", pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
+			log_info(loggerSecundario, "Llegó catch: %s en la pos %d-%d", pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
 
 			uint32_t resultado = administrarCatchPokemon(pokemonCatch->nombre, pokemonCatch->posX, pokemonCatch->posY);
 
@@ -106,6 +106,7 @@ void process_request(MensajeParaSuscriptor* mensaje){
 
 			free(dataCaught);
 
+			free(pokemonCatch->nombre);
 			free(pokemonCatch);
 
 			break;
@@ -114,8 +115,10 @@ void process_request(MensajeParaSuscriptor* mensaje){
 			break;
 	}
 
-	free(mensaje);
 	sem_post(&mutexFS);
+
+	free(mensaje->contenido);
+	free(mensaje);
 }
 
 
@@ -128,23 +131,22 @@ void atenderMensajeGameboy(int* socket)
 
 	if(codigo == NUEVO_MENSAJE_SUSCRIBER)
 	{
-		t_log* logger = log_create("nuevoMensajeSuscriber.log", "Nuevo mensaje suscriber", true, LOG_LEVEL_INFO);
 		MensajeParaSuscriptor* mensaje = NULL;
-		int recepcionExitosa = recibirMensajeSuscriber(*socket, logger, TEAM, &mensaje, ipBroker, puertoBroker);
+		int recepcionExitosa = recibirMensajeSuscriber(*socket, loggerObligatorio, GAMECARD, &mensaje, ipBroker, puertoBroker);
 
 		if(!recepcionExitosa) return;
 
 		//process_request(mensaje);
 		pthread_create(&threadGameBoy, NULL, (void*)process_request, mensaje);
-		pthread_detach(thread);
+		pthread_detach(threadGameBoy);
 
 	}
 }
 
 void iniciar_servidor(t_config* config, int socketBroker)
 {
-	loggerObligatorio = iniciar_logger("LoggerObligatorioGamecard.log", "GAMECARDObligatorio");
-	loggerSecundario = iniciar_logger("LoggerSecundarioGamecard.log", "GAMECARDSecundario");
+	loggerObligatorio = iniciar_logger("LoggerObligatorioGamecard.log", "GAMECARD");
+	loggerSecundario = iniciarLoggerSinConsola("LoggerSecundarioGamecard.log", "GAMECARDSecundario");
 	int socketActual = socketBroker;
 	int resultado;
     while(1){
