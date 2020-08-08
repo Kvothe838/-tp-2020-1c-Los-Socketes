@@ -22,12 +22,7 @@ void asignar_movimiento(Entrenador* entrenador,int mov_x,int mov_y,Pokemon* poke
 	pthread_mutex_lock(&modificar_cola_preparados);
 	queue_push(PREPARADOS,entrenador);
 	pthread_mutex_unlock(&modificar_cola_preparados);
-	//log_info(logInit,"A %d SE LE VA A ASIGNAR %s",entrenador->idEntrenador,pokemon->nombre);
-	//log_info(logInit," = %d = PASA A LA COLA PREPARADOS",entrenador->idEntrenador);
-	//fprintf(logTP,"Se matcheo al Entrenador %d con %s, que aparecio en (%d,%d)\n",entrenador->idEntrenador,pokemon->nombre,pokemon->x,pokemon->y);
-	log_info(logTP,"Entrenador %d pasa de la cola DISPONIBLES a PREPARADOS: va a intentar atrapar un Pokemon",entrenador->idEntrenador);
-	////log_info(logInit,"Se matcheo al Entrenador %d con %s, que aparecio en (%d,%d)\n",entrenador->idEntrenador,pokemon->nombre,pokemon->x,pokemon->y);
-	//sem_post(&s_ejecucion);
+	log_info(logTP,"Entrenador %d pasa de la cola DISPONIBLES a PREPARADOS: va a intentar atrapar a un %s en (%d,%d)",entrenador->idEntrenador,pokemon->nombre,pokemon->x,pokemon->y);
 }
 
 float distancia(int e_x,int e_y,int p_x,int p_y){ // se calcula la distancia entre el pokemon recien aparecido y el entrenador en su posicion actual
@@ -173,44 +168,28 @@ void intercambio_forzoso(Entrenador* mover, Entrenador* quieto){
 
 	pthread_mutex_lock(&modificar_cola_preparados);
 	queue_push(PREPARADOS,list_get(DEADLOCKS->elements,getIndice(mover->idEntrenador)));
-	//queue_push(PREPARADOS,mover);
 	pthread_mutex_unlock(&modificar_cola_preparados);
 	log_info(logTP,"Entrenador %d pasa de la cola DEADLOCKS a PREPARADOS: va a intercambiar con %d",mover->idEntrenador,quieto->idEntrenador);
-	//log_info(logInit," = %d = PASA A LA COLA PREPARADOS",mover->idEntrenador);
 	pthread_mutex_lock(&modificar_cola_esperando);
 	queue_push(ESPERANDO,list_get(DEADLOCKS->elements,getIndice(quieto->idEntrenador)));
-	//queue_push(PREPARADOS,quieto);
 	pthread_mutex_unlock(&modificar_cola_esperando);
 	log_info(logTP,"Entrenador %d pasa de la cola DEADLOCKS a ESPERANDO: va a intercambiar con %d",quieto->idEntrenador,mover->idEntrenador);
-	//log_info(logInit," = %d = PASA A LA COLA ESPERANDO",quieto->idEntrenador);
 
 	list_remove(DEADLOCKS->elements,getIndice(quieto->idEntrenador));
 	list_remove(DEADLOCKS->elements,getIndice(mover->idEntrenador));
-
-	//log_info(logInit,"<<<< = %d = VA A INTERCAMBIAR CON %d\n\n",mover->idEntrenador,quieto->idEntrenador);
-
-	//log_info(logInit,"\n\n FORZADAMENTE <<<<<<< %d --> %s --> %d >>>>>>",mover->idEntrenador,getPokemon(list_get(mover->pertenecientesIntercambiables,mover->indiceDar))->nombre,quieto->idEntrenador);
-	//log_info(logInit," FORZADAMENTE <<<<<<< %d --> %s --> %d >>>>>>\n\n",quieto->idEntrenador,getPokemon(list_get(quieto->pertenecientesIntercambiables,quieto->indiceDar))->nombre,mover->idEntrenador);
-
-
-	//printf("\nSE SUMA 1 HAY_PREPARADOS");
 	sem_post(&hayPreparados);
-
 	pthread_mutex_unlock(&modificar_cola_deadlocks);
 	//printf("\n ENTRENADOR %d VA A DAR A %s",mover->idEntrenador,retornarNombrePosta(list_get(mover->mios,mover->indiceDar)));
 	//printf("\n ENTRENADOR %d VA A DAR A %s",quieto->idEntrenador,retornarNombrePosta(list_get(quieto->mios,quieto->indiceDar)));
-
+	DEADLOCKS_RESUELTOS += 1;
 }
 
 void verificar_espera_circular(){
 	int temporal;
 	int sigo;
-	//pthread_mutex_lock(&modificar_cola_deadlocks);
 	int datos[3][queue_size(DEADLOCKS)];
 	int columnas = 0;
-	// FILA --> ME INTERESA ALGUN POKEMON DE ESTOS
-	// COLUMNA --> A ALGUNO DE ESTOS LES INTERESA MI POKEMON
-	log_info(logTP,"Se inicia el algoritmo de deteccion de Deadlock entre los entrenadores");
+	
 	for(temporal=0;temporal < queue_size(DEADLOCKS);temporal++){
 		datos[0][temporal] = -1;
 		datos[1][temporal] = -1;
@@ -261,51 +240,21 @@ void verificar_espera_circular(){
 		}
 
 		if(contador >= 2){
-			DEADLOCKS_RESUELTOS += 1;
 			log_info(logTP,"Resultado del algoritmo de deteccion de Deadlock: hay Deadlock entre los entrenadores");
-			//printf("\nhay espera circular");
-			//log_info(logInit,"SE DETECTO ESPERA CIRCULAR");
-			//fprintf(logTP,"se detecto una situacion de Deadlock\n");
-/*
-			printf("\n-------------------------------------------\n");
-			for(temporal=0;temporal < columnas;temporal++){//ESTE ES EL INDICE DE DEADLOCKS
-				printf("ID: %d (%d) // ESPERA: %d // RETIENE: %d \n",temporal,esperaCircular[0][temporal],esperaCircular[1][temporal],esperaCircular[2][temporal]);
-			}
-			printf("\n-------------------------------------------\n");// ESPERA CIRCULAR CONFIRMADA Y VERIFICADA CON 3 O + ENTRENADORES INVOLUCRADOS
-*/
-			//printf("\nprimero: %d (dl : %d)",esperaCircular[0][0],getIndice(esperaCircular[0][0]));
-			//printf("\nsegundo: %d (dl : %d)",esperaCircular[0][(esperaCircular[2][0])],getIndice(esperaCircular[0][(esperaCircular[2][0])]));
-
 			intercambio_forzoso(list_get(DEADLOCKS->elements,getIndice(esperaCircular[0][0])),list_get(DEADLOCKS->elements,getIndice(esperaCircular[0][(esperaCircular[2][0])])));
 		}else{
 			log_info(logTP,"Resultado del algoritmo de deteccion de Deadlock: no hay Deadlock entre los entrenadores");
-			//printf("\nno hay espera circular 1111");
-			//log_info(logInit,"NO SE DETECTO ESPERA CIRCULAR(1)");
-			//fprintf(logTP,"no se detecto una situacion de Deadlock\n");
 		}
 	}else if(columnas==2){
 		if(datos[0][0]==datos[1][1] && datos[1][0]==datos[0][1]){
-			DEADLOCKS_RESUELTOS += 1;
 			log_info(logTP,"Resultado del algoritmo de deteccion de Deadlock: hay Deadlock entre los entrenadores");
-			//printf("\nhay espera circular");
-			//log_info(logInit,"SE DETECTO ESPERA CIRCULAR");
-			//fprintf(logTP,"se detecto una situacion de Deadlock\n");
 			intercambio_forzoso(list_get(DEADLOCKS->elements,0),list_get(DEADLOCKS->elements,1));
 		}else{
 			log_info(logTP,"Resultado del algoritmo de deteccion de Deadlock: no hay Deadlock entre los entrenadores");
-			//printf("\nno hay espera circular 2222");
-			//log_info(logInit,"NO SE DETECTO ESPERA CIRCULAR(2)");
-			//fprintf(logTP,"no se detecto una situacion de Deadlock\n");
 		}
 	}else{
 		log_info(logTP,"Resultado del algoritmo de deteccion de Deadlock: no hay Deadlock entre los entrenadores");
-		//printf("\nno hay espera circular 3333");
-		//log_info(logInit,"NO SE DETECTO ESPERA CIRCULAR(3)");
-		//fprintf(logTP,"no se detecto una situacion de Deadlock\n");
 	}
-	//printf("\nSE FINALIZA LA VERIFICACION DE ESPERA CIRCULAR");
-	//log_info(logInit,"SE FINALIZA LA VERIFICACION DE ESPERA CIRCULAR");
-	//pthread_mutex_unlock(&modificar_cola_deadlocks);
 }
 
 int verificar_intercambio(Entrenador* e1,Entrenador* e2){
@@ -362,11 +311,8 @@ int verificar_intercambio(Entrenador* e1,Entrenador* e2){
 			e2->tipoAccion = INTERCAMBIAR;
 			e2->movimiento[0] = ((e1->posicion[0])-(e2->posicion[0]));
 			e2->movimiento[1] = ((e1->posicion[1])-(e2->posicion[1]));
-			//printf("\n%d se va a mover X:%d // Y:%d",e2->idEntrenador,e2->movimiento[0],e2->movimiento[1]);
 			hayIntercambio=1;
-			//printf("\nhay intercambio entre %d y %d\n",e1->idEntrenador,e2->idEntrenador);
 		}else{
-			//printf("\nno hay intercambio entre %d y %d\n",e1->idEntrenador,e2->idEntrenador);
 		}
 	return hayIntercambio;
 }
@@ -376,12 +322,12 @@ Entrenador* getEntrenador(Entrenador* entrenador){
 }
 
 void verificar_intercambios(Entrenador* recienIngresado){
-	//printf("\ntam DEADLOCKS: %d",queue_size(DEADLOCKS));
-	//mostrarEntrenador(recienIngresado);
 	int indice=0;
 	int sigo=1;
+	log_info(logTP,"Se inicia el algoritmo de deteccion de Deadlock entre los entrenadores");
 	while((sigo==1) && (indice<(queue_size(DEADLOCKS)-1))){
 		if(verificar_intercambio(list_get(DEADLOCKS->elements,indice),recienIngresado)){
+			log_info(logTP,"Resultado del algoritmo de deteccion de Deadlock: hay Deadlock entre los entrenadores");
 			sigo=0;
 			pthread_mutex_lock(&modificar_cola_deadlocks);
 			list_remove(DEADLOCKS->elements,(list_size(DEADLOCKS->elements)-1));
@@ -391,9 +337,9 @@ void verificar_intercambios(Entrenador* recienIngresado){
 			pthread_mutex_unlock(&modificar_cola_preparados);
 			log_info(logTP,"Entrenador %d pasa de la cola DEADLOCKS a PREPARADOS: va a intercambiar con %d",recienIngresado->idEntrenador,getEntrenador(list_get(DEADLOCKS->elements,indice))->idEntrenador);
 			//log_info(logInit," = %d = PASA A COLA PREPARADOS",recienIngresado->idEntrenador);
-
+			
 			//fprintf(logTP,"Entrenador %d pasa de la cola DEADLOCKS a PREPARADOS: va a ir a la posicion de otro entrenador para realizar un intercambio\n",recienIngresado->idEntrenador);
-
+			
 			pthread_mutex_lock(&modificar_cola_esperando);
 			queue_push(ESPERANDO,list_get(DEADLOCKS->elements,indice));
 			pthread_mutex_unlock(&modificar_cola_esperando);
@@ -405,17 +351,17 @@ void verificar_intercambios(Entrenador* recienIngresado){
 			list_remove(DEADLOCKS->elements,indice);
 			sem_post(&hayPreparados);
 			pthread_mutex_unlock(&modificar_cola_deadlocks);
+			DEADLOCKS_RESUELTOS += 1;
 		}else{
 			indice++;
 		}
 	}
 
 	if(sigo==1 && queue_size(DEADLOCKS)>2){ // QUIERE DECIR QUE NO VA A INTERCAMBIAR CON NINGUN OTRO EN DEADLOCK, ENTONCES VAMOS A VER SI HAY ESPERA CIRCULAR
-		//printf("\nvamos a verificar si hay espera circular:");
-		//log_info(logInit,"SE INICIA ALGORITMO DE DETECCION DE ESPERA CIRCULAR");
 		verificar_espera_circular();
+	}else{
+		log_info(logTP,"Resultado del algoritmo de deteccion de Deadlock: no hay Deadlock entre los entrenadores");
 	}
-
 }
 
 int verificar_deadlock(Entrenador* entrenador){//1 true, 0 false
@@ -481,14 +427,7 @@ void intercambiar(Entrenador* persona, Entrenador* quieto){
 
 	quieto->intentar_atrapar = NULL;
 	persona->intentar_atrapar = NULL;
-	//printf("\nLUEGO DE HACER EL INTERCAMBIO QUEDAN ASI:\n");
-	//mostrarEntrenador(quieto);
-	//mostrarEntrenador(persona);
-	/*
-	pthread_mutex_lock(&modificar_cola_ejecutados);
-	queue_push(EJECUTADOS,quieto); 
-	pthread_mutex_unlock(&modificar_cola_ejecutados);
-	*/
+
 	pthread_mutex_lock(&modificar_cola_esperando);
 	queue_pop(ESPERANDO);
 	pthread_mutex_unlock(&modificar_cola_esperando);
@@ -604,7 +543,7 @@ void ingreso_a_colas_entrenador(Entrenador* persona){
 				pthread_mutex_lock(&modificar_cola_disponibles);
 				queue_push(DISPONIBLES,persona);
 				pthread_mutex_unlock(&modificar_cola_disponibles);
-				log_info(logTP,"Entrenador %d pasa de la cola PREPARADOS a DISPONIBLES: tiene espacio para atrapar otro pokemon",persona->idEntrenador);
+				//log_info(logTP,"Entrenador %d pasa de la cola PREPARADOS a DISPONIBLES: tiene espacio para atrapar otro pokemon",persona->idEntrenador);
 				//log_info(logInit," = %d = PASA A LA COLA DISPONIBLES",persona->idEntrenador);
 				entrenador_mas_cercano(queue_peek(POKEMONS));
 			}
@@ -619,8 +558,8 @@ void ingreso_a_colas_entrenador(Entrenador* persona){
 			}
 			break;
 		default:
-			printf("");
-			//log_info(logInit,"= %d = FINALIZA SU MISION",persona->idEntrenador);
+			break;
+			log_info(logTP,"Entrenador %d finalizó su mision",persona->idEntrenador);
 	}
 }
 
@@ -640,13 +579,11 @@ void ubicar_entrenador(Entrenador* entrenador){
 		pthread_mutex_lock(&modificar_cola_ejecutados);
 		queue_push(EJECUTADOS,(entrenador));
 		pthread_mutex_unlock(&modificar_cola_ejecutados);
-		//log_info(logInit," = %d = PASA A LA COLA EJECUTADOS",entrenador->idEntrenador);
 		//fprintf(logTP,"Entrenador %d pasa de la cola PREPARADOS a EJECUTADOS: tiene espacio para atrapar otro pokemon, o se va a ir del sistema",(entrenador)->idEntrenador);
 	}else{
 		pthread_mutex_lock(&modificar_cola_deadlocks);
 		queue_push(DEADLOCKS,entrenador);
 		pthread_mutex_unlock(&modificar_cola_deadlocks);
-		//log_info(logInit," = %d = PASA A LA COLA DEADLOCKS",entrenador->idEntrenador);
 		//fprintf(logTP,"Entrenador %d pasa de la cola PREPARADOS a DEADLOCKS: no tiene espacio para atrapar otro pokemon, y todavia no cumplió su objetivo\n",(entrenador)->idEntrenador);
 		if(queue_size(DEADLOCKS)>1){
 			verificar_intercambios(entrenador);
@@ -831,7 +768,7 @@ void iniciar_entrenador(Entrenador** entrenador){
 	while(verificar_finalizacion(*entrenador)==0){
 		//log_info(logInit,"= %d = BLOQUEADO",(*entrenador)->idEntrenador);
 		sem_wait(&((*entrenador)->activador));
-		log_info(logTP_aux," = %d SE VA A MOVER %d POSICIONES =",(*entrenador)->idEntrenador,suma((*entrenador)->movimiento[0],(*entrenador)->movimiento[1]));
+		log_info(logTP_aux," = %d se va a mover %d posiciones =",(*entrenador)->idEntrenador,suma((*entrenador)->movimiento[0],(*entrenador)->movimiento[1]));
 		moverse(*entrenador);
 		if((*entrenador)->movimiento[0]==0 && (*entrenador)->movimiento[1]==0){
 			//log_info(logInit,"= %d = LLEGUE A MI OBJETIVO",(*entrenador)->idEntrenador);// LLEGO A SU OBJETIVO
@@ -926,7 +863,7 @@ void cargarConfig(t_log* logger){
 	}
 
 	logTP = iniciar_logger(configTeam.path,"Team");
-	logTP_aux = iniciar_logger("loggerAuxiliar.log","Aux");
+	logTP_aux = iniciarLoggerSinConsola("loggerAuxiliar.log","Aux");
 }
 Pokemon* crearPokemon(char *nombre,int x, int y) {
 	Pokemon *new = malloc(sizeof(Pokemon));
@@ -1032,10 +969,10 @@ void mostrarEntrenador(Entrenador* entrenador){
 	printf(" estado= ");
 	mostrarEstado(entrenador);
 	printf("\n");
-	PokemonFantasia* pokemon;
+	//PokemonFantasia* pokemon;
 	for(int i=0;i<list_size(entrenador->mios); i++ ){
 
-		pokemon =list_get(entrenador->mios,i);
+		//pokemon =list_get(entrenador->mios,i);
 		//printf(" pokemon[%d]=",i);
 		//printf("%s",pokemon->nombre );
 	}
@@ -1146,7 +1083,6 @@ void incrementarObjetivoGlobal(char* nombreObjetivo){
 		}
 	}
 	pthread_mutex_unlock(&acceder_objetivos_globales);
-	////log_info(logInit,"SE INCREMENTO EN 1 EL OJETIVO %s",nombreObjetivo); ESTE FUE EL 1RO
 }
 void decrementarObjetivoGlobal(char* nombreObjetivo){
 	pthread_mutex_lock(&acceder_objetivos_globales);
@@ -1156,7 +1092,6 @@ void decrementarObjetivoGlobal(char* nombreObjetivo){
 		}
 	}
 	pthread_mutex_unlock(&acceder_objetivos_globales);
-	////log_info(logInit,"SE DECREMENTO EN 1 EL OJETIVO %s",nombreObjetivo);
 }
 
 int yaEsObjetivoGlobal(PokemonFantasia* especiePokemon){
@@ -1170,24 +1105,12 @@ int yaEsObjetivoGlobal(PokemonFantasia* especiePokemon){
 	}
 	return loEs;
 }
-/*
-void eliminarObjetivosGlobales(Objetivo* x){
-	free(x->cantidad);
-	free(x->especie);
-	free(x);
-}
-*/
-void getObjetivosGlobales(Team team){/*
-	if(list_size(OBJETIVO_GLOBAL)>0){
-		list_clean_and_destroy_elements(OBJETIVO_GLOBAL,(void*)eliminarObjetivosGlobales);
-	}*/
 
+void getObjetivosGlobales(Team team){
 	for(int i = 0 ;i<CANT_ENTRENADORES;i++){
 		for(int j = 0 ; j<list_size(team[i]->objetivosActuales);j++){
 			if(yaEsObjetivoGlobal(list_get(team[i]->objetivosActuales,j))){
-				// no hace nada
 			}else{crearObjetivoGlobal(retornarNombreFantasia(list_get(team[i]->objetivosActuales,j)));}
-			//list_add(OBJETIVO_GLOBAL,list_get(team[i]->objetivosActuales,j));
 		}
 	}
 }
@@ -1195,21 +1118,15 @@ void getObjetivosGlobales(Team team){/*
 Team inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeObjetivos){
 	Entrenador** team = (Entrenador**)(malloc(CANT_ENTRENADORES*sizeof(Entrenador)));
 
-	sem_init(&esperar_pokemons,0,0);
-	sem_init(&s_match,0,0);
 	sem_init(&s_ejecucion,0,0);
-	sem_init(&mas_pokemons,0,1);
 	sem_init(&ya_termine,0,0);
 	sem_init(&siguiente,0,0);
-	sem_init(&rellenar_colas,0,1);
 	sem_init(&esperar_finalizacion,0,0);
 	sem_init(&finalizar_ejecucion,0,0);
-	sem_init(&intercambio_hecho,0,0);
 	sem_init(&hayPreparados,0,0);
 	sem_init(&consultaCatch,0,0);
 
 	OBJETIVO_GLOBAL = list_create();
-	//OBJETIVO_GLOBAL_FILTRADO = list_create();
 	
 	PREPARADOS = queue_create();
 	DISPONIBLES = queue_create();
@@ -1227,7 +1144,7 @@ Team inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeO
 	pthread_mutex_init(&modificar_cola_ejecutados,NULL);
 	pthread_mutex_init(&modificar_cola_esperando,NULL);
 	pthread_mutex_init(&modificar_cola_reservas,NULL);
-	sem_init(&progreso,0,1);
+
 	pthread_t hilo[cantidad_arrays(posiciones)];
 	for(int i=0 ; i<cantidad_arrays(posiciones) ; i++){
 		team[i] = inicializarEntrenador(i,posiciones[i],pokePertenecientes[i],pokeObjetivos[i]);
@@ -1235,8 +1152,6 @@ Team inicializarTeam(char** posiciones, char** pokePertenecientes , char** pokeO
 		pthread_create(&hilo[i],NULL,(void*)iniciar_entrenador,&(team[i]));
 		pthread_detach(hilo[i]);
 	}
-	//getObjetivosGlobales(team);
-	////log_info(logInit,"IP BROKER: %s, PUERTO BROKER: %s",configTeam.ip,configTeam.puerto);
 	return team;
 }
 
@@ -1275,35 +1190,41 @@ void asignarObjetivosActuales(Entrenador* persona){
 	}
 }
 
-void destructorPokemonsFantasia(PokemonFantasia* pokemon){
-	free(pokemon->nombre);
-	free(pokemon);
- }
 
-void liberarTeam(Team team){
-	/*for(int i=0 ; i< CANT_ENTRENADORES;i++){
-		free(team[i]);
-	}*/
-	sem_destroy(&esperar_pokemons);
-	sem_destroy(&s_match);
-	sem_destroy(&s_ejecucion);
-	sem_destroy(&mas_pokemons);
-	sem_destroy(&ya_termine);
-	sem_destroy(&siguiente);
-	sem_destroy(&rellenar_colas);
-	sem_destroy(&esperar_finalizacion);
-	sem_destroy(&finalizar_ejecucion);
-	sem_destroy(&intercambio_hecho);
-	sem_destroy(&hayPreparados);
-
-	//list_destroy_and_destroy_elements( OBJETIVO_GLOBAL ,(void*) destructorPokemonsFantasia);
-
+void chauObjetivo(Objetivo* x){
+	free(x->especie);
+	free(x);
+}
+void chauMetrica(Metrica* x){
+	free(x);
+}
+void chauPokemon(Pokemon* x){
+	free(x);
+}
+void chauObjetivoP(PokemonFantasia* x){
+	free(x);
+}
+void chauEntrenador(Entrenador* x){
+	list_destroy_and_destroy_elements(x->mios,(void*)chauPokemon);
+	list_destroy_and_destroy_elements(x->objetivos,(void*)chauObjetivoP);
+	list_destroy(x->objetivosActuales);
+	list_destroy(x->pertenecientesIntercambiables);
+	free(x);
+}
+void limpiarMemoryLeaks(Team team){
+	log_destroy(logTP);
+	log_destroy(logTP_aux);
+	list_destroy_and_destroy_elements(OBJETIVO_GLOBAL,(void*)chauObjetivo);
+	list_destroy_and_destroy_elements(METRICAS_ENTRENADORES,(void*)chauMetrica);
 	queue_destroy(PREPARADOS);
 	queue_destroy(DISPONIBLES);
-	queue_destroy(DEADLOCKS);
 	queue_destroy(POKEMONS);
+	queue_destroy(DEADLOCKS);
 	queue_destroy(EJECUTADOS);
 	queue_destroy(ESPERANDO);
-
-	//free(team);
+	queue_destroy(POKEMONS_RESERVA);
+	for(int i=0;i<CANT_ENTRENADORES;i++){
+		chauEntrenador(team[i]);
+	}
+	free(team);
 }

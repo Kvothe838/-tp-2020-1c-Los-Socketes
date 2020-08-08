@@ -19,7 +19,6 @@ int CAMBIOS_CONTEXTO;
 int DEADLOCKS_RESUELTOS;
 
 t_list* OBJETIVO_GLOBAL;
-t_list* OBJETIVO_GLOBAL_FILTRADO;
 t_list* METRICAS_ENTRENADORES;
 
 t_queue* PREPARADOS;
@@ -30,19 +29,11 @@ t_queue* EJECUTADOS;
 t_queue* ESPERANDO;
 t_queue* POKEMONS_RESERVA;
 
-sem_t s_match;
 sem_t s_ejecucion;
-sem_t s_intercambio;
-sem_t progreso;
-sem_t mas_pokemons;
 sem_t ya_termine;
 sem_t siguiente;
-sem_t rellenar_colas;
-sem_t esperarPokemons;
-sem_t esperar_pokemons;
 sem_t esperar_finalizacion;
 sem_t finalizar_ejecucion;
-sem_t intercambio_hecho;
 sem_t hayPreparados;
 sem_t consultaCatch;
 
@@ -178,6 +169,6 @@ int getQuantum(int indice);
 Metrica* getMetrica(int indice);
 
 // EVITAR MEMORY LEAKS
-void liberarTeam(Team team);
+void limpiarMemoryLeaks(Team team);
 
 #endif /* TEAMINIT_H_ */
