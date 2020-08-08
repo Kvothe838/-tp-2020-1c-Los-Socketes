@@ -115,3 +115,10 @@ then
   sed -i "${lineaAModificarTeam}s/.*/$textoIP=$3/" $pathTeam
   sed -i "$((lineaAModificarTeam + 1))s/.*/$textoPuerto=$4/" $pathTeam
 fi
+
+# Ejemplitos para cambiar configuración de Team a manopla si es necesario.
+# sed -i '5s/.*/POSICIONES_ENTRENADORES=[1|3,2|3,2|2]/' configTeam.config
+# sed -i '6s/.*/POKEMON_ENTRENADORES=[Pikachu, , ]/' configTeam.config
+# sed -i '7s/.*/OBJETIVOS_ENTRENADORES=[Pikachu|Squirtle,Pikachu|Gengar,Squirtle|Onix]/' configTeam.config
+# sed -i '12s/.*/QUANTUM=0/' configTeam.config
+# sed -i '10s/.*/ALGORITMO_PLANIFICACION=FIFO/' configTeam.config
