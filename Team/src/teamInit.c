@@ -327,7 +327,6 @@ void verificar_intercambios(Entrenador* recienIngresado){
 	log_info(logTP,"Se inicia el algoritmo de deteccion de Deadlock entre los entrenadores");
 	while((sigo==1) && (indice<(queue_size(DEADLOCKS)-1))){
 		if(verificar_intercambio(list_get(DEADLOCKS->elements,indice),recienIngresado)){
-			log_info(logTP,"Resultado del algoritmo de deteccion de Deadlock: hay Deadlock entre los entrenadores");
 			sigo=0;
 			pthread_mutex_lock(&modificar_cola_deadlocks);
 			list_remove(DEADLOCKS->elements,(list_size(DEADLOCKS->elements)-1));
@@ -356,11 +355,14 @@ void verificar_intercambios(Entrenador* recienIngresado){
 			indice++;
 		}
 	}
-
-	if(sigo==1 && queue_size(DEADLOCKS)>2){ // QUIERE DECIR QUE NO VA A INTERCAMBIAR CON NINGUN OTRO EN DEADLOCK, ENTONCES VAMOS A VER SI HAY ESPERA CIRCULAR
-		verificar_espera_circular();
+	if(sigo==1){
+		if(queue_size(DEADLOCKS)>2){ // QUIERE DECIR QUE NO VA A INTERCAMBIAR CON NINGUN OTRO EN DEADLOCK, ENTONCES VAMOS A VER SI HAY ESPERA CIRCULAR
+			verificar_espera_circular();
+		}else{
+			log_info(logTP,"Resultado del algoritmo de deteccion de Deadlock: no hay Deadlock entre los entrenadores");
+		}
 	}else{
-		log_info(logTP,"Resultado del algoritmo de deteccion de Deadlock: no hay Deadlock entre los entrenadores");
+		log_info(logTP,"Resultado del algoritmo de deteccion de Deadlock: hay Deadlock entre los entrenadores");
 	}
 }
 
@@ -393,7 +395,7 @@ void actualizar_estado(Entrenador* persona){
 }
 
 void intercambiar(Entrenador* persona, Entrenador* quieto){
-	log_info(logTP,"Entrenador %d va a intercambiar con el Entrenador %d en (%d,%d)\n",
+	log_info(logTP,"Entrenador %d va a intercambiar con el Entrenador %d en (%d,%d)",
 	persona->idEntrenador,quieto->idEntrenador,
 	quieto->posicion[0],quieto->posicion[1]);
 
@@ -523,7 +525,7 @@ void moverse(Entrenador* persona){
 			}
 		}
 	}
-	log_info(logTP,"Entrenador %d se movio a (%d,%d)\n",persona->idEntrenador,persona->posicion[0],persona->posicion[1]);
+	log_info(logTP,"Entrenador %d se movio a (%d,%d)",persona->idEntrenador,persona->posicion[0],persona->posicion[1]);
 	//printf("\n[Entrenador %d] X FINAL: %d, Y FINAL: %d",persona->idEntrenador,persona->posicion[0],persona->posicion[1]);
 }
 
