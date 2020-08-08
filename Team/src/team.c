@@ -13,12 +13,6 @@ void mostrarCiclosIndividuales(){
 	}
 }
 void metricas(){
-		/*
-		printf("\n-------------------METRICAS-------------------------\n");
-		for(int i=0;i < CANT_ENTRENADORES;i++){
-			printf("\n%d -> %d",i,getQuantum(i));
-		}
-		*/
 		log_info(logTP,"Ciclos de cpu totales: %d",sumarCiclos());
 		log_info(logTP,"Ciclos de cpu de cada entrenador:");
 		mostrarCiclosIndividuales();
@@ -35,6 +29,7 @@ int main(void) {
 	conexiones(team);
 	planificacion();
 	metricas();
+	limpiarMemoryLeaks(team);
 	printf(" \nprograma finalizado\n");
 	return 0;
 }

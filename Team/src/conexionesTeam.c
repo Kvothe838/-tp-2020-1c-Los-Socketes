@@ -10,9 +10,9 @@ int enviarGet(char* nombre){
 		//log_info(logConexiones, "NO SE PUDO MANDAR EL GET(%s)",nombre);
 		exito = 0;
 	} else{
-		log_info(logTP_aux, "SE PUDO MANDAR EL GET(%s)",nombre);
+		log_info(logTP_aux, "Se pudo mandar el GET(%s)",nombre);
 	}
-	log_info(logTP_aux, "ID CORRELATIVO DEL GET(%s): %ld",nombre,respuesta->IDMensaje);
+	log_info(logTP_aux, "ID correlativo del GET(%s): %ld",nombre,respuesta->IDMensaje);
 	liberar_conexion_cliente(conexionBroker2);
 
 	return exito;
@@ -138,10 +138,9 @@ void manejarNuevoMensajeSuscriptor(MensajeParaSuscriptor* mensaje)
 			int i = 0;
 			int par = 1;
 			while(i < list_size(localized->posiciones)){
-				log_info(logTP,"Par %d de posiciones para el LOCALIZED(%s): (%d,%d)",par,localized->nombre,*(uint32_t*)list_get(localized->posiciones, i),*(uint32_t*)list_get(localized->posiciones, i+1));
+				log_info(logTP,"Par %d de las posiciones del LOCALIZED(%s): (%d,%d)",par,localized->nombre,*(uint32_t*)list_get(localized->posiciones, i),*(uint32_t*)list_get(localized->posiciones, i+1));
 				Pokemon* nuevo;
 				nuevo = crearPokemon(localized->nombre,*(uint32_t*)list_get(localized->posiciones, i),*(uint32_t*)list_get(localized->posiciones, i+1));
-				//log_info(logConexiones,"SE CREO UN POKEMON %s PARA LA POSICION (%d,%d)",nuevo->nombre,nuevo->x,nuevo->y);
 				list_add(pokemonsLocalized,nuevo);
 				i += 2;
 				par++;
@@ -238,10 +237,10 @@ void escucharABroker(){
 				}
 			}else{
 				//log_info(logConexiones,"conexionBroker: %d",conexionBroker);
-				log_info(logTP, "RESULTADO DE LA RECONEXION: NO HAY COMUNICACION CON BROKER");
+				log_info(logTP, "Resultado del intento de reconexion: no hay comunicacion con Broker");
 				liberar_conexion_cliente(conexionBroker);
 				sleep(configTeam.tiempoReconexion);
-				log_info(logTP,"SE VA A INTENTAR COMUNICARSE CON BROKER");
+				log_info(logTP,"Se va a intentar reconectarse con Broker");
 				conexionBroker = crear_conexion_cliente(configTeam.ip, configTeam.puerto);
 				enviarSuscripcion(conexionBroker, configTeam.ID, 3, APPEARED, LOCALIZED, CAUGHT);
 			}
