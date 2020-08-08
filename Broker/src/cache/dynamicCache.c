@@ -342,7 +342,9 @@ void compactarCache(){
 
 	modificarTablaVacio(tablaNuevoVacio, posicionNueva, 0);
 	memcpy(tablaElementos, tablaCompactada, sizeof(ItemTablaDinamica) * tamanioTabla);
+	free(tablaCompactada);
 	memcpy(tablaVacios, tablaNuevoVacio, sizeof(ItemTablaDinamica) * tamanioTabla);
+	free(tablaNuevoVacio);
 	reemplazarCache(tamanioCache);
 
 	//Log obligatorio.
@@ -520,8 +522,8 @@ void liberarParticiones(){
 	for(int i = 0; i < tamanioTabla; i++){
 		if(!tablaElementos[i].estaVacio)
 		{
-			free(tablaElementos[i].suscriptoresEnviados);
-			free(tablaElementos[i].suscriptoresRecibidos);
+			list_destroy(tablaElementos[i].suscriptoresEnviados);
+			list_destroy(tablaElementos[i].suscriptoresRecibidos);
 			free(tablaElementos[i].fechaCreacion);
 			free(tablaElementos[i].fechaUltimoUso);
 		}
@@ -529,7 +531,5 @@ void liberarParticiones(){
 
 	free(tablaElementos);
 	free(tablaVacios);
-
-	liberarBasicCache();
 }
 

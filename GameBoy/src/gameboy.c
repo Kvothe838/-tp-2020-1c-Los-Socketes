@@ -67,7 +67,6 @@ int main(int argc, char **argv){
 
 					liberar_conexion_cliente(conexionBroker);
 
-					free(newPokemon->nombre);
 					free(newPokemon);
 
 					break;
@@ -83,7 +82,6 @@ int main(int argc, char **argv){
 
 					liberar_conexion_cliente(conexionBroker);
 
-					free(appearedPokemon->nombre);
 					free(appearedPokemon);
 
 					break;
@@ -99,7 +97,6 @@ int main(int argc, char **argv){
 
 					liberar_conexion_cliente(conexionBroker);
 
-					free(catchPokemon->nombre);
 					free(catchPokemon);
 
 					break;
@@ -129,7 +126,6 @@ int main(int argc, char **argv){
 
 					liberar_conexion_cliente(conexionBroker);
 
-					free(getPokemon->nombre);
 					free(getPokemon);
 
 					break;
@@ -171,7 +167,6 @@ int main(int argc, char **argv){
 
 						liberar_conexion_cliente(conexionTeam);
 
-						free(pokemon->nombre);
 						free(pokemon);
 
 						break;
@@ -215,7 +210,6 @@ int main(int argc, char **argv){
 
 					liberar_conexion_cliente(conexionGamecard);
 
-					free(catchPokemon->nombre);
 					free(catchPokemon);
 
 					break;
@@ -232,7 +226,6 @@ int main(int argc, char **argv){
 
 					liberar_conexion_cliente(conexionGamecard);
 
-					free(getPokemon->nombre);
 					free(getPokemon);
 
 					break;
@@ -253,7 +246,6 @@ int main(int argc, char **argv){
 
 					liberar_conexion_cliente(conexionGamecard);
 
-					free(newPokemon->nombre);
 					free(newPokemon);
 
 					break;

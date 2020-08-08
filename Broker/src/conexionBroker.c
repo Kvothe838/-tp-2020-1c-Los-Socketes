@@ -139,6 +139,7 @@ void processRequest(int opCode, Suscriptor* suscriptor) {
 		int cantidadColas;
 		t_list* colas = recibirSuscripcion(suscriptor->socket, &cantidadColas);
 		manejarSuscripcion(colas, cantidadColas, suscriptor);
+		list_destroy_and_destroy_elements(colas, free);
 
 		break;
 	case PUBLISHER:;
@@ -165,9 +166,15 @@ void serveClient(int* socketCliente) {
 		modulo = -1;
 	}
 
+	char* moduloMostrar = tipoModuloToString(modulo);
+
 	//Log obligatorio.
-	log_info(loggerObligatorio, "Conexión de proceso %s a Broker.",
-			tipoModuloToString(modulo));
+	log_info(loggerObligatorio, "Conexión de proceso %s a Broker.", moduloMostrar);
+
+	if(modulo > TEAM)
+	{
+		free(moduloMostrar);
+	}
 
 	suscriptor->socket = *socketCliente;
 	suscriptor->modulo = modulo;
@@ -175,7 +182,7 @@ void serveClient(int* socketCliente) {
 
 	processRequest(opCode, suscriptor);
 
-	if (opCode != SUSCRIBER) {
+	if(opCode != SUSCRIBER) {
 		free(suscriptor);
 	}
 }
@@ -252,10 +259,15 @@ void enviarMensajesPorCola(TipoCola tipoCola) {
 			agregarSuscriptorEnviadoGeneric(*IDMensaje, &suscriptor);
 			cambiarLRUGeneric(*IDMensaje);
 
+			char* moduloMostrar = tipoModuloToString(suscriptor->modulo);
+
 			//Log obligatorio.
-			log_info(loggerObligatorio,
-					"Envío de mensaje con ID %ld a suscriptor %s", *IDMensaje,
-					tipoModuloToString(suscriptor->modulo));
+			log_info(loggerObligatorio,	"Envío de mensaje con ID %ld a suscriptor %s", *IDMensaje, moduloMostrar);
+
+			if(suscriptor->modulo > TEAM)
+			{
+				free(moduloMostrar);
+			}
 
 			manejarACK(respuesta, suscriptor);
 			free(respuesta);

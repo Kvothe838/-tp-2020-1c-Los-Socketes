@@ -32,18 +32,6 @@ void inicializarDataBasica(t_config* config){
 	}
 }
 
-void liberarCache()
-{
-	if(esParticiones)
-	{
-		liberarParticiones();
-	}
-	else
-	{
-		liberarBuddySystem();
-	}
-}
-
 int esTiempoMasAntiguo(char* masAntiguo, char* masNuevo){
 	return strcmp(masAntiguo, masNuevo) < 0;
 }
@@ -198,5 +186,23 @@ void agregarSuscriptorRecibidoGeneric(long IDMensaje, Suscriptor* suscriptor)
 	{
 		agregarSuscriptorRecibidoBuddySystem(IDMensaje, suscriptor);
 	}
+}
+
+void liberarCacheGeneric()
+{
+	if(esParticiones)
+	{
+		liberarParticiones();
+	}
+	else if(esBS)
+	{
+		liberarBuddySystem();
+	}
+	else
+	{
+		return;
+	}
+
+	liberarBasicCache();
 }
 

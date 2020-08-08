@@ -11,7 +11,7 @@ t_log* loggerObligatorio;
 t_log* loggerInterno;
 
 void inicializarDataBasica(t_config* config);
-void liberarCache();
+void liberarCacheGeneric();
 int esTiempoMasAntiguo(char* masAntiguo, char* masNuevo);
 void agregarItemGeneric(void* item, int tamanioItem, long ID, long IDCorrelativo, TipoCola cola);
 int obtenerPosicionPorIDGeneric(long ID);
