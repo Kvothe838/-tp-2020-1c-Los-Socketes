@@ -29,7 +29,7 @@ int main(void) {
 	conexiones(team);
 	planificacion();
 	metricas();
-	limpiarMemoryLeaks(team);
+	//limpiarMemoryLeaks(team);
 	printf(" \nprograma finalizado\n");
 	return 0;
 }
