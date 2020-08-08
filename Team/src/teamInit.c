@@ -435,9 +435,6 @@ void intercambiar(Entrenador* persona, Entrenador* quieto){
 	if(verificar_deadlock(quieto)){
 		log_info(logTP,"Entrenador %d pasa de la cola ESPERANDO a DEADLOCKS: todavia no cumplio su objetivo y no puede atrapar pokemons",quieto->idEntrenador);
 	}
-	if(verificar_finalizacion(quieto)){
-		log_info(logTP,"Entrenador %d finalizó su mision",quieto->idEntrenador);
-	}
 	ingreso_a_colas_entrenador(quieto);
 }
 
@@ -562,7 +559,7 @@ void ingreso_a_colas_entrenador(Entrenador* persona){
 			break;
 		default:
 			break;
-			//log_info(logInit,"= %d = FINALIZA SU MISION",persona->idEntrenador);
+			log_info(logTP,"Entrenador %d finalizó su mision",persona->idEntrenador);
 	}
 }
 
