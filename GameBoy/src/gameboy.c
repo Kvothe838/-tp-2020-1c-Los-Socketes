@@ -39,7 +39,7 @@ int main(int argc, char **argv){
 		exit(-1);
 	}
 
-	IDMensajePublisher* mensajeRecibido;
+	IDMensajePublisher* mensajeRecibido = NULL;
 
 	switch(argvToModuloGameboy(argv[1]))
 	{
@@ -175,11 +175,7 @@ int main(int argc, char **argv){
 						log_info(logger, "ERROR. No se reconoce el tipo de cola ingresada.");
 						exit(-1);
 				}
-
-				free(ipTeam);
 			}
-
-			free(ipsPuertosTeam);
 
 			break;
 
@@ -317,7 +313,8 @@ int main(int argc, char **argv){
 		exit(-1);
 	}
 
-	free(mensajeRecibido);
+	if(mensajeRecibido != NULL)
+		free(mensajeRecibido);
 
 	terminar_programa(logger, config);
 
